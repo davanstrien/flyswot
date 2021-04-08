@@ -1,0 +1,11 @@
+{
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "Daniel van Strien",
+  "email": "daniel.van-strien@bl.uk",
+  "friendly_name": "flyswot",
+  "github_user": "davanstrien",
+  "license": "MIT",
+  "package_name": "flyswot",
+  "project_name": "flyswot",
+  "version": "0.0.0"
+}
