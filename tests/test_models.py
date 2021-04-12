@@ -1,9 +1,20 @@
 """Tests model module."""
 import datetime
+from pathlib import Path
 from typing import Any
 from typing import Dict
 
+import click
+import pytest
+import typer
+from typer.testing import CliRunner
+
 from flyswot import models
+from flyswot.models import app
+
+
+runner = CliRunner()
+
 
 # flake8: noqa
 
@@ -89,18 +100,96 @@ single_github_release_dict: Dict[Any, Any] = {
 }
 
 
-def test_get_release_metadata_exists(test_dict: Dict[Any, Any] = single_github_release_dict) -> None:
+def test_get_release_metadata_exists(
+    test_dict: Dict[Any, Any] = single_github_release_dict
+) -> None:
     """It exists"""
     release = models.get_release_metadata(test_dict)
     assert release
 
 
-def test_get_release_metadata_return_values(test_dict: Dict[Any, Any] = single_github_release_dict) -> None:
-    """It returns expected values"""
+def test_get_release_metadata_types(
+    test_dict: Dict[Any, Any] = single_github_release_dict
+) -> None:
     release = models.get_release_metadata(test_dict)
     assert type(release.html_url) == str
-    assert release.html_url == test_dict["html_url"]
-    assert type(release.body) == str
-    assert release.body == test_dict["body"]
-    assert type(release.updated_at) == datetime.datetime
-    assert release.browser_download_url.startswith("https")
+
+
+def test_url_callback() -> None:
+    url_latest = "latest"
+    assert models._url_callback(url_latest) == url_latest
+    valid_url = "https://google.com"
+    assert models._url_callback(valid_url) == valid_url
+    with pytest.raises(typer.BadParameter):
+        bad_url = "nope"
+        models._url_callback(bad_url)
+
+
+def test_get_remote_release_json_returns() -> None:
+    response = models.get_remote_release_json(
+        "https://api.github.com/repos/davanstrien/learn-onnx/releases"
+    )
+    assert response
+    assert type(response) == list
+
+
+def test_get_remote_release_json_return_single() -> None:
+    response = models.get_remote_release_json(
+        "https://api.github.com/repos/davanstrien/learn-onnx/releases/latest",
+        single=True,
+    )
+    assert response
+    assert type(response) == dict
+
+
+def test_ensure_model_dir_returns_path(tmp_path: Any) -> None:
+    """It returns paths"""
+    model_dir_path = tmp_path / "app"
+    model_dir_path.mkdir()
+    model_dir = models.ensure_model_dir(model_dir_path)
+    assert model_dir.exists()
+    assert model_dir.is_dir()
+    assert model_dir.absolute().parts[-1] == "models"
+
+
+def test_ensure_model_dir_raises_error(tmp_path: Any) -> None:
+    """It raises error if no write permision"""
+    model_dir_path = tmp_path / "app"
+    model_dir_path.mkdir(mode=0o444)
+    with pytest.raises(PermissionError):
+        moodel_dir = models.ensure_model_dir(model_dir_path)
+
+
+def test_show_model_dir() -> None:
+    result = runner.invoke(app, ["show-model-dir"])
+    assert result.exit_code == 0
+
+
+@pytest.mark.parametrize(
+    "model_name, expected",
+    [
+        ("2021-03-31-resnet34.pkl", "2021-03-31-resnet34.md"),
+        ("2021-04-23-resnet50.onnx", "2021-04-23-resnet50.md"),
+    ],
+)
+def test_create_model_metadata_path(model_name: Any, expected: Any) -> None:
+    result = models._create_model_metadata_path(model_name)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "model_name, expected",
+    [
+        ("2021-03-31-resnet34.pkl", "2021-03-31 00:00:00"),
+        ("2021-04-23-resnet50.onnx", "2021-04-23 00:00:00"),
+    ],
+)
+def test_get_model_date(model_name: Any, expected: Any) -> None:
+    """It returns datetime and str matches"""
+    date = models._get_model_date(model_name)
+    assert type(date) == datetime.datetime
+    assert str(date) == expected
+
+
+def test_app(tmp_path: Any) -> None:
+    pass
