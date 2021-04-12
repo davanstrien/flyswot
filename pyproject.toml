@@ -23,6 +23,8 @@ python = "^3.7.0"
 click = "^7.0"
 rich = "^10.1.0"
 typer = "^0.3.2"
+requests = "^2.25.1"
+validators = "^0.18.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
@@ -57,12 +59,9 @@ source = ["src", "*/site-packages"]
 branch = true
 source = ["flyswot"]
 
-[tool.black]
-line-length = 120
-
 [tool.coverage.report]
 show_missing = true
-fail_under = 100
+fail_under = 90
 
 
 [build-system]
