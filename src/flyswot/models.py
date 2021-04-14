@@ -145,5 +145,10 @@ def _get_model_date(model_name: Path) -> datetime.datetime:
     return datetime.datetime.strptime(str_date, "%Y-%m-%d")
 
 
+def _sort_local_models_by_date(model_dir: Path) -> List[Path]:
+    models = list(Path(model_dir).rglob("*.pkl"))
+    return sorted(models, key=_get_model_date, reverse=True)
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()
