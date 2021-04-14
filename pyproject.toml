@@ -25,6 +25,7 @@ rich = "^10.1.0"
 typer = "^0.3.2"
 requests = "^2.25.1"
 validators = "^0.18.2"
+toolz = "^0.11.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
@@ -48,6 +49,7 @@ pre-commit-hooks = "^3.4.0"
 sphinx-rtd-theme = "^0.5.1"
 sphinx-click = "^2.6.0"
 Pygments = "^2.8.1"
+hypothesis = "^6.9.1"
 
 [tool.poetry.scripts]
 flyswot = "flyswot.__main__:main"
