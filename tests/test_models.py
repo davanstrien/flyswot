@@ -1,5 +1,6 @@
 """Tests model module."""
 import datetime
+import time
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -11,7 +12,6 @@ from typer.testing import CliRunner
 
 from flyswot import models
 from flyswot.models import app
-
 
 runner = CliRunner()
 
@@ -126,6 +126,7 @@ def test_url_callback() -> None:
 
 
 def test_get_remote_release_json_returns() -> None:
+    time.sleep(1)
     response = models.get_remote_release_json(
         "https://api.github.com/repos/davanstrien/learn-onnx/releases"
     )
@@ -134,6 +135,7 @@ def test_get_remote_release_json_returns() -> None:
 
 
 def test_get_remote_release_json_return_single() -> None:
+    time.sleep(1)
     response = models.get_remote_release_json(
         "https://api.github.com/repos/davanstrien/learn-onnx/releases/latest",
         single=True,
