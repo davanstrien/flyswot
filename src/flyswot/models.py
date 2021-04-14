@@ -65,10 +65,7 @@ def get_remote_release_json(
         try:
             html = response.read()
             response_json: Dict[str, Any] = json.loads(html)
-            if single:
-                return response_json
-            else:
-                return response_json
+            return response_json
         except ConnectionError as error:  # pragma: no cover
             typer.echo(error)
             raise typer.Exit(code=1)
@@ -114,28 +111,27 @@ def download_model(
     ),
 ) -> None:
     """Downloads models, defaults to the latest available model"""
-    if url == "latest":  # pragma: no cover
+    if url != "latest":  # pragma: no cover
 
-        url = MODEL_REPO_URL + "/latest"
-        remote_release_json = get_remote_release_json(url, single=True)
-        if isinstance(remote_release_json, dict):
-            release_metadata = get_release_metadata(remote_release_json)
-        download_url = release_metadata.browser_download_url
-        updated_date = release_metadata.updated_at
-        model_description = release_metadata.body
-        typer.echo(f"{updated_date} {download_url}")
-        model_dir = ensure_model_dir(model_dir)
-        model_save_path = model_dir / release_metadata.model_name
-        typer.echo(f"Saving model to {model_save_path}...")
-        urllib.request.urlretrieve(download_url, model_save_path)
-        model_description_path = model_dir / _create_model_metadata_path(
-            release_metadata.model_name
-        )
-        typer.echo(model_description_path)
-        with open(model_description_path, "w") as f:
-            f.write(model_description)
-    else:
         raise NotImplementedError
+    url = MODEL_REPO_URL + "/latest"
+    remote_release_json = get_remote_release_json(url, single=True)
+    if isinstance(remote_release_json, dict):
+        release_metadata = get_release_metadata(remote_release_json)
+    download_url = release_metadata.browser_download_url
+    updated_date = release_metadata.updated_at
+    model_description = release_metadata.body
+    typer.echo(f"{updated_date} {download_url}")
+    model_dir = ensure_model_dir(model_dir)
+    model_save_path = model_dir / release_metadata.model_name
+    typer.echo(f"Saving model to {model_save_path}...")
+    urllib.request.urlretrieve(download_url, model_save_path)
+    model_description_path = model_dir / _create_model_metadata_path(
+        release_metadata.model_name
+    )
+    typer.echo(model_description_path)
+    with open(model_description_path, "w") as f:
+        f.write(model_description)
 
 
 def _get_model_date(model_name: Path) -> datetime.datetime:
