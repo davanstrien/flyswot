@@ -193,5 +193,24 @@ def test_get_model_date(model_name: Any, expected: Any) -> None:
     assert str(date) == expected
 
 
+def test_sort_local_models_by_date(tmpdir: Any) -> None:
+    """It returns correct order"""
+    for model in ["2021-03-31-resnet34.pkl", "2021-03-28-resnet34.pkl"]:
+        model_path = tmpdir / model
+        model_path.ensure()
+    model_path = models._sort_local_models_by_date(tmpdir)
+    assert model_path
+    assert model_path[0].name == "2021-03-31-resnet34.pkl"
+
+
+def test_get_latest_model(tmpdir: Any) -> None:
+    for model in ["2021-03-31-resnet34.pkl", "2021-03-28-resnet34.pkl"]:
+        model_path = tmpdir / model
+        model_path.ensure()
+    model_path = models._get_latest_model(tmpdir)
+    assert model_path
+    assert model_path.name == "2021-03-31-resnet34.pkl"
+
+
 def test_app(tmp_path: Any) -> None:
     pass

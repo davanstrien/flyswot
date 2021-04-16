@@ -146,5 +146,25 @@ def _sort_local_models_by_date(model_dir: Path) -> List[Path]:
     return sorted(models, key=_get_model_date, reverse=True)
 
 
+def _get_latest_model(model_dir: Path) -> Union[None, Path]:
+    models = _sort_local_models_by_date(model_dir)
+    if not models:
+        return None
+    else:
+        return models[0]
+
+
+def ensure_model(model_dir: Path) -> Path:  # pragma: no cover
+    model = _get_latest_model(model_dir)
+    if model:
+        return model
+    typer.echo("No model found locally...")
+    download_model(url="latest", model_dir=model_dir)
+    model = _get_latest_model(model_dir)
+    if model:
+        print(f"using {model}")
+        return model
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()
