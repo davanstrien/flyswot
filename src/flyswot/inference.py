@@ -17,9 +17,10 @@ from typing import List
 from typing import Union
 
 import numpy as np
+import onnxruntime
+import PIL
 import typer
-from fastai.vision.all import Learner
-from fastai.vision.all import load_learner
+from PIL import Image
 from rich.progress import Progress
 from rich.table import Table
 from toolz import itertoolz  # type: ignore
@@ -27,6 +28,9 @@ from toolz import itertoolz  # type: ignore
 from flyswot import core
 from flyswot import models
 from flyswot.console import console
+
+# rom fastai.vision.all import Learner
+# from fastai.vision.all import load_learner
 
 # flake8: noqa
 app = typer.Typer()
@@ -100,10 +104,11 @@ def predict_directory(
     model_dir = models.ensure_model_dir()
     typer.echo(model_dir)
     # TODO add load learner function that can be passed a model name
-    model = models.ensure_model(model_dir)
+    # model = models.ensure_model(model_dir)
+    model = model_dir / "2021-04-20-model.onnx"
     typer.echo(model)
-    FastaiInference = FastaiInferenceModel(model)
-    # FastaiInference = FastaiInferenceModel(model_dir / "2021-04-03-resnet-34.pkl")
+    # FastaiInference = FastaiInferenceModel(model)
+    OnnxInference = onnx_inference_session(str(model), vocab=["flysheet", "other"])
     files = core.get_image_files_from_pattern(directory, pattern)
     filtered_files = core.filter_to_preferred_ext(files, preferred_format)
     files = list(filtered_files)
@@ -112,12 +117,13 @@ def predict_directory(
     csv_fname = create_csv_fname(csv_save_dir)
     create_csv_header(csv_fname)
     with Progress() as progress:
-        prediction_progress = progress.add_task("Predicting images", total=files)
+        prediction_progress = progress.add_task("Predicting images", total=len(files))
         all_preds = []
         predictions = []
         for batch in itertoolz.partition_all(bs, files):
             # batch_predictions = fastai_predict_batch(learn, batch, bs)
-            batch_predictions = FastaiInference.predict_batch(batch, bs)
+            # batch_predictions = FastaiInference.predict_batch(batch, bs)
+            batch_predictions = OnnxInference.predict_batch(batch, bs)
             all_preds.append(batch_predictions.batch_labels)
             predictions.append(batch_predictions)
             progress.update(prediction_progress, advance=bs)
@@ -173,8 +179,9 @@ def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> N
 
 class InferenceSession(ABC):
     @abstractmethod
-    def __init__(self, model: Path):
+    def __init__(self, model: Path, vocab: List):
         self.model = model
+        self.vocab = vocab
 
     @abstractmethod
     def predict_image(self, image: Path):
@@ -185,28 +192,81 @@ class InferenceSession(ABC):
         pass
 
 
-class FastaiInferenceModel(InferenceSession):
-    def __init__(self, model):
+def softmax(x):
+    x = x.reshape(-1)
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
+
+
+# class FastaiInferenceModel(InferenceSession):
+#     def __init__(self, model):
+#         self.model = model
+#         self.learn = load_learner(model)
+
+#     def predict_image(self, image: Path) -> Any:
+#         return self.learn.predict(image)
+
+#     def predict_batch(self, batch: Iterable[Path], bs: int) -> PredictionBatch:
+#         test_dl = self.learn.dls.test_dl(batch, bs=bs)
+#         vocab = dict(enumerate(self.learn.dls.vocab))
+#         with self.learn.no_bar():
+#             fastai_preds: Any = self.learn.get_preds(dl=test_dl, with_decoded=True)
+#             prediction_tensors: Iterable[Any] = fastai_preds[0]
+#             prediction_items = []
+#             for file, pred in zip(batch, prediction_tensors):
+#                 arg_max = int(np.array(pred).argmax())
+#                 predicted_label = vocab[int(arg_max)]
+#                 confidence = float(np.array(pred).max())
+#                 prediction_items.append(
+#                     ImagePredictionItem(file, predicted_label, confidence)
+#                 )
+#         return PredictionBatch(prediction_items)
+
+
+class onnx_inference_session(InferenceSession):
+    def __init__(self, model, vocab):
         self.model = model
-        self.learn = load_learner(model)
+        self.session = onnxruntime.InferenceSession(model)
+        self.vocab = vocab
+        self.vocab_mapping = dict(enumerate(self.vocab))
 
-    def predict_image(self, image: Path) -> Any:
-        return self.learn.predict(image)
+    def predict_image(self, image: Path):
+        img = self._load_image(image)
+        raw_result = self.session.run(["output"], {"image": img})
+        pred = self._postprocess(raw_result)
+        arg_max = int(np.array(pred).argmax())
+        predicted_label = self.vocab_mapping[int(arg_max)]
+        confidence = float(np.array(pred).max())
+        return ImagePredictionItem(image, predicted_label, confidence)
 
-    def predict_batch(self, batch: Iterable[Path], bs: int) -> PredictionBatch:
-        test_dl = self.learn.dls.test_dl(batch, bs=bs)
-        vocab = dict(enumerate(self.learn.dls.vocab))
-        with self.learn.no_bar():
-            fastai_preds: Any = self.learn.get_preds(dl=test_dl, with_decoded=True)
-            prediction_tensors: Iterable[Any] = fastai_preds[0]
-            prediction_items = []
-            for file, pred in zip(batch, prediction_tensors):
-                arg_max = int(np.array(pred).argmax())
-                predicted_label = vocab[int(arg_max)]
-                confidence = float(np.array(pred).max())
-                prediction_items.append(
-                    ImagePredictionItem(file, predicted_label, confidence)
-                )
+    def _preprocess(self, input_data: PIL.Image):
+        # convert the input data into the float32 input
+        img_data = input_data.astype("float32")
+
+        # normalize
+        mean_vec = np.array([0.485, 0.456, 0.406])
+        stddev_vec = np.array([0.229, 0.224, 0.225])
+        norm_img_data = np.zeros(img_data.shape).astype("float32")
+        for i in range(img_data.shape[0]):
+            norm_img_data[i, :, :] = (
+                img_data[i, :, :] / 255 - mean_vec[i]
+            ) / stddev_vec[i]
+
+        # add batch channel
+        norm_img_data = norm_img_data.reshape(1, 3, 512, 512).astype("float32")
+        return norm_img_data
+
+    def _load_image(self, f):
+        image = Image.open(f, mode="r")
+        image = image.resize((512, 512), Image.BILINEAR)
+        image_data = np.array(image).transpose(2, 0, 1)
+        return self._preprocess(image_data)
+
+    def _postprocess(self, result: List):
+        return softmax(np.array(result)).tolist()
+
+    def predict_batch(self, batch: Iterable[Path], bs: int):
+        prediction_items = [self.predict_image(file) for file in batch]
         return PredictionBatch(prediction_items)
 
 
