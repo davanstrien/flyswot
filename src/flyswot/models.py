@@ -142,8 +142,7 @@ def download_model(
 
 def _get_model_date(model: Path) -> datetime.datetime:
     """Gets the date from a `model_name` fname"""
-    utc = pytz.UTC
-    return utc.localize(datetime.datetime.strptime(model.name, "%Y%m%d"))
+    return datetime.datetime.strptime(model.name, "%Y%m%d")
 
 
 def _sort_local_models_by_date(model_dir: Path) -> List[Path]:
@@ -176,7 +175,10 @@ def ensure_model(
         if not remote_release_json:
             raise typer.Exit()
         release_metadata = get_release_metadata(remote_release_json)
-        if release_metadata.updated_at > _get_model_date(local_model):
+        if (
+            release_metadata.updated_at.isoformat()
+            > _get_model_date(local_model).isoformat()
+        ):
             download_model(url="latest", model_dir=model_dir)
         model_path = Path(local_model).rglob(f"**/*{model_format}")
         vocab_path = Path(local_model).rglob("vocab.txt")
