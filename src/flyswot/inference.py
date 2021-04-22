@@ -7,9 +7,6 @@ from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-from typing import AnyStr
-from typing import Generator
 from typing import IO
 from typing import Iterable
 from typing import Iterator
@@ -17,7 +14,7 @@ from typing import List
 from typing import Union
 
 import numpy as np
-import onnxruntime
+import onnxruntime as rt
 import PIL
 import typer
 from PIL import Image
@@ -29,13 +26,17 @@ from flyswot import core
 from flyswot import models
 from flyswot.console import console
 
-# rom fastai.vision.all import Learner
-# from fastai.vision.all import load_learner
+try:
+    from fastai.vision.all import Learner
+    from fastai.vision.all import load_learner
+except ImportError:
+    pass
 
-# flake8: noqa
+
 app = typer.Typer()
 
 
+# flake8: noqa
 @dataclass()
 class ImagePredictionItem:
     """Prediction for an image.
@@ -74,10 +75,7 @@ image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("i
 def predict_image(
     image: Path = typer.Argument(..., readable=True, resolve_path=True)
 ) -> None:
-    """Predict against a single image"""
-    model_dir = models.ensure_model_dir()
-    FastaiInference = FastaiInferenceModel(model_dir / "2021-04-03-resnet-34.pkl")
-    typer.echo(FastaiInference.predict_image(image))
+    pass  # pragma: no cover
 
 
 @app.command(name="directory")
@@ -104,11 +102,11 @@ def predict_directory(
     model_dir = models.ensure_model_dir()
     typer.echo(model_dir)
     # TODO add load learner function that can be passed a model name
-    # model = models.ensure_model(model_dir)
-    model = model_dir / "2021-04-20-model.onnx"
+    model, vocab = models.ensure_model(model_dir)
     typer.echo(model)
+    typer.echo(vocab)
     # FastaiInference = FastaiInferenceModel(model)
-    OnnxInference = onnx_inference_session(str(model), vocab=["flysheet", "other"])
+    OnnxInference = onnx_inference_session(str(model), vocab)
     files = core.get_image_files_from_pattern(directory, pattern)
     filtered_files = core.filter_to_preferred_ext(files, preferred_format)
     files = list(filtered_files)
@@ -132,7 +130,7 @@ def predict_directory(
     print_table(all_preds)
 
 
-def print_table(decoded) -> IO[str]:
+def print_table(decoded) -> None:
     table = Table(show_header=True, title="Prediction summary")
     table.add_column(
         "Class",
@@ -224,13 +222,26 @@ def softmax(x):
 
 
 class onnx_inference_session(InferenceSession):
+    """Class for running inference making use of the onnxrunntime"""
+
     def __init__(self, model, vocab):
         self.model = model
-        self.session = onnxruntime.InferenceSession(model)
-        self.vocab = vocab
+        self.session = rt.InferenceSession(model)
+        sess_options = rt.SessionOptions()
+
+        # Set graph optimization level
+        sess_options.graph_optimization_level = (
+            rt.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        )
+        self.vocab = self._load_vocab(vocab)
         self.vocab_mapping = dict(enumerate(self.vocab))
 
+    def _load_vocab(self, vocab: Path) -> List:
+        with open(vocab, "r") as f:
+            return [item.strip("\n") for item in f.readlines()]
+
     def predict_image(self, image: Path):
+        """Predict a single image"""
         img = self._load_image(image)
         raw_result = self.session.run(["output"], {"image": img})
         pred = self._postprocess(raw_result)
@@ -239,8 +250,8 @@ class onnx_inference_session(InferenceSession):
         confidence = float(np.array(pred).max())
         return ImagePredictionItem(image, predicted_label, confidence)
 
-    def _preprocess(self, input_data: PIL.Image):
-        # convert the input data into the float32 input
+    def _preprocess(self, input_data: np.ndarray) -> np.ndarray:
+        # converts the input data into the float32 input for onnx
         img_data = input_data.astype("float32")
 
         # normalize
@@ -256,16 +267,19 @@ class onnx_inference_session(InferenceSession):
         norm_img_data = norm_img_data.reshape(1, 3, 512, 512).astype("float32")
         return norm_img_data
 
-    def _load_image(self, f):
-        image = Image.open(f, mode="r")
+    def _load_image(self, file: Path) -> np.ndarray:
+        """loads image and carries out preprocessing for inference"""
+        image = Image.open(file, mode="r")
         image = image.resize((512, 512), Image.BILINEAR)
         image_data = np.array(image).transpose(2, 0, 1)
         return self._preprocess(image_data)
 
     def _postprocess(self, result: List):
+        """process results from onnx session"""
         return softmax(np.array(result)).tolist()
 
     def predict_batch(self, batch: Iterable[Path], bs: int):
+        """predicts a batch of images"""
         prediction_items = [self.predict_image(file) for file in batch]
         return PredictionBatch(prediction_items)
 
