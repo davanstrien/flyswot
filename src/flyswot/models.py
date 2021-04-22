@@ -3,11 +3,14 @@ import datetime
 import json
 import urllib.error
 import urllib.request
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
+from typing import Tuple
 from typing import Type
 from typing import Union
 
@@ -16,6 +19,7 @@ import validators  # type: ignore
 
 from flyswot.config import APP_NAME
 from flyswot.config import MODEL_REPO_URL
+from flyswot.console import console
 
 # flake8: noqa
 app = typer.Typer()
@@ -57,9 +61,7 @@ def _url_callback(url: str) -> Union[str, None]:
         raise typer.BadParameter(f"Please check {url} is a valid url")
 
 
-def get_remote_release_json(
-    url: str, single: bool = False
-) -> Union[List[Dict[str, Any]], Dict[str, Any], Type[ConnectionError]]:
+def get_remote_release_json(url: str, single: bool = False) -> Dict[str, Any]:
     """Returns all releases found at `url`"""
     with urllib.request.urlopen(url) as response:
         try:
@@ -91,14 +93,14 @@ def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
 
 @app.command()
 def show_model_dir() -> None:
-    """Print out the directory where modles are stored"""
+    """Print out the directory where models are stored"""
     ensure_model_dir()
 
 
-def _create_model_metadata_path(model_name: str) -> str:
-    """Creates a filename for model metadata"""
-    without_suffix = "".join(model_name.split(".")[:-1])
-    return f"{without_suffix}.md"
+# def _create_model_metadata_path(model_name: str) -> str:
+#     """Creates a filename for model metadata"""
+#     without_suffix = "".join(model_name.split(".")[:-1])
+#     return f"{without_suffix}.md"
 
 
 @app.command(name="download")
@@ -116,37 +118,40 @@ def download_model(
         raise NotImplementedError
     url = MODEL_REPO_URL + "/latest"
     remote_release_json = get_remote_release_json(url, single=True)
-    if isinstance(remote_release_json, dict):
-        release_metadata = get_release_metadata(remote_release_json)
+    if not remote_release_json:
+        raise typer.Exit()
+    release_metadata = get_release_metadata(remote_release_json)
     download_url = release_metadata.browser_download_url
     updated_date = release_metadata.updated_at
     model_description = release_metadata.body
     typer.echo(f"{updated_date} {download_url}")
-    model_dir = ensure_model_dir(model_dir)
+    model_dir = ensure_model_dir()
     model_save_path = model_dir / release_metadata.model_name
-    typer.echo(f"Saving model to {model_save_path}...")
-    urllib.request.urlretrieve(download_url, model_save_path)
-    model_description_path = model_dir / _create_model_metadata_path(
-        release_metadata.model_name
-    )
-    typer.echo(model_description_path)
-    with open(model_description_path, "w") as f:
-        f.write(model_description)
+    with console.status(
+        f"Downloading model...",
+        spinner="aesthetic",
+    ):
+        urllib.request.urlretrieve(download_url, model_save_path)
+    typer.echo(f"Model save to {model_save_path}")
+    typer.echo("Extracting model...")
+    with zipfile.ZipFile(model_save_path, "r") as zip_ref:
+        zip_ref.extractall(model_dir / release_metadata.model_name.replace(".zip", ""))
+        Path(model_save_path).unlink()
 
 
-def _get_model_date(model_name: Path) -> datetime.datetime:
+def _get_model_date(model: Path) -> datetime.datetime:
     """Gets the date from a `model_name` fname"""
-    stem = Path(model_name).stem.split("-")
-    str_date = "-".join(stem[:3])
-    return datetime.datetime.strptime(str_date, "%Y-%m-%d")
+    return datetime.datetime.strptime(model.name, "%Y%m%d")
 
 
 def _sort_local_models_by_date(model_dir: Path) -> List[Path]:
-    models = list(Path(model_dir).rglob("*.pkl"))
-    return sorted(models, key=_get_model_date, reverse=True)
+    return sorted(
+        [d for d in Path(model_dir).iterdir() if not d.name.startswith(".")],
+        reverse=True,
+    )
 
 
-def _get_latest_model(model_dir: Path) -> Union[None, Path]:
+def _get_latest_model(model_dir: Path) -> Optional[Path]:
     models = _sort_local_models_by_date(model_dir)
     if not models:
         return None
@@ -154,16 +159,39 @@ def _get_latest_model(model_dir: Path) -> Union[None, Path]:
         return models[0]
 
 
-def ensure_model(model_dir: Path) -> Path:  # pragma: no cover
-    model = _get_latest_model(model_dir)
-    if model:
-        return model
+def ensure_model(
+    model_dir: Path, check_latest: bool = False, model_format: str = ".onnx"
+) -> Tuple[Path, Path]:  # pragma: no cover
+    local_model = _get_latest_model(model_dir)
+    typer.echo(f"model path{local_model}")
+    if local_model and not check_latest:
+        model_path = Path(local_model).rglob(f"**/*{model_format}")
+        vocab_path = Path(local_model).rglob("vocab.txt")
+        return list(model_path)[0], list(vocab_path)[0]
+    if local_model and check_latest:
+        url = MODEL_REPO_URL + "/latest"
+        remote_release_json = get_remote_release_json(url, single=True)
+        if not remote_release_json:
+            raise typer.Exit()
+        release_metadata = get_release_metadata(remote_release_json)
+        if (
+            release_metadata.updated_at.isoformat()
+            > _get_model_date(local_model).isoformat()
+        ):
+            download_model(url="latest", model_dir=model_dir)
+        model_path = Path(local_model).rglob(f"**/*{model_format}")
+        vocab_path = Path(local_model).rglob("vocab.txt")
+        return list(model_path)[0], list(vocab_path)[0]
     typer.echo("No model found locally...")
     download_model(url="latest", model_dir=model_dir)
-    model = _get_latest_model(model_dir)
-    if model:
-        print(f"using {model}")
-        return model
+    if not local_model:
+        local_model = _get_latest_model(model_dir)
+        if local_model:
+            model_path = Path(local_model).rglob(f"**/*{model_format}")
+            vocab_path = Path(local_model).rglob("vocab.txt")
+            return list(model_path)[0], list(vocab_path)[0]
+        typer.echo("Not able to find a model")
+        raise typer.Exit()
 
 
 if __name__ == "__main__":  # pragma: no cover

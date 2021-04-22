@@ -168,48 +168,36 @@ def test_show_model_dir() -> None:
 
 
 @pytest.mark.parametrize(
-    "model_name, expected",
+    "model_dir, expected",
     [
-        ("2021-03-31-resnet34.pkl", "2021-03-31-resnet34.md"),
-        ("2021-04-23-resnet50.onnx", "2021-04-23-resnet50.md"),
+        (Path("20210331"), "2021-03-31 00:00:00"),
+        (Path("20210423"), "2021-04-23 00:00:00"),
     ],
 )
-def test_create_model_metadata_path(model_name: Any, expected: Any) -> None:
-    result = models._create_model_metadata_path(model_name)
-    assert result == expected
-
-
-@pytest.mark.parametrize(
-    "model_name, expected",
-    [
-        ("2021-03-31-resnet34.pkl", "2021-03-31 00:00:00"),
-        ("2021-04-23-resnet50.onnx", "2021-04-23 00:00:00"),
-    ],
-)
-def test_get_model_date(model_name: Any, expected: Any) -> None:
+def test_get_model_date(model_dir: Any, expected: Any) -> None:
     """It returns datetime and str matches"""
-    date = models._get_model_date(model_name)
+    date = models._get_model_date(model_dir)
     assert type(date) == datetime.datetime
     assert str(date) == expected
 
 
 def test_sort_local_models_by_date(tmpdir: Any) -> None:
     """It returns correct order"""
-    for model in ["2021-03-31-resnet34.pkl", "2021-03-28-resnet34.pkl"]:
-        model_path = tmpdir / model
+    for model_dir in ["20210331", "20210328"]:
+        model_path = tmpdir / model_dir
         model_path.ensure()
     model_path = models._sort_local_models_by_date(tmpdir)
     assert model_path
-    assert model_path[0].name == "2021-03-31-resnet34.pkl"
+    assert model_path[0].name == "20210331"
 
 
 def test_get_latest_model(tmpdir: Any) -> None:
-    for model in ["2021-03-31-resnet34.pkl", "2021-03-28-resnet34.pkl"]:
+    for model in ["20210331", "20210328"]:
         model_path = tmpdir / model
         model_path.ensure()
     model_path = models._get_latest_model(tmpdir)
     assert model_path
-    assert model_path.name == "2021-03-31-resnet34.pkl"
+    assert model_path.name == "20210331"
 
 
 def test_app(tmp_path: Any) -> None:
