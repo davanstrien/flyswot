@@ -14,7 +14,6 @@ from typing import Tuple
 from typing import Type
 from typing import Union
 
-import pytz
 import typer
 import validators  # type: ignore
 
