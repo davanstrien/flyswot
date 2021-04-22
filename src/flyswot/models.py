@@ -136,7 +136,6 @@ def download_model(
     typer.echo("Extracting model...")
     with zipfile.ZipFile(model_save_path, "r") as zip_ref:
         zip_ref.extractall(model_dir / release_metadata.model_name.replace(".zip", ""))
-        Path(model_save_path).unlink()
 
 
 def _get_model_date(model: Path) -> datetime.datetime:
