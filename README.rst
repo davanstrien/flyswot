@@ -32,6 +32,7 @@ flyswot
    :target: https://github.com/psf/black
    :alt: Black
 
+.. image:: https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII
 
 Features
 --------
