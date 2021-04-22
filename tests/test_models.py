@@ -6,12 +6,15 @@ from typing import Any
 from typing import Dict
 
 import click
+import onnxruntime as ort
 import pytest
 import typer
 from typer.testing import CliRunner
+from typing_extensions import runtime
 
 from flyswot import models
 from flyswot.models import app
+from flyswot.models import ensure_model_dir
 
 runner = CliRunner()
 
@@ -198,6 +201,12 @@ def test_get_latest_model(tmpdir: Any) -> None:
     model_path = models._get_latest_model(tmpdir)
     assert model_path
     assert model_path.name == "20210331"
+
+
+def test_ensure_model():
+    model_dir = ensure_model_dir()
+    model, _ = models.ensure_model(model_dir)
+    runtime = ort.InferenceSession(str(model))
 
 
 def test_app(tmp_path: Any) -> None:
