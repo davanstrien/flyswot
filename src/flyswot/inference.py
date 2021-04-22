@@ -31,7 +31,7 @@ try:
     from fastai.vision.all import load_learner
 except ImportError:
     pass
-
+from importlib import resources
 
 app = typer.Typer()
 
@@ -103,10 +103,13 @@ def predict_directory(
     typer.echo(model_dir)
     # TODO add load learner function that can be passed a model name
     model, vocab = models.ensure_model(model_dir)
+    from importlib import resources
+
     typer.echo(model)
     typer.echo(vocab)
     # FastaiInference = FastaiInferenceModel(model)
-    OnnxInference = onnx_inference_session(str(model), vocab)
+
+    OnnxInference = onnx_inference_session((model), vocab)
     files = core.get_image_files_from_pattern(directory, pattern)
     filtered_files = core.filter_to_preferred_ext(files, preferred_format)
     files = list(filtered_files)
