@@ -8,3 +8,4 @@
 /src/*.egg-info/
 __pycache__/
 *.dat
+*.csv
