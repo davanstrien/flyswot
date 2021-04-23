@@ -140,7 +140,6 @@ def download_model(
     release_metadata = get_release_metadata(remote_release_json)
     download_url = release_metadata.browser_download_url
     updated_date = release_metadata.updated_at
-    model_description = release_metadata.body
     typer.echo(f"{updated_date} {download_url}")
     model_dir = ensure_model_dir()
     model_save_path = model_dir / release_metadata.model_name
@@ -233,7 +232,7 @@ def ensure_model(
         raise typer.Exit()
 
 
-def load_vocab(vocab: Path) -> List:
+def load_vocab(vocab: Path) -> List[str]:
     with open(vocab, "r") as f:
         return [line.strip("\n") for line in f.readlines()]
 
@@ -241,7 +240,7 @@ def load_vocab(vocab: Path) -> List:
 @app.command()
 def vocab(
     model: str = typer.Argument("latest"), show: bool = typer.Option(True)
-) -> Optional[List]:
+) -> Optional[List[str]]:
     if model != "latest":
         raise NotImplemented
     model_dir = ensure_model_dir()
@@ -249,12 +248,11 @@ def vocab(
     if model_path:
         model_parts = _get_model_parts(model_path)
         if model_parts.vocab:
-            with open(model_parts.vocab, "r") as f:
-                vocab = [line.strip("\n") for line in f.readlines()]
-                if show:
-                    console.print(Markdown("# Model Vocab"))
-                    console.print(vocab)
-                return vocab
+            vocab = load_vocab(model_parts.vocab)
+            if show:
+                console.print(Markdown("# Model Vocab"))
+                console.print(vocab)
+            return vocab
     if not model_path:
         typer.echo(f"No models currently found in {model_path}")
         raise typer.Exit()
