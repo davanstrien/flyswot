@@ -241,10 +241,7 @@ def vocab(
         raise NotImplemented
     model_dir = ensure_model_dir()
     model_path = _get_latest_model(model_dir)
-    if not model_path:
-        typer.echo(f"No models currently found in {model_dir}")
-        raise typer.Exit()
-    else:
+    if model_path:
         model_parts = _get_model_parts(model_path)
         if model_parts.vocab:
             with open(model_parts.vocab, "r") as f:
@@ -253,8 +250,9 @@ def vocab(
                     console.print(Markdown("# Model Vocab"))
                     console.print(vocab)
                 return vocab
-        else:
-            typer.echo("Model not found")
+    if not model_path:
+        typer.echo(f"No models currently found in {model_path}")
+        raise typer.Exit()
 
 
 if __name__ == "__main__":  # pragma: no cover
