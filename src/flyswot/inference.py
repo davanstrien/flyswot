@@ -102,14 +102,12 @@ def predict_directory(
     model_dir = models.ensure_model_dir()
     typer.echo(model_dir)
     # TODO add load learner function that can be passed a model name
-    model, vocab = models.ensure_model(model_dir)
-    from importlib import resources
-
-    typer.echo(model)
-    typer.echo(vocab)
+    model_parts = models.ensure_model(model_dir)
+    model = model_parts.model
+    vocab = models.load_vocab(model_parts.vocab)
     # FastaiInference = FastaiInferenceModel(model)
 
-    OnnxInference = onnx_inference_session((model), vocab)
+    OnnxInference = onnx_inference_session(model, vocab)
     files = core.get_image_files_from_pattern(directory, pattern)
     filtered_files = core.filter_to_preferred_ext(files, preferred_format)
     files = list(filtered_files)
@@ -229,14 +227,9 @@ class onnx_inference_session(InferenceSession):
 
     def __init__(self, model, vocab):
         self.model = model
-        self.session = rt.InferenceSession(model)
-        sess_options = rt.SessionOptions()
+        self.session = rt.InferenceSession(str(model))
 
-        # Set graph optimization level
-        sess_options.graph_optimization_level = (
-            rt.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
-        )
-        self.vocab = self._load_vocab(vocab)
+        self.vocab = vocab
         self.vocab_mapping = dict(enumerate(self.vocab))
 
     def _load_vocab(self, vocab: Path) -> List:
