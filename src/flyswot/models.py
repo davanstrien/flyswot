@@ -1,14 +1,18 @@
 """Model Commands."""
 import datetime
+import fnmatch
 import json
+import os
 import urllib.error
 import urllib.request
 import zipfile
+from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import NamedTuple
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -16,12 +20,16 @@ from typing import Union
 
 import typer
 import validators  # type: ignore
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.text import Text
 
 from flyswot.config import APP_NAME
 from flyswot.config import MODEL_REPO_URL
 from flyswot.console import console
 
 # flake8: noqa
+
 app = typer.Typer()
 
 REPO_URL = "https://api.github.com/repos/davanstrien/learn-onnx/releases"
@@ -38,6 +46,15 @@ class GitHubRelease:
     model_name: str
 
 
+@dataclass
+class LocalModel:
+    """A local model container"""
+
+    vocab: Optional[Path]
+    model: Optional[Path]
+    modelcard: Optional[Path]
+
+
 def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
     """Extracts required fields from `release` for `GitHubRelease`"""
     html_url = release["html_url"]
@@ -52,7 +69,7 @@ def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
 
 
 def _url_callback(url: str) -> Union[str, None]:
-    """Check url appears valid"""
+    """Check url appea = Noners valid"""
     if url == "latest":
         return url
     if validators.url(url):
@@ -145,7 +162,11 @@ def _get_model_date(model: Path) -> datetime.datetime:
 
 def _sort_local_models_by_date(model_dir: Path) -> List[Path]:
     return sorted(
-        [d for d in Path(model_dir).iterdir() if not d.name.startswith(".")],
+        [
+            d
+            for d in Path(model_dir).iterdir()
+            if (d.is_dir() and not d.name.startswith("."))
+        ],
         reverse=True,
     )
 
@@ -158,15 +179,28 @@ def _get_latest_model(model_dir: Path) -> Optional[Path]:
         return models[0]
 
 
+def _get_model_parts(model_dir: Path) -> LocalModel:
+    """Returns model path, vocab and metadata for a model"""
+    model_files = Path(model_dir / "model").iterdir()
+    vocab, modelcard, model = None, None, None
+    for file in model_files:
+        if fnmatch.fnmatch(file.name, "vocab.txt"):
+            vocab = file
+        if fnmatch.fnmatch(file.name, "modelcard.md"):
+            modelcard = file
+        if fnmatch.fnmatch(file.name, "*.onnx") or fnmatch.fnmatch(file.name, "*.pkl"):
+            model = file
+    return LocalModel(vocab, modelcard, model)
+
+
 def ensure_model(
-    model_dir: Path, check_latest: bool = False, model_format: str = ".onnx"
-) -> Tuple[Path, Path]:  # pragma: no cover
+    model_dir: Path, check_latest: bool = False
+) -> Optional[LocalModel]:  # pragma: no cover
     local_model = _get_latest_model(model_dir)
-    typer.echo(f"model path{local_model}")
+    typer.echo(f"model path {local_model}")
     if local_model and not check_latest:
-        model_path = Path(local_model).rglob(f"**/*{model_format}")
-        vocab_path = Path(local_model).rglob("vocab.txt")
-        return list(model_path)[0], list(vocab_path)[0]
+        model_parts = _get_model_parts(local_model)
+        return model_parts
     if local_model and check_latest:
         url = MODEL_REPO_URL + "/latest"
         remote_release_json = get_remote_release_json(url, single=True)
@@ -178,19 +212,45 @@ def ensure_model(
             > _get_model_date(local_model).isoformat()
         ):
             download_model(url="latest", model_dir=model_dir)
-        model_path = Path(local_model).rglob(f"**/*{model_format}")
-        vocab_path = Path(local_model).rglob("vocab.txt")
-        return list(model_path)[0], list(vocab_path)[0]
-    typer.echo("No model found locally...")
-    download_model(url="latest", model_dir=model_dir)
-    if not local_model:
         local_model = _get_latest_model(model_dir)
         if local_model:
-            model_path = Path(local_model).rglob(f"**/*{model_format}")
-            vocab_path = Path(local_model).rglob("vocab.txt")
-            return list(model_path)[0], list(vocab_path)[0]
+            model_parts = _get_model_parts(local_model)
+            return model_parts
+        else:
+            typer.echo("No model found locally...")
+
+    if not local_model:
+        download_model(url="latest", model_dir=model_dir)
+        local_model = _get_latest_model(model_dir)
+        if local_model:
+            model_parts = _get_model_parts(local_model)
+            return model_parts
         typer.echo("Not able to find a model")
         raise typer.Exit()
+
+
+@app.command()
+def vocab(
+    model: str = typer.Argument("latest"), show: bool = typer.Option(True)
+) -> Optional[List]:
+    if model != "latest":
+        raise NotImplemented
+    model_dir = ensure_model_dir()
+    model_path = _get_latest_model(model_dir)
+    if not model_path:
+        typer.echo(f"No models currently found in {model_dir}")
+        raise typer.Exit()
+    else:
+        model_parts = _get_model_parts(model_path)
+        if model_parts.vocab:
+            with open(model_parts.vocab, "r") as f:
+                vocab = [line.strip("\n") for line in f.readlines()]
+                if show:
+                    console.print(Markdown("# Model Vocab"))
+                    console.print(vocab)
+                return vocab
+        else:
+            typer.echo("Model not found")
 
 
 if __name__ == "__main__":  # pragma: no cover
