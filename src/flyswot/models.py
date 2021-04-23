@@ -193,6 +193,18 @@ def _get_model_parts(model_dir: Path) -> LocalModel:
     return LocalModel(vocab, modelcard, model)
 
 
+def _compare_remote_local(local_model: Path) -> bool:
+    url = MODEL_REPO_URL + "/latest"
+    remote_release_json = get_remote_release_json(url, single=True)
+    if not remote_release_json:
+        raise typer.Exit()
+    release_metadata = get_release_metadata(remote_release_json)
+    return (
+        release_metadata.updated_at.isoformat()
+        > _get_model_date(local_model).isoformat()
+    )
+
+
 def ensure_model(
     model_dir: Path, check_latest: bool = False
 ) -> Optional[LocalModel]:  # pragma: no cover
@@ -202,15 +214,7 @@ def ensure_model(
         model_parts = _get_model_parts(local_model)
         return model_parts
     if local_model and check_latest:
-        url = MODEL_REPO_URL + "/latest"
-        remote_release_json = get_remote_release_json(url, single=True)
-        if not remote_release_json:
-            raise typer.Exit()
-        release_metadata = get_release_metadata(remote_release_json)
-        if (
-            release_metadata.updated_at.isoformat()
-            > _get_model_date(local_model).isoformat()
-        ):
+        if _compare_remote_local(local_model):
             download_model(url="latest", model_dir=model_dir)
         local_model = _get_latest_model(model_dir)
         if local_model:
