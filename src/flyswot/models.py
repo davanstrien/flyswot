@@ -51,8 +51,8 @@ class LocalModel:
     """A local model container"""
 
     vocab: Optional[Path]
-    model: Optional[Path]
     modelcard: Optional[Path]
+    model: Optional[Path]
 
 
 def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
@@ -231,6 +231,11 @@ def ensure_model(
             return model_parts
         typer.echo("Not able to find a model")
         raise typer.Exit()
+
+
+def load_vocab(vocab: Path) -> List:
+    with open(vocab, "r") as f:
+        return [line.strip("\n") for line in f.readlines()]
 
 
 @app.command()
