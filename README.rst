@@ -37,11 +37,10 @@ flyswot
 Features
 --------
 
-`flyswot` is a Command Line Tool for detecting 'fake' flysheets.
+`flyswot` is a Command Line Tool for detecting 'fake' flysheets. TODO add description of project
 
 * unix style search patterns for matching images to predict against
 * produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
-
 
 
 Requirements
@@ -65,7 +64,6 @@ Even better, if you have pipx:
 .. code:: console
 
    $ pipx install flyswot
-
 
 
 Usage
