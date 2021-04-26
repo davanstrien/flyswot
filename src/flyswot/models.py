@@ -6,7 +6,6 @@ import os
 import urllib.error
 import urllib.request
 import zipfile
-from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any

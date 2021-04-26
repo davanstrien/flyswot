@@ -96,7 +96,7 @@ def predict_directory(
     """
     Predicts against all images containing PATTERN in the filename found under DIRECTORY.
     By default searches for filenames containing FSE
-
+    Creates a CSV report saved to CSV_SAVE_DIR containing the predictions
     """
     typer.echo(csv_save_dir)
     model_dir = models.ensure_model_dir()
@@ -105,14 +105,11 @@ def predict_directory(
     model_parts = models.ensure_model(model_dir)
     model = model_parts.model
     vocab = models.load_vocab(model_parts.vocab)
-    # FastaiInference = FastaiInferenceModel(model)
-
     OnnxInference = onnx_inference_session(model, vocab)
     files = core.get_image_files_from_pattern(directory, pattern)
     filtered_files = core.filter_to_preferred_ext(files, preferred_format)
     files = list(filtered_files)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
-    typer.echo(f"Predicting with batch size: {bs}")
     csv_fname = create_csv_fname(csv_save_dir)
     create_csv_header(csv_fname)
     with Progress() as progress:
@@ -120,8 +117,6 @@ def predict_directory(
         all_preds = []
         predictions = []
         for batch in itertoolz.partition_all(bs, files):
-            # batch_predictions = fastai_predict_batch(learn, batch, bs)
-            # batch_predictions = FastaiInference.predict_batch(batch, bs)
             batch_predictions = OnnxInference.predict_batch(batch, bs)
             all_preds.append(batch_predictions.batch_labels)
             predictions.append(batch_predictions)
