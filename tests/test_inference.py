@@ -1,0 +1,56 @@
+import pathlib
+from typing import Any
+
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+from hypothesis.core import given
+
+from flyswot import inference
+
+# flake8: noqa
+
+
+def test__image_predicton_item_raises_error_when_too_few_params():
+    """It raises Typerror when passed too frew items"""
+    with pytest.raises(TypeError):
+        item = inference.ImagePredictionItem("A")
+
+
+def test_image_prediction_items_match(tmp_path):
+    im_path = tmp_path / "image.tif"
+    label = "flysheet"
+    confidence = 0.9
+    item = inference.ImagePredictionItem(im_path, label, confidence)
+    assert item.path == im_path
+    assert item.predicted_label == "flysheet"
+    assert item.confidence == 0.9
+    assert type(item.path) == pathlib.PosixPath
+    assert type(item.confidence) == float
+
+
+@pytest.fixture(scope="session")
+def imfile(tmpdir_factory):
+    image_dir = tmpdir_factory.mktemp("images")
+    imfile = image_dir.join("image1.tif")
+    imfile.ensure()
+    return imfile
+
+
+@given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
+def test_image_prediction_item(confidence, label, imfile: Any):
+    item = inference.ImagePredictionItem(imfile, label, confidence)
+    assert item.path == imfile
+    assert item.predicted_label == label
+    assert item.confidence == confidence
+    assert type(item.confidence) == float
+
+
+@given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
+def test_prediction_batch(confidence: float, label: str, imfile: Any):
+    item = inference.ImagePredictionItem(imfile, label, confidence)
+    item2 = inference.ImagePredictionItem(imfile, label, confidence)
+    batch = inference.PredictionBatch([item, item2])
+    assert batch.batch_labels
+    assert len(list(batch.batch_labels)) == 2
+    assert hasattr(batch.batch_labels, "__next__")
