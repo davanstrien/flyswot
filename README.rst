@@ -47,7 +47,7 @@ Features
 Requirements
 ------------
 
-* TODO
+* Python 3.7+
 
 
 Installation
@@ -58,6 +58,14 @@ You can install *flyswot* via pip_ from PyPI_:
 .. code:: console
 
    $ pip install flyswot
+
+
+Even better, if you have pipx:
+
+.. code:: console
+
+   $ pipx install flyswot
+
 
 
 Usage
@@ -89,6 +97,7 @@ please `file an issue`_ along with a detailed description.
 
 Credits
 -------
+
 
 This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter`_ template.
 
