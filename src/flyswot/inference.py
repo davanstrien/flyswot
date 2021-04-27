@@ -7,7 +7,6 @@ from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import IO
 from typing import Iterable
 from typing import Iterator
 from typing import List
@@ -15,10 +14,8 @@ from typing import Union
 
 import numpy as np
 import onnxruntime as rt
-import PIL
 import typer
 from PIL import Image
-from rich.progress import Progress
 from rich.table import Table
 from toolz import itertoolz  # type: ignore
 
@@ -26,17 +23,10 @@ from flyswot import core
 from flyswot import models
 from flyswot.console import console
 
-try:  # pragma: no cover
-    from fastai.vision.all import Learner
-    from fastai.vision.all import load_learner
-except ImportError:
-    pass
-from importlib import resources
 
 app = typer.Typer()
 
 
-# flake8: noqa
 @dataclass()
 class ImagePredictionItem:
     """Prediction for an image.
@@ -52,6 +42,7 @@ class ImagePredictionItem:
     confidence: float
 
     def __post_init__(self) -> Union[Path, None]:
+        """attempt to get absolute path"""
         try:
             self.path: Path = self.path.absolute()
         except AttributeError:
@@ -65,6 +56,7 @@ class PredictionBatch:
     batch: List[ImagePredictionItem]
 
     def __post_init__(self):
+        """Returns a list of all predicted labels in batch"""
         self.batch_labels: Iterator[str] = (item.predicted_label for item in self.batch)
 
 
@@ -75,6 +67,7 @@ image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("i
 def predict_image(
     image: Path = typer.Argument(..., readable=True, resolve_path=True)
 ) -> None:
+    """Predict a single image"""
     pass  # pragma: no cover
 
 
@@ -93,10 +86,10 @@ def predict_directory(
         help="Preferred image format for predictions. If not available, flyswot will use images matching `pattern`",
     ),
 ):
-    """
-    Predicts against all images containing PATTERN in the filename found under DIRECTORY.
+    """Predicts against all images containing `pattern` in the filename found under DIRECTORY.
+
     By default searches for filenames containing FSE
-    Creates a CSV report saved to CSV_SAVE_DIR containing the predictions
+    Creates a CSV report saved to `csv_save_dir` containing the predictions
     """
     typer.echo(csv_save_dir)
     model_dir = models.ensure_model_dir()
@@ -105,7 +98,7 @@ def predict_directory(
     model_parts = models.ensure_model(model_dir)
     model = model_parts.model
     vocab = models.load_vocab(model_parts.vocab)
-    OnnxInference = onnx_inference_session(model, vocab)
+    onnxinference = OnnxInferenceSession(model, vocab)
     files = core.get_image_files_from_pattern(directory, pattern)
     filtered_files = core.filter_to_preferred_ext(files, preferred_format)
     files = list(filtered_files)
@@ -116,7 +109,7 @@ def predict_directory(
         all_preds = []
         predictions = []
         for batch in itertoolz.partition_all(bs, files):
-            batch_predictions = OnnxInference.predict_batch(batch, bs)
+            batch_predictions = onnxinference.predict_batch(batch, bs)
             all_preds.append(batch_predictions.batch_labels)
             predictions.append(batch_predictions)
             progress.update(len(batch))
@@ -126,6 +119,7 @@ def predict_directory(
 
 
 def print_table(decoded) -> None:
+    """Prints table summary of predicted labels"""
     table = Table(show_header=True, title="Prediction summary")
     table.add_column(
         "Class",
@@ -147,6 +141,7 @@ def print_table(decoded) -> None:
 
 
 def create_csv_fname(csv_directory: Path) -> Path:
+    """Creates a csv filename"""
     date_now = datetime.now()
     date_now = date_now.strftime("%Y_%m_%d_%H_%M")
     fname = Path(date_now + ".csv")
@@ -154,6 +149,7 @@ def create_csv_fname(csv_directory: Path) -> Path:
 
 
 def create_csv_header(csv_path: Path) -> None:
+    """Creates a header for csv `csv_path`"""
     with open(csv_path, mode="w", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
@@ -161,6 +157,7 @@ def create_csv_header(csv_path: Path) -> None:
 
 
 def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> None:
+    """Appends `predictions` batch to `csv_path`"""
     with open(csv_fpath, mode="a", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
@@ -171,21 +168,27 @@ def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> N
 
 
 class InferenceSession(ABC):
+    """Abstract class for inference sessions"""
+
     @abstractmethod
     def __init__(self, model: Path, vocab: List):
+        """Inference Sessions should init from a model file and vocab"""
         self.model = model
         self.vocab = vocab
 
     @abstractmethod
     def predict_image(self, image: Path):
+        """Predict a single image"""
         pass
 
     @abstractmethod
     def predict_batch(self, model: Path, batch: Iterable[Path], bs: int):
+        """Predict a batch"""
         pass
 
 
 def softmax(x):
+    """return softmax of `x`"""
     x = x.reshape(-1)
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum(axis=0)
@@ -216,10 +219,11 @@ def softmax(x):
 #         return PredictionBatch(prediction_items)
 
 
-class onnx_inference_session(InferenceSession):
-    """Class for running inference making use of the onnxrunntime"""
+class OnnxInferenceSession(InferenceSession):
+    """onnx inference session"""
 
-    def __init__(self, model, vocab):
+    def __init__(self, model: Path, vocab: Path):
+        """Create onnx session"""
         self.model = model
         self.session = rt.InferenceSession(str(model))
 
