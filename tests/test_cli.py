@@ -11,7 +11,8 @@ from flyswot.cli import app
 runner = CliRunner()
 
 
-def test_main_cli():
+def test_main_cli() -> None:
+    """Basic tests for Cli"""
     result = runner.invoke(app)
     assert result.exit_code == 0
     result = runner.invoke(app, ["model", "show-model-dir"])
