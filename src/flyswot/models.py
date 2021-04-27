@@ -79,7 +79,7 @@ def _url_callback(url: str) -> Union[str, None]:
 
 def get_remote_release_json(url: str, single: bool = False) -> Dict[str, Any]:
     """Returns all releases found at `url`"""
-    with urllib.request.urlopen(url) as response:
+    with urllib.request.urlopen(url) as response:  # pragma: no cover
         try:
             html = response.read()
             response_json: Dict[str, Any] = json.loads(html)
@@ -121,9 +121,9 @@ def download_model(
         envvar="MODEL_DIR",
         help="Optionally specify a directory to store model files in",
     ),
-) -> None:
+) -> None:  # pragma: no cover
     """Downloads models, defaults to the latest available model"""
-    if url != "latest":  # pragma: no cover
+    if url != "latest":
 
         raise NotImplementedError
     url = MODEL_REPO_URL + "/latest"
@@ -185,7 +185,7 @@ def _get_model_parts(model_dir: Path) -> LocalModel:
     return LocalModel(vocab, modelcard, model)
 
 
-def _compare_remote_local(local_model: Path) -> bool:
+def _compare_remote_local(local_model: Path) -> bool:  # pragma: no cover
     url = MODEL_REPO_URL + "/latest"
     remote_release_json = get_remote_release_json(url, single=True)
     if not remote_release_json:
