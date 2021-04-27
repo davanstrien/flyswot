@@ -138,14 +138,6 @@ def test_ensure_model_dir_returns_path(tmp_path: Any) -> None:
     assert model_dir.absolute().parts[-1] == "models"
 
 
-def test_ensure_model_dir_raises_error(tmp_path: Any) -> None:
-    """It raises error if no write permision"""
-    model_dir_path = tmp_path / "app"
-    model_dir_path.mkdir(mode=0o444)
-    with pytest.raises(PermissionError):
-        moodel_dir = models.ensure_model_dir(model_dir_path)
-
-
 def test_show_model_dir() -> None:
     result = runner.invoke(app, ["show-model-dir"])
     assert result.exit_code == 0
