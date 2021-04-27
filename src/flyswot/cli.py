@@ -10,5 +10,5 @@ app.add_typer(inference.app, name="predict")
 
 
 def main():
-    """main flyswot cli entrypoint"""
-    app()
+    """flyswot"""
+    app()  # pragma: no cover
