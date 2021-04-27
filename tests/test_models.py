@@ -166,6 +166,23 @@ def test_get_model_date(model_dir: Any, expected: Any) -> None:
     assert str(date) == expected
 
 
+def test_get_latest_model(tmp_path: Any) -> None:
+    flyswot = tmp_path / "flyswot"
+    flyswot.mkdir()
+    for model in ["20210331", "20210328"]:
+        model_path = flyswot / model
+        model_path.mkdir()
+    latest = models._get_latest_model(flyswot)
+    assert latest.name == "20210331"
+
+
+def test_get_latest_model_none(tmp_path: Any) -> None:
+    flyswot = tmp_path / "flyswot"
+    flyswot.mkdir()
+    latest = models._get_latest_model(flyswot)
+    assert latest is None
+
+
 def test_get_model_parts(tmp_path: Any) -> None:
     model_dir = tmp_path / "20210331/model"
     model_dir.mkdir(parents=True)
@@ -180,16 +197,6 @@ def test_get_model_parts(tmp_path: Any) -> None:
     assert parts.vocab
     assert parts.model
     assert parts.modelcard
-
-
-def test_get_latest_model(tmp_path: Any) -> None:
-    flyswot = tmp_path / "flyswot"
-    flyswot.mkdir()
-    for model in ["20210331", "20210328"]:
-        model_path = flyswot / model
-        model_path.mkdir()
-    latest = models._get_latest_model(flyswot)
-    assert latest.name == "20210331"
 
 
 def test_ensure_model() -> None:
