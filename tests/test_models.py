@@ -177,6 +177,7 @@ def test_get_latest_model(tmp_path: Any) -> None:
 
 
 def test_get_latest_model_none(tmp_path: Any) -> None:
+    """It returns None if model directory empty"""
     flyswot = tmp_path / "flyswot"
     flyswot.mkdir()
     latest = models._get_latest_model(flyswot)
