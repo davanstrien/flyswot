@@ -34,6 +34,12 @@ flyswot
 
 .. image:: https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII
 
+
+Disclaimer
+-----------
+
+`flyswot` is a work in progress and is currently only intended to be used for testing.
+
 Features
 --------
 
