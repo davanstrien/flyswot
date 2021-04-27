@@ -128,25 +128,6 @@ def test_url_callback() -> None:
         models._url_callback(bad_url)
 
 
-def test_get_remote_release_json_returns() -> None:
-    time.sleep(1)
-    response = models.get_remote_release_json(
-        "https://api.github.com/repos/davanstrien/learn-onnx/releases"
-    )
-    assert response
-    assert type(response) == list
-
-
-def test_get_remote_release_json_return_single() -> None:
-    time.sleep(2)
-    response = models.get_remote_release_json(
-        "https://api.github.com/repos/davanstrien/learn-onnx/releases/latest",
-        single=True,
-    )
-    assert response
-    assert type(response) == dict
-
-
 def test_ensure_model_dir_returns_path(tmp_path: Any) -> None:
     """It returns paths"""
     model_dir_path = tmp_path / "app"
@@ -168,6 +149,7 @@ def test_ensure_model_dir_raises_error(tmp_path: Any) -> None:
 def test_show_model_dir() -> None:
     result = runner.invoke(app, ["show-model-dir"])
     assert result.exit_code == 0
+    assert "model" in result.stdout
 
 
 @pytest.mark.parametrize(
@@ -184,24 +166,30 @@ def test_get_model_date(model_dir: Any, expected: Any) -> None:
     assert str(date) == expected
 
 
-# def test_sort_local_models_by_date(tmpdir: Any) -> None:
-#     """It returns correct order"""
-#     for model_dir in ["20210331", "20210328"]:
-#         model_path = tmpdir / model_dir
-#         model_path.ensure()
-#     model_path = models._sort_local_models_by_date(tmpdir)
-#     assert model_path
-#     assert model_path[0].name == "20210331"
+def test_get_model_parts(tmp_path: Any) -> None:
+    model_dir = tmp_path / "20210331/model"
+    model_dir.mkdir(parents=True)
+    assert model_dir.is_dir()
+    vocab = model_dir / "vocab.txt"
+    vocab.touch()
+    model_card = model_dir / "modelcard.md"
+    model_card.touch()
+    modelfile = model_dir / "20210331.onnx"
+    modelfile.touch()
+    parts = models._get_model_parts(tmp_path / "20210331")
+    assert parts.vocab
+    assert parts.model
+    assert parts.modelcard
 
 
-# def test_get_latest_model(tmp_path: Any) -> None:
-#     flyswot = tmp_path / "flyswot"
-#     flyswot.mkdir()
-#     for model in ["20210331", "20210328"]:
-#         model_path = flyswot / model
-#         model_path.mkdir()
-#     latest = models._get_latest_model(flyswot)
-#     assert latest.name == "20210331"
+def test_get_latest_model(tmp_path: Any) -> None:
+    flyswot = tmp_path / "flyswot"
+    flyswot.mkdir()
+    for model in ["20210331", "20210328"]:
+        model_path = flyswot / model
+        model_path.mkdir()
+    latest = models._get_latest_model(flyswot)
+    assert latest.name == "20210331"
 
 
 def test_ensure_model() -> None:
