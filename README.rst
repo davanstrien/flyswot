@@ -71,13 +71,13 @@ Usage
 
 To run predictions against a directory of images:
 
-.. code:: console 
+.. code:: console
 
-   $ flyswot predict directory manuscripts_folder . 
-  
-- :code:`flyswot` will search inside the :code:`manuscripts_folder` looking for image files. 
-- By default it will look for files that contain :code:`FSE` in the filename since these are files which have been labelled as being "end flysheets". 
-- Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labbeled correctly i.e. if it is indeed a flysheet or something else. 
+   $ flyswot predict directory manuscripts_folder .
+
+- :code:`flyswot` will search inside the :code:`manuscripts_folder` looking for image files.
+- By default it will look for files that contain :code:`FSE` in the filename since these are files which have been labelled as being "end flysheets".
+- Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labbeled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
 
 
