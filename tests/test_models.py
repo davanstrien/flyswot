@@ -204,7 +204,7 @@ def test_get_model_date(model_dir: Any, expected: Any) -> None:
 #     assert latest.name == "20210331"
 
 
-def test_ensure_model():
+def test_ensure_model() -> None:
     model_dir = ensure_model_dir()
     model_parts = models.ensure_model(model_dir)
     assert model_parts

@@ -68,7 +68,7 @@ def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
 
 
 def _url_callback(url: str) -> Union[str, None]:
-    """Check url appea = Noners valid"""
+    """Checks url is valid"""
     if url == "latest":
         return url
     if validators.url(url):
@@ -111,12 +111,6 @@ def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
 def show_model_dir() -> None:
     """Print out the directory where models are stored"""
     ensure_model_dir()
-
-
-# def _create_model_metadata_path(model_name: str) -> str:
-#     """Creates a filename for model metadata"""
-#     without_suffix = "".join(model_name.split(".")[:-1])
-#     return f"{without_suffix}.md"
 
 
 @app.command(name="download")
