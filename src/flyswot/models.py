@@ -2,7 +2,6 @@
 import datetime
 import fnmatch
 import json
-import os
 import urllib.error
 import urllib.request
 import zipfile
@@ -11,23 +10,17 @@ from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import NamedTuple
 from typing import Optional
-from typing import Tuple
-from typing import Type
 from typing import Union
 
 import typer
 import validators  # type: ignore
 from rich.markdown import Markdown
-from rich.panel import Panel
-from rich.text import Text
 
 from flyswot.config import APP_NAME
 from flyswot.config import MODEL_REPO_URL
 from flyswot.console import console
 
-# flake8: noqa
 
 app = typer.Typer()
 
@@ -133,15 +126,15 @@ def download_model(
     release_metadata = get_release_metadata(remote_release_json)
     download_url = release_metadata.browser_download_url
     updated_date = release_metadata.updated_at
-    typer.echo(f"{updated_date} {download_url}")
+    typer.echo(f"Remote model updated on {updated_date}")
     model_dir = ensure_model_dir()
     model_save_path = model_dir / release_metadata.model_name
     with console.status(
-        f"Downloading model...",
+        "Downloading model...",
         spinner="aesthetic",
     ):
         urllib.request.urlretrieve(download_url, model_save_path)
-    typer.echo(f"Model save to {model_save_path}")
+    typer.echo(f"Model saving to {model_save_path}...")
     typer.echo("Extracting model...")
     with zipfile.ZipFile(model_save_path, "r") as zip_ref:
         zip_ref.extractall(model_dir / release_metadata.model_name.replace(".zip", ""))
@@ -200,6 +193,7 @@ def _compare_remote_local(local_model: Path) -> bool:  # pragma: no cover
 def ensure_model(
     model_dir: Path, check_latest: bool = False
 ) -> Optional[LocalModel]:  # pragma: no cover
+    """Checks for a local model and if not found downloads the latest available remote model"""
     local_model = _get_latest_model(model_dir)
     typer.echo(f"model path {local_model}")
     if local_model and not check_latest:
@@ -226,6 +220,7 @@ def ensure_model(
 
 
 def load_vocab(vocab: Path) -> List[str]:
+    """loads vocab from `vocab` and returns as list"""
     with open(vocab, "r") as f:
         return [line.strip("\n") for line in f.readlines()]
 
@@ -234,8 +229,9 @@ def load_vocab(vocab: Path) -> List[str]:
 def vocab(
     model: str = typer.Argument("latest"), show: bool = typer.Option(True)
 ) -> Optional[List[str]]:
+    """Prints out vocab for latest model"""
     if model != "latest":
-        raise NotImplemented
+        raise NotImplementedError
     model_dir = ensure_model_dir()
     model_path = _get_latest_model(model_dir)
     if model_path:
