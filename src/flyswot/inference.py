@@ -154,14 +154,14 @@ def create_csv_fname(csv_directory: Path) -> Path:
 
 
 def create_csv_header(csv_path: Path) -> None:
-    with open(csv_path, mode="w") as csv_file:
+    with open(csv_path, mode="w", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         writer.writeheader()
 
 
 def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> None:
-    with open(csv_fpath, mode="a") as csv_file:
+    with open(csv_fpath, mode="a", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         for pred in predictions.batch:
