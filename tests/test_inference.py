@@ -27,7 +27,7 @@ def test_image_prediction_items_match(tmp_path):
     assert item.path == im_path
     assert item.predicted_label == "flysheet"
     assert item.confidence == 0.9
-    assert type(item.path) == pathlib.PosixPath
+    assert type(item.path) == pathlib.PosixPath or pathlib.WindowsPath
     assert type(item.confidence) == float
 
 
