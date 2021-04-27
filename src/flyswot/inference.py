@@ -26,7 +26,7 @@ from flyswot import core
 from flyswot import models
 from flyswot.console import console
 
-try:
+try:  # pragma: no cover
     from fastai.vision.all import Learner
     from fastai.vision.all import load_learner
 except ImportError:
