@@ -112,15 +112,14 @@ def predict_directory(
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     create_csv_header(csv_fname)
-    with Progress() as progress:
-        prediction_progress = progress.add_task("Predicting images", total=len(files))
+    with typer.progressbar(length=len(files)) as progress:
         all_preds = []
         predictions = []
         for batch in itertoolz.partition_all(bs, files):
             batch_predictions = OnnxInference.predict_batch(batch, bs)
             all_preds.append(batch_predictions.batch_labels)
             predictions.append(batch_predictions)
-            progress.update(prediction_progress, advance=bs)
+            progress.update(len(batch))
             write_batch_preds_to_csv(csv_fname, batch_predictions)
         all_preds = list(itertoolz.concat(all_preds))
     print_table(all_preds)
@@ -155,14 +154,14 @@ def create_csv_fname(csv_directory: Path) -> Path:
 
 
 def create_csv_header(csv_path: Path) -> None:
-    with open(csv_path, mode="w") as csv_file:
+    with open(csv_path, mode="w", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         writer.writeheader()
 
 
 def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> None:
-    with open(csv_fpath, mode="a") as csv_file:
+    with open(csv_fpath, mode="a", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         for pred in predictions.batch:
