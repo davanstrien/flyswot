@@ -1,4 +1,5 @@
 import csv
+import os
 import pathlib
 from typing import Any
 
@@ -56,8 +57,6 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
     assert len(list(batch.batch_labels)) == 2
     assert hasattr(batch.batch_labels, "__next__")
 
-
-import os
 
 FIXTURE_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
