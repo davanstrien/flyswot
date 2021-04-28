@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import Any
 from typing import Iterable
 from typing import Iterator
+from typing import List
 from typing import Set
 from typing import Tuple
+from typing import Union
 
 from toolz import itertoolz  # type: ignore
 
@@ -32,20 +34,28 @@ def get_image_files_from_pattern(directory: Path, pattern: str) -> Iterator[Path
         console.log("Search files complete...")
 
 
-def filter_to_preferred_ext(files: Iterable[Path], ext: str) -> Iterable[Path]:
+def filter_to_preferred_ext(
+    files: Iterable[Path], ext: Union[str, List[str]]
+) -> Iterable[Path]:
     """filter_to_preferred_ext"""
     files = list(files)
     files_without_ext = (
         file.with_suffix("") for file in files if not file.name.startswith(".")
     )
-    unique = set(itertoolz.unique(files_without_ext))
+    file_names_without_ext = (file.name for file in files_without_ext)
+    unique = set(itertoolz.unique(file_names_without_ext))
+    print(unique)
     for file in files:
-        if file.with_suffix("") in unique:
+        file_without_suffix = file.with_suffix("")
+        print(file_without_suffix.name)
+        if file_without_suffix.name in unique:
+            print(file)
             if file.with_suffix(ext).is_file():
+                print(file)
                 yield file.with_suffix(ext)
             else:
                 yield file
-            unique.discard(file.with_suffix(""))
+            unique.discard(file_without_suffix.name)
 
 
 def signal_last(it: Iterable[Any]) -> Iterable[Tuple[bool, Any]]:

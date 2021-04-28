@@ -70,6 +70,28 @@ def test_filter(fname, tmpdir):
     assert len(list(matches)) == 50 + 25
 
 
+@pytest.mark.parametrize("fname", patterns_to_test)
+def test_filter_matching_files(fname, tmp_path):
+    """It filters files from pattern when file in both extensions"""
+    a_dir = tmp_path / "image_dir"
+    a_dir.mkdir()
+    for number in range(50):
+        file = a_dir / f"file_{fname}_{number}.tif"
+        file.touch()
+        file2 = a_dir / f"file_{fname}_{number}.jpg"
+        file2.touch()
+    files = Path(a_dir).rglob("**/*")
+    files = (file for file in files if file.suffix in [".jpg", ".tif"])
+    matches = core.filter_to_preferred_ext(
+        files,
+        ".tif",
+    )
+    files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
+    assert len(files) == 100
+    print(matches)
+    assert len(list(matches)) == 50
+
+
 @pytest.fixture()
 def image_files(tmpdir_factory):
     """Fixture for image files"""
@@ -92,6 +114,35 @@ def test_filter_to_preferred_ext(image_files):
     image_files = [f for f in Path(image_files).iterdir()]
     return_files = list(core.filter_to_preferred_ext(image_files, ".jpg"))
     assert len(return_files) == 2000
+
+
+@pytest.mark.parametrize("fname", patterns_to_test)
+def test_filter_matching_files_in_different_directories(fname, tmp_path):
+    """It filters files from pattern when file live in different directories"""
+    img_dir = tmp_path / "image_dir"
+    img_dir.mkdir()
+    tif_dir = img_dir / "tif"
+    tif_dir.mkdir()
+    jpg_dir = img_dir / "jpg"
+    jpg_dir.mkdir()
+    for number in range(50):
+        file = tif_dir / f"file_{fname}_{number}.tif"
+        file.touch()
+        file2 = jpg_dir / f"file_{fname}_{number}.jpg"
+        file2.touch()
+    files = Path(img_dir).rglob("**/*")
+    files = (file for file in files if file.suffix in [".jpg", ".tif"])
+    matches = core.filter_to_preferred_ext(
+        files,
+        ".tif",
+    )
+    files = [
+        f
+        for f in Path(img_dir).rglob("**/*")
+        if f.is_file() and not f.name.startswith(".")
+    ]
+    assert len(files) == 100
+    assert len(list(matches)) == 50
 
 
 @given(strategies.lists(int_values, min_size=1))
