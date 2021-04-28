@@ -70,6 +70,25 @@ def test_filter(fname, tmpdir):
     assert len(list(matches)) == 50 + 25
 
 
+@pytest.mark.parametrize("fname", patterns_to_test)
+def test_filter_matching_files(fname, tmpdir):
+    """It filters files from pattern when file in both extensions"""
+    a_dir = tmpdir.mkdir("image_dir")
+    for number in range(50):
+        file = a_dir.join(f"file_{fname}_{number}.tif")
+        file.ensure()
+        file2 = a_dir.join(f"file_{number}.jpg")
+        file2.ensure()
+    files = Path("a_dir").rglob("**/*")
+    matches = core.filter_to_preferred_ext(
+        a_dir,
+        fname,
+    )
+    files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
+    assert len(files) == 100
+    assert len(list(matches)) == 50
+
+
 @pytest.fixture()
 def image_files(tmpdir_factory):
     """Fixture for image files"""
@@ -92,6 +111,27 @@ def test_filter_to_preferred_ext(image_files):
     image_files = [f for f in Path(image_files).iterdir()]
     return_files = list(core.filter_to_preferred_ext(image_files, ".jpg"))
     assert len(return_files) == 2000
+
+
+@pytest.mark.parametrize("fname", patterns_to_test)
+def test_filter_matching_files_in_different_directories(fname, tmpdir):
+    """It filters files from pattern when file live in different directories"""
+    img_dir = tmpdir.mkdir("image_dir")
+    tif_dir = img_dir.mkdir("tif")
+    jpg_dir = img_dir.mkdir("jpg")
+    for number in range(50):
+        file = tif_dir.join(f"file_{fname}_{number}.tif")
+        file.ensure()
+        file2 = jpg_dir.join(f"file_{fname}_{number}.jpg")
+        file2.ensure()
+    files = Path(img_dir).rglob("**/*")
+    matches = core.filter_to_preferred_ext(
+        files,
+        ".tif",
+    )
+    files = [f for f in Path(img_dir).rglob("**/*") if f.is_file()]
+    assert len(files) == 100
+    assert len(list(matches)) == 50
 
 
 @given(strategies.lists(int_values, min_size=1))
