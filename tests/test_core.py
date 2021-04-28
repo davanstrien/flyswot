@@ -71,21 +71,24 @@ def test_filter(fname, tmpdir):
 
 
 @pytest.mark.parametrize("fname", patterns_to_test)
-def test_filter_matching_files(fname, tmpdir):
+def test_filter_matching_files(fname, tmp_path):
     """It filters files from pattern when file in both extensions"""
-    a_dir = tmpdir.mkdir("image_dir")
+    a_dir = tmp_path / "image_dir"
+    a_dir.mkdir()
     for number in range(50):
-        file = a_dir.join(f"file_{fname}_{number}.tif")
-        file.ensure()
-        file2 = a_dir.join(f"file_{number}.jpg")
-        file2.ensure()
-    files = Path("a_dir").rglob("**/*")
+        file = a_dir / f"file_{fname}_{number}.tif"
+        file.touch()
+        file2 = a_dir / f"file_{fname}_{number}.jpg"
+        file2.touch()
+    files = Path(a_dir).rglob("**/*")
+    files = (file for file in files if file.suffix in [".jpg", ".tif"])
     matches = core.filter_to_preferred_ext(
-        a_dir,
-        fname,
+        files,
+        ".tif",
     )
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == 100
+    print(matches)
     assert len(list(matches)) == 50
 
 
@@ -114,22 +117,30 @@ def test_filter_to_preferred_ext(image_files):
 
 
 @pytest.mark.parametrize("fname", patterns_to_test)
-def test_filter_matching_files_in_different_directories(fname, tmpdir):
+def test_filter_matching_files_in_different_directories(fname, tmp_path):
     """It filters files from pattern when file live in different directories"""
-    img_dir = tmpdir.mkdir("image_dir")
-    tif_dir = img_dir.mkdir("tif")
-    jpg_dir = img_dir.mkdir("jpg")
+    img_dir = tmp_path / "image_dir"
+    img_dir.mkdir()
+    tif_dir = img_dir / "tif"
+    tif_dir.mkdir()
+    jpg_dir = img_dir / "jpg"
+    jpg_dir.mkdir()
     for number in range(50):
-        file = tif_dir.join(f"file_{fname}_{number}.tif")
-        file.ensure()
-        file2 = jpg_dir.join(f"file_{fname}_{number}.jpg")
-        file2.ensure()
+        file = tif_dir / f"file_{fname}_{number}.tif"
+        file.touch()
+        file2 = jpg_dir / f"file_{fname}_{number}.jpg"
+        file2.touch()
     files = Path(img_dir).rglob("**/*")
+    files = (file for file in files if file.suffix in [".jpg", ".tif"])
     matches = core.filter_to_preferred_ext(
         files,
         ".tif",
     )
-    files = [f for f in Path(img_dir).rglob("**/*") if f.is_file()]
+    files = [
+        f
+        for f in Path(img_dir).rglob("**/*")
+        if f.is_file() and not f.name.startswith(".")
+    ]
     assert len(files) == 100
     assert len(list(matches)) == 50
 
