@@ -15,7 +15,7 @@ from typing import Union
 import numpy as np
 import onnxruntime as rt  # type: ignore
 import typer
-from PIL import Image
+from PIL import Image  # type: ignore
 from rich.table import Table
 from toolz import itertoolz  # type: ignore
 
