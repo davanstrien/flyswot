@@ -62,14 +62,7 @@ You can install *flyswot* via pip_ from PyPI_:
 
 .. code:: console
 
-   $ pip install flyswot
-
-
-Even better, if you have pipx:
-
-.. code:: console
-
-   $ pipx install flyswot
+   $ pip install git+https://github.com/davanstrien/flyswot
 
 
 Usage
