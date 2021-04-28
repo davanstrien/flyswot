@@ -84,7 +84,7 @@ def test_filter_matching_files(fname, tmp_path):
     files = (file for file in files if file.suffix in [".jpg", ".tif"])
     matches = core.filter_to_preferred_ext(
         files,
-        ".tif",
+        [".tif"],
     )
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == 100
@@ -112,7 +112,7 @@ def test_filter_to_preferred_ext(image_files):
     jpeg_files = list(Path(image_files).glob("*.jpg"))
     assert len(jpeg_files) == 1000
     image_files = [f for f in Path(image_files).iterdir()]
-    return_files = list(core.filter_to_preferred_ext(image_files, ".jpg"))
+    return_files = list(core.filter_to_preferred_ext(image_files, [".jpg"]))
     assert len(return_files) == 2000
 
 
@@ -134,7 +134,7 @@ def test_filter_matching_files_in_different_directories(fname, tmp_path):
     files = (file for file in files if file.suffix in [".jpg", ".tif"])
     matches = core.filter_to_preferred_ext(
         files,
-        ".tif",
+        [".tif"],
     )
     files = [
         f
