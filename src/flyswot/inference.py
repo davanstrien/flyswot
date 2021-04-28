@@ -13,7 +13,7 @@ from typing import List
 from typing import Union
 
 import numpy as np
-import onnxruntime as rt
+import onnxruntime as rt  # type: ignore
 import typer
 from PIL import Image
 from rich.table import Table
