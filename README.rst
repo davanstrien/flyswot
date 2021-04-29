@@ -105,14 +105,14 @@ Install flyswot in your Conda Environment
 Now you have created and activated your conda enviroment you can install flyswot. Before doing this you can check that `pip`_ is available inside your environment:
 
 .. code:: console
-          pip
+          $ pip
 
 This should return the help pages for `pip`_. We can now use `pip`_ to install *flyswot* from `PyPI`_.
 To do this run:
 
 .. code:: console
 
-   pip install flyswot
+   $ pip install flyswot
 
 You should now see the installation process begin. During this you will see some information printed to the terminal abou what packages are being installed.
 
@@ -123,7 +123,7 @@ We can quickly confirm that *flyswot* has been installed by printing out the hel
 
 .. code:: console
 
-   flyswot --help
+  $ flyswot --help
 
 This should print some help information to the screen. If you get this it means you have successfully installed *flyswot* 💪.
 
@@ -180,7 +180,8 @@ Identify the folder you want to flyswot to check for "fake" flysheets. If you ar
 For example something that looks like:
 
 .. code:: console
-   \\ad\collections\hmd\excitingcollection\excitingsubcollection\
+  
+  \\ad\collections\hmd\excitingcollection\excitingsubcollection\
 
 
 This will be the folder from which *flyswot* starts looking.
@@ -188,12 +189,14 @@ This will be the folder from which *flyswot* starts looking.
 When you activated your conda environment in a terminal, you were likely 'inside' your user directory. Since we need to specify a place for *flyswot* to store the CSV report, we'll move to a better place to store that output; your ``Desktop`` folder. To do we can navigate using the command:
 
 .. code:: console
-   chdir desktop
+   
+   $ chdir desktop
 
 
 if you are using  Mac, Linux or have GitBash installed you should instead run:
 
 .. code:: console
+   
    $ cd Desktop
 
 
@@ -201,11 +204,13 @@ if you are using  Mac, Linux or have GitBash installed you should instead run:
 This will take you to your Desktop. We'll now run *flyswot*. As with many other command line tools, *flyswot* has commands and sub-commands. We are interested in the ``predict`` command. This includes two sub-commands: ``predict-image`` and ``directory``.  We will mostly want to predict directories. To do this we use the following approach
 
 .. code:: console
+   
    $ flyswot predict directory input_directory output_directory
 
 The input directory is the folder containing our images and the output directory is where we want to save our CSV report. Using the folder we previously identified this would look like:
 
 .. code:: console
+   
    $ flyswot predict directory \\ad\collections\hmd\excitingcollection\excitingsubcollection\ .
 
 We can use ``.`` to indicate we want the CSV report to be saved to the current directory (in this case the Deskop directory).
