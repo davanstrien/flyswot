@@ -119,13 +119,13 @@ You should now see the installation process begin. During this you will see some
 Check flyswot is installed
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We can quickly confirm that flyswot has been installed by printing out the help information. We can do this by typing:
+We can quickly confirm that *flyswot* has been installed by printing out the help information. We can do this by typing:
 
 .. code:: console
 
    flyswot --help
 
-This should print some help information to the screen. If you get this it means you have sucesfully installed flyswot 💪.
+This should print some help information to the screen. If you get this it means you have successfully installed *flyswot* 💪.
 
 
 Usage
@@ -141,6 +141,27 @@ To run predictions against a directory of images:
 - By default it will look for files that contain :code:`FSE` in the filename since these are files which have been labelled as being "end flysheets".
 - Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labelled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
+
+Detailed Usage Guide
+--------------------
+
+This section provides additional guidance on the usage of *flyswot*. This is primarily aimed at `HMD`_ users of *flyswot*.
+
+How flyswot searches for images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+
+Running flyswot against a directory of images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+
+
 
 
 Contributing
