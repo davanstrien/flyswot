@@ -93,9 +93,7 @@ def predict_directory(
     Creates a CSV report saved to `csv_save_dir` containing the predictions
     """
     start_time = time.perf_counter()
-    typer.echo(csv_save_dir)
     model_dir = models.ensure_model_dir()
-    typer.echo(model_dir)
     # TODO add load learner function that can be passed a model name
     model_parts = models.ensure_model(model_dir)
     model = model_parts.model
@@ -117,8 +115,9 @@ def predict_directory(
             progress.update(len(batch))
             write_batch_preds_to_csv(csv_fname, batch_predictions)
         all_preds = list(itertoolz.concat(all_preds))
+    typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
-    typer.echo(f"Time taken to run command {str(delta)}")
+    typer.echo(f"Time taken to run:  {str(delta)}")
     print_table(all_preds)
 
 

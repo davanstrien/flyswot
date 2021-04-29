@@ -195,7 +195,6 @@ def ensure_model(
 ) -> Optional[LocalModel]:  # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
     local_model = _get_latest_model(model_dir)
-    typer.echo(f"model path {local_model}")
     if local_model and not check_latest:
         model_parts = _get_model_parts(local_model)
         return model_parts
