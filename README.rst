@@ -150,6 +150,18 @@ This section provides additional guidance on the usage of *flyswot*. This is pri
 How flyswot searches for images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code:: console
+
+   Collection/
+   ├─ item1/
+   │  ├─ add_ms_9403_fbspi.tif
+   │  ├─ add_ms_9403_fse001r.tif
+   │  ├─ add_ms_9403_fse001v.tif
+   ├─ item2/
+   │  ├─ sloane_ms_116_fblefr.tif
+   │  ├─ sloane_ms_116_fbspi.tif
+   │  ├─ sloane_ms_116_fse004r.tif
+
 
 
 
