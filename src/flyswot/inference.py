@@ -1,11 +1,13 @@
 """Inference functionality"""
 import csv
 import mimetypes
+import time
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 from typing import Iterable
 from typing import Iterator
@@ -22,7 +24,6 @@ from toolz import itertoolz  # type: ignore
 from flyswot import core
 from flyswot import models
 from flyswot.console import console
-
 
 app = typer.Typer()
 
@@ -91,6 +92,7 @@ def predict_directory(
     By default searches for filenames containing FSE
     Creates a CSV report saved to `csv_save_dir` containing the predictions
     """
+    start_time = time.perf_counter()
     typer.echo(csv_save_dir)
     model_dir = models.ensure_model_dir()
     typer.echo(model_dir)
@@ -115,6 +117,8 @@ def predict_directory(
             progress.update(len(batch))
             write_batch_preds_to_csv(csv_fname, batch_predictions)
         all_preds = list(itertoolz.concat(all_preds))
+    delta = timedelta(seconds=time.perf_counter() - start_time)
+    typer.echo(f"Time taken to run command {str(delta)}")
     print_table(all_preds)
 
 
