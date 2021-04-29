@@ -79,6 +79,53 @@ Install Python
 
 For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution of Python. If you are on a managed PC/laptop you should request this via Technology.
 
+Create and activate a Conda Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- why? (briefly)
+- how?
+
+There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use `Anaconda Navigator`_.
+
+You can find more detailed instructions for creating a new virtual environments in the `Anaconda documentation`_. Briefly you should:
+
+- Open Anaconda Navigator
+- Navigate to the *Environments* tab
+- Create a new Python environment and give it a descriptive name i.e. *flyswot*. You should ensure that the Python version is greater than 3.7
+
+Once you have created this new environment you can "activate it" by clicking on the arrow next to the name of the environment. You should select the "open terminal". This should open a new terminal window. On the left you should see the name of your environment in brackets:
+
+.. code:: console
+
+    (flyswot) $
+
+Install flyswot in your Conda Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now you have created and activated your conda enviroment you can install flyswot. Before doing this you can check that `pip`_ is available inside your environment:
+
+.. code:: console
+          pip
+
+This should return the help pages for `pip`_. We can now use `pip`_ to install *flyswot* from `PyPI`_.
+To do this run:
+
+.. code:: console
+
+   pip install flyswot
+
+You should now see the installation process begin. During this you will see some information printed to the terminal abou what packages are being installed.
+
+Check flyswot is installed
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We can quickly confirm that flyswot has been installed by printing out the help information. We can do this by typing:
+
+.. code:: console
+
+   flyswot --help
+
+This should print some help information to the screen. If you get this it means you have sucesfully installed flyswot 💪.
 
 
 Usage
@@ -92,7 +139,7 @@ To run predictions against a directory of images:
 
 - *flyswot* will search inside the manuscripts_folder looking for image files.
 - By default it will look for files that contain :code:`FSE` in the filename since these are files which have been labelled as being "end flysheets".
-- Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labbeled correctly i.e. if it is indeed a flysheet or something else.
+- Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labelled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
 
 
@@ -136,3 +183,5 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _HMD: https://www.bl.uk/projects/heritage-made-digital
 .. _Python: https://www.python.org/
 .. _Anaconda: https://www.anaconda.com/products/individual
+.. _Anaconda Navigator: https://docs.anaconda.com/anaconda/navigator/
+.. _Anaconda Documentation: https://docs.anaconda.com/anaconda/navigator/tutorials/manage-environments/#creating-a-new-environment
