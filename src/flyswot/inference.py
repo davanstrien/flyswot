@@ -80,7 +80,7 @@ def predict_directory(
         resolve_path=True,
     ),
     pattern: str = typer.Option("fse"),
-    bs: int = typer.Option(32),
+    bs: int = typer.Option(16),
     preferred_format: str = typer.Option(
         ".tif",
         help="Preferred image format for predictions. If not available, flyswot will use images matching `pattern`",
