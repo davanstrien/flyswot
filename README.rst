@@ -54,6 +54,7 @@ Requirements
 
 * Python 3.7+
 
+TODO update this section with requirements and uses.
 
 Installation
 ------------
@@ -62,7 +63,22 @@ You can install *flyswot* via pip_ from PyPI_:
 
 .. code:: console
 
-   $ pip install git+https://github.com/davanstrien/flyswot
+   $ pip install flyswot
+
+This will install the latest release version of *flyswot*
+
+Detailed Installation Guide
+---------------------------
+
+This section gives a more detailed instructions for installing *flyswot*. This guidance is aimed particularly at `HMD`_ users of *flyswot*. This set of instructions covers the steps required to install *flyswot*.
+
+Install Python
+^^^^^^^^^^^^^^
+
+*flyswot* uses the `Python`_ programming language. You will therefore need to have Python installed on your computer to run *flyswot*.
+
+For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution of Python. If you are on a managed PC/laptop you should request this via Technology.
+
 
 
 Usage
@@ -74,7 +90,7 @@ To run predictions against a directory of images:
 
    $ flyswot predict directory manuscripts_folder .
 
-- :code:`flyswot` will search inside the :code:`manuscripts_folder` looking for image files.
+- *flyswot* will search inside the manuscripts_folder looking for image files.
 - By default it will look for files that contain :code:`FSE` in the filename since these are files which have been labelled as being "end flysheets".
 - Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labbeled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
@@ -117,3 +133,6 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. github-only
 .. _Contributor Guide: CONTRIBUTING.rst
 .. _Usage: https://flyswot.readthedocs.io/en/latest/usage.html
+.. _HMD: https://www.bl.uk/projects/heritage-made-digital
+.. _Python: https://www.python.org/
+.. _Anaconda: https://www.anaconda.com/products/individual
