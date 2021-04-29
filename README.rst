@@ -37,8 +37,8 @@ flyswot
 
 Disclaimer
 -----------
-
-`flyswot` is a work in progress and is currently only intended to be used for testing.
+_
+`flyswot` is a work in progress and is currently only intended to be used for testing by `HMD`_.
 
 Features
 --------
@@ -180,7 +180,7 @@ Identify the folder you want to flyswot to check for "fake" flysheets. If you ar
 For example something that looks like:
 
 .. code:: console
-  
+
   \\ad\collections\hmd\excitingcollection\excitingsubcollection\
 
 
@@ -189,14 +189,14 @@ This will be the folder from which *flyswot* starts looking.
 When you activated your conda environment in a terminal, you were likely 'inside' your user directory. Since we need to specify a place for *flyswot* to store the CSV report, we'll move to a better place to store that output; your ``Desktop`` folder. To do we can navigate using the command:
 
 .. code:: console
-   
+
    $ chdir desktop
 
 
 if you are using  Mac, Linux or have GitBash installed you should instead run:
 
 .. code:: console
-   
+
    $ cd Desktop
 
 
@@ -204,13 +204,13 @@ if you are using  Mac, Linux or have GitBash installed you should instead run:
 This will take you to your Desktop. We'll now run *flyswot*. As with many other command line tools, *flyswot* has commands and sub-commands. We are interested in the ``predict`` command. This includes two sub-commands: ``predict-image`` and ``directory``.  We will mostly want to predict directories. To do this we use the following approach
 
 .. code:: console
-   
+
    $ flyswot predict directory input_directory output_directory
 
 The input directory is the folder containing our images and the output directory is where we want to save our CSV report. Using the folder we previously identified this would look like:
 
 .. code:: console
-   
+
    $ flyswot predict directory \\ad\collections\hmd\excitingcollection\excitingsubcollection\ .
 
 We can use ``.`` to indicate we want the CSV report to be saved to the current directory (in this case the Deskop directory).
