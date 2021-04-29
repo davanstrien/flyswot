@@ -150,6 +150,10 @@ This section provides additional guidance on the usage of *flyswot*. This is pri
 How flyswot searches for images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+*flyswot* is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have ``fse`` as part of their filename so this is used by flyswot to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
+
+Since these images of concern will often be inside a directory structure *flyswot* will look in sub-folders from the input folder for images which contain ``fse`` in the name. For example in the following folder structure:
+
 .. code:: console
 
    Collection/
@@ -162,15 +166,47 @@ How flyswot searches for images
    │  ├─ sloane_ms_116_fbspi.tif
    │  ├─ sloane_ms_116_fse004r.tif
 
-
-
+All of the images containing ``fse`` would be checked but others such as files containing ``fbspi`` and ``fblefr`` won't be checked since these aren't labelled as flysheets so don't need to be checked.
 
 
 Running flyswot against a directory of images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+To run *flyswot* against a directory of images you need to give it the path to that directory/folder.
+There are different ways you could do this. The following is suggested for people who are not very familiar (yet 😜) with terminal interfaces.
 
+Identify the folder you want to flyswot to check for "fake" flysheets. If you are using *flyswot* for the first time it may make sense to choose a folder which doesn't contain a huge number of collection items so you don't have to wait to long for *flyswot* to finish running. Once you have found a directory you want to predict against copy the path. This path should be the full path to the item.
 
+For example something that looks like:
+
+.. code:: console
+   \\ad\collections\hmd\excitingcollection\excitingsubcollection\
+
+This will be the folder from which *flyswot* starts looking.
+
+When you activated your conda environment in a terminal, you were likely 'inside' your user directory. Since we need to specify a place for *flyswot* to store the CSV report, we'll move to a better place to store that output; your ``Desktop`` folder. To do we can navigate using the command:
+
+.. code:: console
+   chdir desktop
+
+if you are using  Mac, Linux or have GitBash installed you should instead run:
+
+.. code:: console
+   $ cd Desktop
+
+This will take you to your Desktop. We'll now run *flyswot*. As with many other command line tools, *flyswot* has commands and sub-commands. We are interested in the ``predict`` command. This includes two sub-commands: ``predict-image`` and ``directory``.  We will mostly want to predict directories. To do this we use the following approach
+
+.. code:: console
+   $ flyswot predict directory input_directory output_directory
+
+The input directory is the folder containing our images and the output directory is where we want to save our CSV report. Using the folder we previously identified this would look like:
+
+.. code:: console
+   $ flyswot predict directory \\ad\collections\hmd\excitingcollection\excitingsubcollection\ .
+
+We can use ``.`` to indicate we want the CSV report to be saved to the current directory (in this case the Deskop directory).
+
+Once you run this command you should see some progress reported by *flyswot*, including a progress bar that shows how many of the images *flyswot* has predicted against.
 
 
 
