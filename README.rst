@@ -38,7 +38,8 @@ flyswot
 Disclaimer
 -----------
 _
-`flyswot` is a work in progress and is currently only intended to be used for testing by `HMD`_.
+
+*flyswot* is a work in progress and is currently only intended to be used for testing by `HMD`_.
 
 Features
 --------
