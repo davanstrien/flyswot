@@ -106,6 +106,7 @@ Install flyswot in your Conda Environment
 Now you have created and activated your conda enviroment you can install flyswot. Before doing this you can check that `pip`_ is available inside your environment:
 
 .. code:: console
+
           $ pip
 
 This should return the help pages for `pip`_. We can now use `pip`_ to install *flyswot* from `PyPI`_.
