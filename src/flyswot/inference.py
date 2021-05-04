@@ -74,23 +74,30 @@ def predict_image(
 
 @app.command(name="directory")
 def predict_directory(
-    directory: Path = typer.Argument(..., readable=True, resolve_path=True),
+    directory: Path = typer.Argument(
+        ...,
+        readable=True,
+        resolve_path=True,
+        help="Directory to start searching for images from",
+    ),
     csv_save_dir: Path = typer.Argument(
         ...,
         writable=True,
         resolve_path=True,
+        help="Directory used to store the csv report",
     ),
-    pattern: str = typer.Option("fse"),
-    bs: int = typer.Option(16),
+    pattern: str = typer.Option("fse", help="pattern used to filter image filenames"),
+    bs: int = typer.Option(16, help="Batch Size"),
     preferred_format: str = typer.Option(
         ".tif",
         help="Preferred image format for predictions. If not available, flyswot will use images matching `pattern`",
     ),
 ):
-    """Predicts against all images containing `pattern` in the filename found under DIRECTORY.
+    """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
-    By default searches for filenames containing FSE
-    Creates a CSV report saved to `csv_save_dir` containing the predictions
+    By default searches for filenames containing 'fse'.
+
+    Creates a CSV report saved to `csv_save_dir`
     """
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
