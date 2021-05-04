@@ -73,6 +73,18 @@ Detailed Installation Guide
 
 This section gives a more detailed instructions for installing *flyswot*. This guidance is aimed particularly at `HMD`_ users of *flyswot*. This set of instructions covers the steps required to install *flyswot*.
 
+Note on the examples
+^^^^^^^^^^^^^^^^^^^^
+
+You will see examples for input in the guidance below which looks like:
+
+.. code:: console
+
+          $ pip
+
+The ``$`` symbol here is often used as a convention to show that this is input to a terminal/command line. When you input this into your own terminal you should only input the part after the ``$`` symbol. For example, in the above case you would type ``pip``.
+
+
 Install Python
 ^^^^^^^^^^^^^^
 
