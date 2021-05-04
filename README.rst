@@ -82,7 +82,7 @@ You will see examples for input in the guidance below which looks like:
 
           $ pip
 
-The ``$`` symbol here is often used as a convention to show that this is input to a terminal/command line. When you input this into your own terminal you should only input the part after the ``$`` symbol. 
+The ``$`` symbol here is often used as a convention to show that this is input to a terminal/command line. When you input this into your own terminal you should only input the part after the ``$`` symbol. For example, in the above case you would type ``pip``.
 
 
 Install Python
