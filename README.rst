@@ -37,7 +37,7 @@ flyswot
 
 Disclaimer
 -----------
-_
+
 
 *flyswot* is a work in progress and is currently only intended to be used for testing by `HMD`_.
 
@@ -83,8 +83,7 @@ For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution o
 Create and activate a Conda Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- why? (briefly)
-- how?
+A virtual environment allows us to isolate the requirements of different python packages. This can be useful since different python packages might have different requirements. Using a virtual environment allows us to install these in a way where you are less likely to have conflicts between these packages.
 
 There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use `Anaconda Navigator`_.
 
