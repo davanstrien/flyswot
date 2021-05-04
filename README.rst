@@ -218,8 +218,7 @@ We can use ``.`` to indicate we want the CSV report to be saved to the current d
 
 Once you run this command you should see some progress reported by *flyswot*, including a progress bar that shows how many of the images *flyswot* has predicted against.
 
-
-
+When *flyswot* has finshed you will have a CSV 'report' which contains the path to the image, the predicted label and the confidence for that prediction.
 
 
 Contributing
