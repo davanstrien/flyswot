@@ -30,7 +30,7 @@ onnxruntime = "^1.7.0"
 Pillow = "^8.0.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.2"
+pytest = "^6.2.4"
 coverage = {extras = ["toml"], version = "^5.4"}
 safety = "^1.10.3"
 mypy = "^0.812"
