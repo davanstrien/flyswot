@@ -53,7 +53,7 @@ Features
 Requirements
 ------------
 
-* Python 3.7+
+* Python 3.7 or greater
 
 TODO update this section with requirements and uses.
 
@@ -103,7 +103,7 @@ You can find more detailed instructions for creating a new virtual environments 
 
 - Open Anaconda Navigator
 - Navigate to the *Environments* tab
-- Create a new Python environment and give it a descriptive name i.e. *flyswot*. You should ensure that the Python version is greater than 3.7
+- Create a new Python environment and give it a descriptive name i.e. *flyswot*. You should ensure that the Python version is version 3.7 or above.
 
 Once you have created this new environment you can "activate it" by clicking on the arrow next to the name of the environment. You should select the "open terminal". This should open a new terminal window. On the left you should see the name of your environment in brackets:
 
