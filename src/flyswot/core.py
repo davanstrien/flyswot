@@ -19,14 +19,16 @@ image_extensions: Set[str] = {
 }
 
 
-def get_image_files_from_pattern(directory: Path, pattern: str) -> Iterator[Path]:
-    """yield image files from `directory` matching pattern `str`"""
+def get_image_files_from_pattern(
+    directory: Path, pattern: str, ext: str = None
+) -> Iterator[Path]:
+    """yield image files from `directory` matching pattern `str` with `ext`"""
     with console.status(
         f"Searching for files matching {pattern} in {directory}...",
         spinner="dots",
     ):
         time.sleep(1)
-        match_files = Path(directory).rglob(f"**/*{pattern}*")
+        match_files = Path(directory).rglob(f"**/*{pattern}*{ext}")
         for file in match_files:
             if Path(file).suffix in image_extensions:
                 yield file

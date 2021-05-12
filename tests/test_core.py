@@ -61,10 +61,7 @@ def test_filter(fname, tmpdir):
         for i in range(5):
             file = a_sub_dir.join(f"file_{fname}_{i}.tif")
             file.ensure()
-    matches = core.get_image_files_from_pattern(
-        a_dir,
-        fname,
-    )
+    matches = core.get_image_files_from_pattern(a_dir, fname, ".tif")
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == (50 * 2) + 25
     assert len(list(matches)) == 50 + 25
@@ -154,7 +151,6 @@ def test_signal_last(l):
             assert var == last
 
 
-@typing.no_type_check
 def test_signal_last_raises_value_error_with_no_length():
     """It raises value error when no length"""
     with pytest.raises(ValueError):
