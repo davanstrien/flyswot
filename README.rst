@@ -233,13 +233,6 @@ Once you run this command you should see some progress reported by *flyswot*, in
 When *flyswot* has finshed you will have a CSV 'report' which contains the path to the image, the predicted label and the confidence for that prediction.
 
 
-Contributing
-------------
-
-Contributions are very welcome.
-To learn more, see the `Contributor Guide`_.
-
-
 License
 -------
 
