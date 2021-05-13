@@ -106,9 +106,9 @@ def predict_directory(
     model = model_parts.model
     vocab = models.load_vocab(model_parts.vocab)
     onnxinference = OnnxInferenceSession(model, vocab)
-    files = core.get_image_files_from_pattern(directory, pattern)
-    filtered_files = core.filter_to_preferred_ext(files, [preferred_format])
-    files = list(filtered_files)
+    files = core.get_image_files_from_pattern(directory, pattern, preferred_format)
+    # filtered_files = core.filter_to_preferred_ext(files, [preferred_format])
+    files = list(files)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     create_csv_header(csv_fname)
