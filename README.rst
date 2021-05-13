@@ -140,6 +140,15 @@ We can quickly confirm that *flyswot* has been installed by printing out the hel
 
 This should print some help information to the screen. If you get this it means you have successfully installed *flyswot* 💪.
 
+Update flyswot
+^^^^^^^^^^^^^^^
+
+If you need to upgrade your version of flyswot you should activate your Conda Environment and then run
+
+.. code:: console
+
+   $ pip install flyswot --upgrade
+
 
 Usage
 -----
