@@ -72,7 +72,7 @@ FIXTURE_DIR = os.path.join(
 )
 def test_predict_directory(datafiles, tmp_path) -> None:
     inference.predict_directory(
-        datafiles, tmp_path, pattern="fse", bs=1, preferred_format=".jpg"
+        datafiles, tmp_path, pattern="fse", bs=1, image_format=".jpg"
     )
     csv_file = list(tmp_path.rglob("*.csv"))
     assert csv_file
