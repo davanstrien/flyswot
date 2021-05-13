@@ -89,9 +89,9 @@ def predict_directory(
     pattern: str = typer.Option("fse", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
     image_format: str = typer.Option(
-        ".tif",
-        help="Image format for flyswot to use for predictions",
+        ".tif", help="Image format for flyswot to use for predictions"
     ),
+    check_latest: bool = typer.Option(True, help="use latest available flyswot model"),
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -102,7 +102,7 @@ def predict_directory(
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
     # TODO add load learner function that can be passed a model name
-    model_parts = models.ensure_model(model_dir)
+    model_parts = models.ensure_model(model_dir, check_latest=check_latest)
     model = model_parts.model
     vocab = models.load_vocab(model_parts.vocab)
     onnxinference = OnnxInferenceSession(model, vocab)
