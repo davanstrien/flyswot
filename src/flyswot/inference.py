@@ -88,9 +88,9 @@ def predict_directory(
     ),
     pattern: str = typer.Option("fse", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
-    preferred_format: str = typer.Option(
+    image_format: str = typer.Option(
         ".tif",
-        help="Preferred image format for predictions. If not available, flyswot will use images matching `pattern`",
+        help="Image format for flyswot to use for predictions",
     ),
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
@@ -106,8 +106,7 @@ def predict_directory(
     model = model_parts.model
     vocab = models.load_vocab(model_parts.vocab)
     onnxinference = OnnxInferenceSession(model, vocab)
-    files = core.get_image_files_from_pattern(directory, pattern, preferred_format)
-    # filtered_files = core.filter_to_preferred_ext(files, [preferred_format])
+    files = core.get_image_files_from_pattern(directory, pattern, image_format)
     files = list(files)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
