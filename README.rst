@@ -233,9 +233,9 @@ The input directory is the folder containing our images and the output directory
 
 .. code:: console
 
-   $ flyswot predict directory \\ad\collections\hmd\excitingcollection\excitingsubcollection\ .
+   $ flyswot predict directory "\\ad\collections\hmd\excitingcollection\excitingsubcollection\" .
 
-We can use ``.`` to indicate we want the CSV report to be saved to the current directory (in this case the Deskop directory).
+We can use ``.`` to indicate we want the CSV report to be saved to the current directory (in this case the Deskop directory). Also notice that there are quotation marks `""` around the path. This is used to make sure that any spaces in the path are escaped.
 
 Once you run this command you should see some progress reported by *flyswot*, including a progress bar that shows how many of the images *flyswot* has predicted against.
 
