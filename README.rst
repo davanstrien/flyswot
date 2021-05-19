@@ -150,7 +150,7 @@ If you need to upgrade your version of flyswot you should activate your Conda En
    $ pip install flyswot --upgrade
 
 
-Usage
+Usage2
 -----
 
 To run predictions against a directory of images:
