@@ -28,7 +28,7 @@ from flyswot.console import console
 app = typer.Typer()
 
 
-@dataclass()
+@dataclass
 class ImagePredictionItem:
     """Prediction for an image.
 
