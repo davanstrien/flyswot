@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Iterable
 from typing import Iterator
 from typing import List
+from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -25,6 +26,8 @@ from flyswot import core
 from flyswot import models
 from flyswot.console import console
 
+# noqa: DAR401
+
 app = typer.Typer()
 
 
@@ -35,7 +38,7 @@ class ImagePredictionItem:
     Attributes:
         path: The Path to the image
         predicted_label: The predicted label i.e. the argmax value for the prediction tensor
-        condidence: The confidence for `predicted_label` i.e. the max value for prediction tensor
+        confidence: The confidence for `predicted_label` i.e. the max value for prediction tensor
     """
 
     path: Path
@@ -55,6 +58,17 @@ class PredictionBatch:
     """Container for ImagePredictionItems"""
 
     batch: List[ImagePredictionItem]
+
+    def __post_init__(self):
+        """Returns a list of all predicted labels in batch"""
+        self.batch_labels: Iterator[str] = (item.predicted_label for item in self.batch)
+
+
+@dataclass
+class MultiPredictionBatch:
+    """Container for ImagePredictionItems"""
+
+    batch: List[Tuple[ImagePredictionItem]]
 
     def __post_init__(self):
         """Returns a list of all predicted labels in batch"""
@@ -107,6 +121,11 @@ def predict_directory(
     vocab = models.load_vocab(model_parts.vocab)
     onnxinference = OnnxInferenceSession(model, vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
+    if not files:
+        typer.echo(
+            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
+        )
+        raise typer.Exit(code=1)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     create_csv_header(csv_fname)
