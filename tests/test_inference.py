@@ -4,6 +4,7 @@ import pathlib
 from typing import Any
 
 import pytest
+import typer
 from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.core import given
@@ -84,3 +85,10 @@ def test_predict_directory(datafiles, tmp_path) -> None:
             assert row["predicted_label"]
             assert row["confidence"]
             assert type(float(row["confidence"])) == float
+
+
+def test_predict_empty_directory(tmp_path) -> None:
+    test_dir = tmp_path / "test"
+    test_dir.mkdir()
+    with pytest.raises(typer.Exit):
+        inference.predict_directory(test_dir)
