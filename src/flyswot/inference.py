@@ -107,6 +107,11 @@ def predict_directory(
     vocab = models.load_vocab(model_parts.vocab)
     onnxinference = OnnxInferenceSession(model, vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
+    if not files:
+        typer.echo(
+            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
+        )
+        raise typer.Exit(code=1)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     create_csv_header(csv_fname)
