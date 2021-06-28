@@ -35,7 +35,7 @@ class ImagePredictionItem:
     Attributes:
         path: The Path to the image
         predicted_label: The predicted label i.e. the argmax value for the prediction tensor
-        condidence: The confidence for `predicted_label` i.e. the max value for prediction tensor
+        confidence: The confidence for `predicted_label` i.e. the max value for prediction tensor
     """
 
     path: Path
