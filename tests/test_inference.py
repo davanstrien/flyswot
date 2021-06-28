@@ -73,6 +73,26 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
     assert hasattr(batch.batch_labels, "__next__")
 
 
+@given(confidence=st.floats(min_value=0.0, max_value=100.0), label=st.text(min_size=1))
+def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
+    item = inference.MultiLabelImagePredictionItem(
+        imfile, [(label, confidence), (label, confidence)]
+    )
+    item2 = inference.MultiLabelImagePredictionItem(
+        imfile, [(label, confidence), (label, confidence)]
+    )
+    batch = inference.MultiPredictionBatch([item, item2])
+    assert batch.batch
+    assert type(batch.batch) == list
+    assert type(batch.batch[0]) == inference.MultiLabelImagePredictionItem
+    assert batch.batch_labels
+    assert len(list(batch.batch_labels)) == 2
+    assert hasattr(batch.batch_labels, "__next__")
+    for labels in batch.batch_labels:
+        for label in labels:
+            assert label == label
+
+
 FIXTURE_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "test_files",

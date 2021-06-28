@@ -10,7 +10,6 @@ from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
 from typing import Iterable
-from typing import Iterator
 from typing import List
 from typing import Tuple
 from typing import Union
@@ -66,8 +65,22 @@ class PredictionBatch:
     batch: List[ImagePredictionItem]
 
     def __post_init__(self):
-        """Returns a list of all predicted labels in batch"""
-        self.batch_labels: Iterator[str] = (item.predicted_label for item in self.batch)
+        """Returns a iterable of all predicted labels in batch"""
+        self.batch_labels: Iterable[str] = (item.predicted_label for item in self.batch)
+
+
+@dataclass
+class MultiPredictionBatch:
+    """Container for MultiLabelImagePRedictionItems"""
+
+    batch: List[MultiLabelImagePredictionItem]
+
+    def __post_init__(self):
+        """Returns a iterable of lists containing all predicted labels in batch"""
+        self.batch_labels: Iterable = (
+            list(itertoolz.pluck(0, pred))
+            for pred in zip(*[o.predictions for o in self.batch])
+        )
 
 
 image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
