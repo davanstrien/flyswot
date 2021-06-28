@@ -14,7 +14,7 @@ from flyswot import inference
 # flake8: noqa
 
 
-def test__image_predicton_item_raises_error_when_too_few_params():
+def test__image_prediction_item_raises_error_when_too_few_params():
     """It raises Typerror when passed too few items"""
     with pytest.raises(TypeError):
         item = inference.ImagePredictionItem("A")
