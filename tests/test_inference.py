@@ -50,6 +50,20 @@ def test_image_prediction_item(confidence, label, imfile: Any):
 
 
 @given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
+def test_multi_image_prediction_item(confidence, label, imfile: Any):
+    item = inference.MultiLabelImagePredictionItem(
+        imfile, [(label, confidence), (label, confidence)]
+    )
+    assert item.path == imfile
+    assert type(item.predictions) == list
+    assert type(item.predictions[0]) == tuple
+    assert item.predictions[0][0] == label
+    assert item.predictions[1][0] == label
+    assert item.predictions[0][1] == confidence
+    assert item.predictions[1][1] == confidence
+
+
+@given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
 def test_prediction_batch(confidence: float, label: str, imfile: Any):
     item = inference.ImagePredictionItem(imfile, label, confidence)
     item2 = inference.ImagePredictionItem(imfile, label, confidence)

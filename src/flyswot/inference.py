@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Iterable
 from typing import Iterator
 from typing import List
+from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -48,6 +49,14 @@ class ImagePredictionItem:
             self.path: Path = self.path.absolute()
         except AttributeError:
             pass
+
+
+@dataclass
+class MultiLabelImagePredictionItem:
+    """Multiple predictions for a single image"""
+
+    path: Path
+    predictions: List[Tuple[str, float]]
 
 
 @dataclass
