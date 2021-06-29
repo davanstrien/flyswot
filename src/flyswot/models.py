@@ -11,16 +11,18 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import typer
 import validators  # type: ignore
 from rich.markdown import Markdown
+from toolz import itertoolz
+from toolz import recipes
 
 from flyswot.config import APP_NAME
 from flyswot.config import MODEL_REPO_URL
 from flyswot.console import console
-
 
 app = typer.Typer()
 
@@ -218,10 +220,21 @@ def ensure_model(
         raise typer.Exit()
 
 
-def load_vocab(vocab: Path) -> List[str]:
-    """loads vocab from `vocab` and returns as list"""
+def is_pipe(c: Tuple) -> bool:
+    """Checks if | in c"""
+    return "|" in c
+
+
+def load_vocab(vocab: Path) -> List[List[str]]:
+    """loads vocab from `vocab` and returns as list contaning lists of vocab"""
     with open(vocab, "r") as f:
-        return [line.strip("\n") for line in f.readlines()]
+        raw_vocab = [line.strip("\n") for line in f.readlines()]
+        return list(
+            map(
+                list,
+                (itertoolz.remove(is_pipe, (recipes.partitionby(is_pipe, raw_vocab)))),
+            )
+        )
 
 
 @app.command()

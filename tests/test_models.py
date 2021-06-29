@@ -15,6 +15,7 @@ from typing_extensions import runtime
 from flyswot import models
 from flyswot.models import app
 from flyswot.models import ensure_model_dir
+from flyswot.models import load_vocab
 
 runner = CliRunner()
 
@@ -196,6 +197,13 @@ def test_ensure_model() -> None:
     model_dir = ensure_model_dir()
     model_parts = models.ensure_model(model_dir)
     assert model_parts
+
+
+def test_load_vocab() -> None:
+    vocab = models.load_vocab(Path("tests/test_files/test_vocab.txt"))
+    assert vocab
+    assert type(vocab) == list
+    assert type(vocab[0]) == list
 
 
 def test_app(tmp_path: Any) -> None:
