@@ -309,18 +309,20 @@ class InferenceSession(ABC):
     """Abstract class for inference sessions"""
 
     @abstractmethod
-    def __init__(self, model: Path, vocab: List):
+    def __init__(self, model: Path, vocab: List):  # pragma: no cover
         """Inference Sessions should init from a model file and vocab"""
         self.model = model
         self.vocab = vocab
 
     @abstractmethod
-    def predict_image(self, image: Path):
+    def predict_image(self, image: Path):  # pragma: no cover
         """Predict a single image"""
         pass
 
     @abstractmethod
-    def predict_batch(self, model: Path, batch: Iterable[Path], bs: int):
+    def predict_batch(
+        self, model: Path, batch: Iterable[Path], bs: int
+    ):  # pragma: no cover
         """Predict a batch"""
         pass
 
@@ -357,7 +359,7 @@ def softmax(x):
 #         return PredictionBatch(prediction_items)
 
 
-class OnnxInferenceSession(InferenceSession):
+class OnnxInferenceSession(InferenceSession):  # pragma: no cover
     """onnx inference session"""
 
     def __init__(self, model: Path, vocab: Path):
@@ -425,7 +427,7 @@ class OnnxInferenceSession(InferenceSession):
     ) -> Union[PredictionBatch, MultiPredictionBatch]:
         """predicts a batch of images"""
         prediction_items = [self.predict_image(file) for file in batch]
-        if len(self.vocab) < 1:
+        if len(self.vocab) < 2:
             return PredictionBatch(prediction_items)
         else:
             return MultiPredictionBatch(prediction_items)
