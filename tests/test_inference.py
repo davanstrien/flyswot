@@ -1,13 +1,19 @@
 import csv
 import os
 import pathlib
+from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
 import pytest
+import rich
 import typer
 from hypothesis import given
+from hypothesis import strategies
 from hypothesis import strategies as st
 from hypothesis.core import given
+from rich.table import Column
+from toolz import itertoolz
 
 from flyswot import inference
 
@@ -107,7 +113,12 @@ FIXTURE_DIR = os.path.join(
 )
 def test_predict_directory(datafiles, tmp_path) -> None:
     inference.predict_directory(
-        datafiles, tmp_path, pattern="fse", bs=1, image_format=".jpg"
+        datafiles,
+        tmp_path,
+        pattern="fse",
+        bs=1,
+        image_format=".jpg",
+        model_name="latest",
     )
     csv_file = list(tmp_path.rglob("*.csv"))
     assert csv_file
@@ -116,13 +127,45 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         for row in reader:
             assert row["path"]
             assert row["directory"]
-            assert row["predicted_label"]
-            assert row["confidence"]
-            assert type(float(row["confidence"])) == float
+        columns = defaultdict(list)
+    with open(csv_file[0], newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            for (k, v) in row.items():
+                columns[k].append(v)
+        assert any(["prediction" in k for k in columns])
+        labels = [columns[k] for k in columns.keys() if "prediction" in k]
+        confidences = [columns[k] for k in columns.keys() if "confidence" in k]
+        # check all labels are strings
+        assert all(map(lambda x: isinstance(x, str), (itertoolz.concat(labels))))
+        # check all confidences can be cast to float
+        assert all(
+            map(
+                lambda x: isinstance(x, float),
+                map(lambda x: float(x), (itertoolz.concat(confidences))),
+            )
+        )
 
 
-def test_predict_empty_directory(tmp_path) -> None:
-    test_dir = tmp_path / "test"
-    test_dir.mkdir()
+@given(strategies.lists(st.text(), min_size=1))
+def test_check_files(l):
+    inference.check_files(l, "fse", Path("."))
+
+
+def test_check_files_emopty():
     with pytest.raises(typer.Exit):
-        inference.predict_directory(test_dir)
+        inference.check_files([], "fse", Path("."))
+
+
+def test_make_layout():
+    layout = inference.make_layout()
+    assert layout
+    assert isinstance(layout, rich.layout.Layout)
+
+
+# def test_predict_empty_directory(tmp_path) -> None:
+#     test_dir = tmp_path / "test"
+#     test_dir.mkdir()
+#     with pytest.raises(typer.Exit):
+#         inference.predict_directory(test_dir)
