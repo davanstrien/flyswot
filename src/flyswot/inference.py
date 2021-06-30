@@ -161,22 +161,13 @@ def predict_directory(
     typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
     typer.echo(f"Time taken to run:  {str(delta)}")
-    if len(onnxinference.vocab) > 1:
-        labels_to_print = labels_from_csv(csv_fname)
-        tables = [
-            print_table(labels, f"Prediction summary {i+1}", print=False)
-            for i, labels in enumerate(labels_to_print)
-        ]
-        columns = Columns(tables)
-        print(columns)
-    else:
-        labels_to_print = labels_from_csv(csv_fname)
-        tables = [
-            print_table(labels, f"Prediction summary {i+1}", print=False)
-            for i, labels in enumerate(labels_to_print)
-        ]
-        columns = Columns(tables)
-        print(columns)
+    labels_to_print = labels_from_csv(csv_fname)
+    tables = [
+        print_table(labels, f"Prediction summary {i+1}", print=False)
+        for i, labels in enumerate(labels_to_print)
+    ]
+    columns = Columns(tables)
+    print(columns)
     # print_table(list(itertoolz.concat(all_preds)))
 
 

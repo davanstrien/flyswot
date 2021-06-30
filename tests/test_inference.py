@@ -134,9 +134,9 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         for row in reader:
             for (k, v) in row.items():
                 columns[k].append(v)
-        assert any(["prediction" in k for k in columns])
-        labels = [columns[k] for k in columns.keys() if "prediction" in k]
-        confidences = [columns[k] for k in columns.keys() if "confidence" in k]
+        assert any("prediction" in k for k in columns)
+        labels = [columns[k] for k in columns if "prediction" in k]
+        confidences = [columns[k] for k in columns if "confidence" in k]
         # check all labels are strings
         assert all(map(lambda x: isinstance(x, str), (itertoolz.concat(labels))))
         # check all confidences can be cast to float
