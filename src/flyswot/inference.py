@@ -125,7 +125,8 @@ def predict_directory(
     image_format: str = typer.Option(
         ".tif", help="Image format for flyswot to use for predictions"
     ),
-    check_latest: bool = typer.Option(True, help="Use latest available model"),
+    # check_latest: bool = typer.Option(True, help="Use latest available model"),
+    model_name: str = typer.Option("latest", help="Which model to use"),
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -136,8 +137,10 @@ def predict_directory(
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
     # TODO add load learner function that can be passed a model name
-    # model_parts = models.ensure_model(model_dir, check_latest)
-    model_parts = models._get_model_parts(Path(model_dir / "20210629"))
+    if model_name == "latest":
+        model_parts = models.ensure_model(model_dir, check_latest=True)
+    if model_name != "latest":
+        model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
     onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
