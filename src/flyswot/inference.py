@@ -159,6 +159,11 @@ def predict_directory(
     typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
     typer.echo(f"Time taken to run:  {str(delta)}")
+    print_inference_summary(csv_fname)
+
+
+def print_inference_summary(csv_fname):
+    """print_inference_summary from `fname`"""
     labels_to_print = labels_from_csv(csv_fname)
     tables = [
         print_table(labels, f"Prediction summary {i+1}", print=False)
