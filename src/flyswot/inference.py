@@ -150,10 +150,8 @@ def predict_directory(
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     with typer.progressbar(length=len(files)) as progress:
-        all_preds = []
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
-            all_preds.append(list(batch_predictions.batch_labels))
             if i == 0:
                 create_csv_header(batch_predictions, csv_fname)
             write_batch_preds_to_csv(batch_predictions, csv_fname)
@@ -168,7 +166,6 @@ def predict_directory(
     ]
     columns = Columns(tables)
     print(columns)
-    # print_table(list(itertoolz.concat(all_preds)))
 
 
 def labels_from_csv(fname: Path) -> List[List[str]]:
