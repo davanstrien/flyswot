@@ -1,10 +1,10 @@
 """Inference functionality"""
 import csv
-import itertools
 import mimetypes
 import time
 from abc import ABC
 from abc import abstractmethod
+from collections import defaultdict
 from collections import OrderedDict
 from dataclasses import asdict
 from dataclasses import dataclass
@@ -21,6 +21,9 @@ import numpy as np
 import onnxruntime as rt  # type: ignore
 import typer
 from PIL import Image  # type: ignore
+from rich import print
+from rich.columns import Columns
+from rich.layout import Layout
 from rich.table import Table
 from toolz import itertoolz
 
@@ -150,7 +153,7 @@ def predict_directory(
         all_preds = []
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
-            all_preds.append(batch_predictions.batch_labels)
+            all_preds.append(list(batch_predictions.batch_labels))
             if i == 0:
                 create_csv_header(batch_predictions, csv_fname)
             write_batch_preds_to_csv(batch_predictions, csv_fname)
@@ -159,15 +162,33 @@ def predict_directory(
     delta = timedelta(seconds=time.perf_counter() - start_time)
     typer.echo(f"Time taken to run:  {str(delta)}")
     if len(onnxinference.vocab) > 1:
-        pass
-        # print_multi(all_preds)
+        labels_to_print = labels_from_csv(csv_fname)
+        tables = [
+            print_table(labels, f"Prediction summary {i+1}", print=False)
+            for i, labels in enumerate(labels_to_print)
+        ]
+        columns = Columns(tables)
+        print(columns)
     else:
-        print_table(itertoolz.concat(all_preds))
+        print_table(list(itertoolz.concat(all_preds)))
 
 
-def print_table(decoded) -> None:
+def labels_from_csv(fname: Path) -> List[List[str]]:
+    """Gets labels from csv `fname`"""
+    columns = defaultdict(list)
+    with open(fname, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for (k, v) in row.items():
+                columns[k].append(v)
+    return [columns[k] for k in columns if "prediction" in k]
+
+
+def print_table(
+    decoded: list, header: str = "Prediction summary", print: bool = True
+) -> Table:
     """Prints table summary of predicted labels"""
-    table = Table(show_header=True, title="Prediction summary")
+    table = Table(show_header=True, title=header)
     table.add_column(
         "Class",
     )
@@ -184,16 +205,33 @@ def print_table(decoded) -> None:
             table.add_row("Total", str(total), "")
         else:
             table.add_row(key, str(count), f"{percentage}")
-    console.print(table)
+    if print:
+        console.print(table)
+    return table
 
 
-def print_multi(all_preds):
-    """Print multiple tables"""
-    iterator1, iterator2 = itertools.tee(all_preds, 2)
-    labels = list(itertoolz.concat(itertools.islice(iterator1, 0, None, 2)))
-    labels1 = list(itertoolz.concat(itertools.islice(iterator2, 1, None, 2)))
-    print_table(list(itertoolz.concat(labels)))
-    print_table(list(itertoolz.concat(labels1)))
+def make_layout():
+    """Define the layout."""
+    layout = Layout(name="root")
+    layout.split(Layout(name="header", size=4), Layout(name="main"))
+    layout["main"].split_column(
+        Layout(name="info", size=4), Layout(name="body", ratio=2, minimum_size=60)
+    )
+    layout["info"].split_row(Layout(name="time"), Layout(name="files"))
+    return layout
+
+
+# def print_summary(columns, time, files):
+#     layout = make_layout()
+#     MARKDOWN = """
+#     # Prediction summary
+#     """
+#     md = Markdown(MARKDOWN)
+#     layout["header"].update(md)
+#     layout["body"].update(columns)
+#     layout["time"].update(time)
+#     layout["files"].update(f"Number of files checked {len(files)}")
+#     print(layout)
 
 
 def create_csv_fname(csv_directory: Path) -> Path:
