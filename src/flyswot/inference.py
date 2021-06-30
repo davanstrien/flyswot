@@ -170,7 +170,14 @@ def predict_directory(
         columns = Columns(tables)
         print(columns)
     else:
-        print_table(list(itertoolz.concat(all_preds)))
+        labels_to_print = labels_from_csv(csv_fname)
+        tables = [
+            print_table(labels, f"Prediction summary {i+1}", print=False)
+            for i, labels in enumerate(labels_to_print)
+        ]
+        columns = Columns(tables)
+        print(columns)
+    # print_table(list(itertoolz.concat(all_preds)))
 
 
 def labels_from_csv(fname: Path) -> List[List[str]]:
@@ -252,7 +259,7 @@ def create_csv_header(batch, csv_path) -> None:
 def _(batch: PredictionBatch, csv_path):
     """Creates a header for csv `csv_path`"""
     with open(csv_path, mode="w", newline="") as csv_file:
-        field_names = ["path", "directory", "predicted_label", "confidence"]
+        field_names = ["path", "directory", "prediction", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         writer.writeheader()
 
