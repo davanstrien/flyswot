@@ -44,9 +44,9 @@ class GitHubRelease:
 class LocalModel:
     """A local model container"""
 
-    vocab: Optional[Path]
-    modelcard: Optional[Path]
-    model: Optional[Path]
+    vocab: Path
+    modelcard: Path
+    model: Path
 
 
 def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
@@ -169,7 +169,6 @@ def _get_latest_model(model_dir: Path) -> Optional[Path]:
 def _get_model_parts(model_dir: Path) -> LocalModel:
     """Returns model path, vocab and metadata for a model"""
     model_files = Path(model_dir / "model").iterdir()
-    vocab, modelcard, model = None, None, None
     for file in model_files:
         if fnmatch.fnmatch(file.name, "vocab.txt"):
             vocab = file
@@ -190,6 +189,11 @@ def _compare_remote_local(local_model: Path) -> bool:  # pragma: no cover
         release_metadata.updated_at.isoformat()
         > _get_model_date(local_model).isoformat()
     )
+
+
+def load_model(model_dir: Path):
+    """returns a local model"""
+    return _get_model_parts(model_dir)
 
 
 def ensure_model(

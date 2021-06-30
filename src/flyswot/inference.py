@@ -1,13 +1,16 @@
 """Inference functionality"""
 import csv
+import itertools
 import mimetypes
 import time
 from abc import ABC
 from abc import abstractmethod
+from collections import OrderedDict
 from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
+from functools import singledispatch
 from pathlib import Path
 from typing import Iterable
 from typing import List
@@ -95,7 +98,7 @@ def predict_image(
 
 
 def check_files(files: List, pattern: str, directory: Path) -> None:
-    """Checks for files"""
+    """Check if files exist and raises error if not"""
     if not files:
         typer.echo(
             f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
@@ -181,6 +184,15 @@ def print_table(decoded) -> None:
     console.print(table)
 
 
+def print_multi(all_preds):
+    """Print multiple tables"""
+    iterator1, iterator2 = itertools.tee(all_preds, 2)
+    labels = list(itertoolz.concat(itertools.islice(iterator1, 0, None, 2)))
+    labels1 = list(itertoolz.concat(itertools.islice(iterator2, 1, None, 2)))
+    print_table(list(itertoolz.concat(labels)))
+    print_table(list(itertoolz.concat(labels1)))
+
+
 def create_csv_fname(csv_directory: Path) -> Path:
     """Creates a csv filename"""
     date_now = datetime.now()
@@ -189,7 +201,14 @@ def create_csv_fname(csv_directory: Path) -> Path:
     return Path(csv_directory / fname)
 
 
-def create_csv_header(csv_path: Path) -> None:
+@singledispatch
+def create_csv_header(batch, csv_path) -> None:
+    """Print csv header"""
+    raise NotImplementedError(f"Not implemented for type {batch}")
+
+
+@create_csv_header.register
+def _(batch: PredictionBatch, csv_path):
     """Creates a header for csv `csv_path`"""
     with open(csv_path, mode="w", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
@@ -197,7 +216,29 @@ def create_csv_header(csv_path: Path) -> None:
         writer.writeheader()
 
 
-def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> None:
+@create_csv_header.register
+def _(batch: MultiPredictionBatch, csv_path):
+    item = batch.batch[0]
+    pred = OrderedDict()
+    pred["path"] = asdict(item)["path"]
+    pred["directory"] = asdict(item)["path"].parent
+    for k, v in enumerate(item.predictions):
+        pred[f"prediction_label_{k}"] = v[0]
+        pred[f"confidence__label_{k}"] = v[1]
+    with open(csv_path, mode="w", newline="") as csv_file:
+        field_names = list(pred.keys())
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+        writer.writeheader()
+
+
+@singledispatch
+def write_batch_preds_to_csv(predictions, csv_fpath: Path) -> None:
+    """print batch preds to csv"""
+    raise NotImplementedError(f"Not implemented for type {predictions}")
+
+
+@write_batch_preds_to_csv.register
+def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
     """Appends `predictions` batch to `csv_path`"""
     with open(csv_fpath, mode="a", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
@@ -205,6 +246,21 @@ def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> N
         for pred in predictions.batch:
             row = asdict(pred)
             row["directory"] = pred.path.parent
+            writer.writerow(row)
+
+
+@write_batch_preds_to_csv.register
+def _(predictions: MultiPredictionBatch, csv_fpath) -> None:
+    for pred in predictions.batch:
+        row = OrderedDict()
+        row["path"] = asdict(pred)["path"]
+        row["directory"] = asdict(pred)["path"].parent
+        for k, v in enumerate(pred.predictions):
+            row[f"prediction_label_{k}"] = v[0]
+            row[f"confidence__label_{k}"] = v[1]
+        with open(csv_fpath, mode="a", newline="") as csv_file:
+            field_names = list(row.keys())
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow(row)
 
 
@@ -268,22 +324,32 @@ class OnnxInferenceSession(InferenceSession):
         self.model = model
         self.session = rt.InferenceSession(str(model))
 
-        self.vocab = vocab
-        self.vocab_mapping = dict(enumerate(self.vocab))
+        self.vocab = models.load_vocab(vocab)
+        self.vocab_mappings = [dict(enumerate(v)) for v in self.vocab]
+        self.mode = "multi" if len(self.vocab) > 1 else "single"
 
-    def _load_vocab(self, vocab: Path) -> List:
-        with open(vocab, "r") as f:
-            return [item.strip("\n") for item in f.readlines()]
-
-    def predict_image(self, image: Path):
+    def predict_image(
+        self, image: Path
+    ) -> Union[ImagePredictionItem, MultiLabelImagePredictionItem]:
         """Predict a single image"""
         img = self._load_image(image)
-        raw_result = self.session.run(["output"], {"image": img})
-        pred = self._postprocess(raw_result)
-        arg_max = int(np.array(pred).argmax())
-        predicted_label = self.vocab_mapping[int(arg_max)]
-        confidence = float(np.array(pred).max())
-        return ImagePredictionItem(image, predicted_label, confidence)
+        output_names = [o.name for o in self.session.get_outputs()]
+        raw_result = self.session.run(output_names, {"image": img})
+        if len(self.vocab) < 2:
+            pred = self._postprocess(raw_result)
+            arg_max = int(np.array(pred).argmax())
+            predicted_label = self.vocab_mappings[0][int(arg_max)]
+            confidence = float(np.array(pred).max())
+            return ImagePredictionItem(image, predicted_label, confidence)
+        else:
+            prediction_tuples = []
+            for vocab_map, pred in zip(self.vocab_mappings, raw_result):
+                pred = self._postprocess(pred)
+                arg_max = int(np.array(pred).argmax())
+                predicted_label = vocab_map[int(arg_max)]
+                confidence = float(np.array(pred).max())
+                prediction_tuples.append((predicted_label, confidence))
+        return MultiLabelImagePredictionItem(image, prediction_tuples)
 
     def _preprocess(self, input_data: np.ndarray) -> np.ndarray:
         # converts the input data into the float32 input for onnx
@@ -313,10 +379,15 @@ class OnnxInferenceSession(InferenceSession):
         """process results from onnx session"""
         return softmax(np.array(result)).tolist()
 
-    def predict_batch(self, batch: Iterable[Path], bs: int):
+    def predict_batch(
+        self, batch: Iterable[Path], bs: int
+    ) -> Union[PredictionBatch, MultiPredictionBatch]:
         """predicts a batch of images"""
         prediction_items = [self.predict_image(file) for file in batch]
-        return PredictionBatch(prediction_items)
+        if len(self.vocab) < 1:
+            return PredictionBatch(prediction_items)
+        else:
+            return MultiPredictionBatch(prediction_items)
 
 
 if __name__ == "__main__":
