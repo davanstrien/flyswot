@@ -133,33 +133,30 @@ def predict_directory(
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
     # TODO add load learner function that can be passed a model name
-    model_parts = models.ensure_model(model_dir, check_latest)
-    model = model_parts.model
-    vocab = models.load_vocab(model_parts.vocab)
-    onnxinference = OnnxInferenceSession(model, vocab)
+    # model_parts = models.ensure_model(model_dir, check_latest)
+    model_parts = models._get_model_parts(Path(model_dir / "20210629"))
+    onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
-    if not files:
-        typer.echo(
-            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
-        )
-        raise typer.Exit(code=1)
+    check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
-    create_csv_header(csv_fname)
     with typer.progressbar(length=len(files)) as progress:
         all_preds = []
-        predictions = []
-        for batch in itertoolz.partition_all(bs, files):
+        for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
             all_preds.append(batch_predictions.batch_labels)
-            predictions.append(batch_predictions)
+            if i == 0:
+                create_csv_header(batch_predictions, csv_fname)
+            write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
-            write_batch_preds_to_csv(csv_fname, batch_predictions)
-        all_preds = list(itertoolz.concat(all_preds))
     typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
     typer.echo(f"Time taken to run:  {str(delta)}")
-    print_table(all_preds)
+    if len(onnxinference.vocab) > 1:
+        pass
+        # print_multi(all_preds)
+    else:
+        print_table(itertoolz.concat(all_preds))
 
 
 def print_table(decoded) -> None:
