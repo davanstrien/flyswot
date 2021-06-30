@@ -139,7 +139,6 @@ def predict_directory(
     """
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
-    # TODO add load learner function that can be passed a model name
     if model_name == "latest":
         model_parts = models.ensure_model(model_dir, check_latest=True)
     if model_name != "latest":
