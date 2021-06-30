@@ -94,6 +94,15 @@ def predict_image(
     pass  # pragma: no cover
 
 
+def check_files(files: List, pattern: str, directory: Path) -> None:
+    """Checks for files"""
+    if not files:
+        typer.echo(
+            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
+        )
+        raise typer.Exit(code=1)
+
+
 @app.command(name="directory")
 def predict_directory(
     directory: Path = typer.Argument(
