@@ -16,6 +16,7 @@ from flyswot import models
 from flyswot.models import app
 from flyswot.models import ensure_model_dir
 from flyswot.models import load_vocab
+from flyswot.models import vocab
 
 runner = CliRunner()
 
@@ -204,6 +205,17 @@ def test_load_vocab() -> None:
     assert vocab
     assert type(vocab) == list
     assert type(vocab[0]) == list
+
+
+def test_vocab_raises() -> None:
+    with pytest.raises(NotImplementedError):
+        models.vocab(model="not_latest")
+
+
+def test_vocab() -> None:
+    vocab = models.vocab(model="latest", show=False)
+    assert vocab
+    assert isinstance(vocab, list)
 
 
 def test_app(tmp_path: Any) -> None:

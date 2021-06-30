@@ -191,7 +191,7 @@ def _compare_remote_local(local_model: Path) -> bool:  # pragma: no cover
     )
 
 
-def load_model(model_dir: Path):
+def load_model(model_dir: Path):  # pragma: no cover
     """returns a local model"""
     return _get_model_parts(model_dir)
 
