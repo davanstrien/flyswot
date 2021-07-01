@@ -432,5 +432,5 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
             return MultiPredictionBatch(prediction_items)
 
 
-if __name__ == "__main__":  # pragma: no cover
-    app()
+if __name__ == "__main__":
+    app()  # pragma: no cover
