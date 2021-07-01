@@ -148,6 +148,11 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         )
 
 
+def test_csv_header():
+    with pytest.raises(NotImplementedError):
+        inference.create_csv_header("string", Path("."))
+
+
 @given(strategies.lists(st.text(min_size=2), min_size=2), st.text())
 def test_print_table(labels, title):
     table = inference.print_table(labels, title, print=False)
