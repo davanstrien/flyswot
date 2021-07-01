@@ -371,7 +371,6 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
 
         self.vocab = models.load_vocab(vocab)
         self.vocab_mappings = [dict(enumerate(v)) for v in self.vocab]
-        self.mode = "multi" if len(self.vocab) > 1 else "single"
 
     def predict_image(
         self, image: Path
