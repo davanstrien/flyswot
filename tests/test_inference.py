@@ -156,7 +156,7 @@ def test_print_table(labels, title):
     unique = itertoolz.count(itertoolz.unique(labels))
     assert table.row_count == unique + 1
     assert all(
-        [label in getattr(itertoolz.first(table.columns), "_cells") for label in labels]
+        label in getattr(itertoolz.first(table.columns), "_cells") for label in labels
     )
 
 
