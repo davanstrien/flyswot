@@ -2,6 +2,7 @@ import csv
 import inspect
 import os
 import pathlib
+import string
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -47,7 +48,10 @@ def imfile(tmpdir_factory):
     return imfile
 
 
-@given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
+@given(
+    confidence=st.floats(max_value=100.0),
+    label=st.text(alphabet=string.ascii_letters, min_size=1),
+)
 def test_image_prediction_item(confidence, label, imfile: Any):
     item = inference.ImagePredictionItem(imfile, label, confidence)
     assert item.path == imfile
@@ -56,7 +60,10 @@ def test_image_prediction_item(confidence, label, imfile: Any):
     assert type(item.confidence) == float
 
 
-@given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
+@given(
+    confidence=st.floats(max_value=100.0),
+    label=st.text(alphabet=string.ascii_letters, min_size=1),
+)
 def test_multi_image_prediction_item(confidence, label, imfile: Any):
     item = inference.MultiLabelImagePredictionItem(
         imfile, [(label, confidence), (label, confidence)]
@@ -70,7 +77,10 @@ def test_multi_image_prediction_item(confidence, label, imfile: Any):
     assert item.predictions[1][1] == confidence
 
 
-@given(confidence=st.floats(max_value=100.0), label=st.text(min_size=1))
+@given(
+    confidence=st.floats(max_value=100.0),
+    label=st.text(alphabet=string.ascii_letters, min_size=1),
+)
 def test_prediction_batch(confidence: float, label: str, imfile: Any):
     item = inference.ImagePredictionItem(imfile, label, confidence)
     item2 = inference.ImagePredictionItem(imfile, label, confidence)
@@ -80,7 +90,10 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
     assert hasattr(batch.batch_labels, "__next__")
 
 
-@given(confidence=st.floats(min_value=0.0, max_value=100.0), label=st.text(min_size=1))
+@given(
+    confidence=st.floats(min_value=0.0, max_value=100.0),
+    label=st.text(alphabet=string.ascii_letters, min_size=1),
+)
 def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
     item = inference.MultiLabelImagePredictionItem(
         imfile, [(label, confidence), (label, confidence)]
@@ -239,7 +252,10 @@ def test_csv_batch_single(tmp_path):
             assert "label" in row
 
 
-@given(strategies.lists(st.text(min_size=2), min_size=2), st.text())
+@given(
+    strategies.lists(st.text(min_size=2), min_size=2),
+    st.text(alphabet=string.ascii_letters, min_size=1),
+)
 def test_print_table(labels, title):
     table = inference.print_table(labels, title, print=False)
     assert isinstance(table, rich.table.Table)
@@ -252,7 +268,7 @@ def test_print_table(labels, title):
     table = inference.print_table(labels, title, print=True)
 
 
-@given(strategies.lists(st.text(), min_size=1))
+@given(strategies.lists(st.text(alphabet=string.ascii_letters, min_size=1), min_size=1))
 def test_check_files(l):
     inference.check_files(l, "fse", Path("."))
 
