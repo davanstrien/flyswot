@@ -130,6 +130,7 @@ def predict_directory(
     ),
     # check_latest: bool = typer.Option(True, help="Use latest available model"),
     model_name: str = typer.Option("latest", help="Which model to use"),
+    model_path: str = None,
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -141,8 +142,10 @@ def predict_directory(
     model_dir = models.ensure_model_dir()
     if model_name == "latest":
         model_parts = models.ensure_model(model_dir, check_latest=True)
-    if model_name != "latest":
+    if model_name != "latest" and not model_path:
         model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
+    if model_name != "latest" and model_path:
+        model_parts = models._get_model_parts(Path(model_path) / Path(model_name))
     onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
