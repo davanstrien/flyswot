@@ -178,6 +178,22 @@ def test_csv_header_single(tmp_path):
     assert "confidence" in list_of_column_names
 
 
+def test_csv_batch():
+    with pytest.raises(NotImplementedError):
+        inference.write_batch_preds_to_csv("string", Path("."))
+
+
+def test_csv_batch_single(tmp_path):
+    predicton = inference.ImagePredictionItem(Path("."), "label", 0.6)
+    batch = inference.PredictionBatch([predicton])
+    csv_fname = tmp_path / "test.csv"
+    inference.write_batch_preds_to_csv(batch, csv_fname)
+    with open(csv_fname, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            assert "label" in row
+
+
 @given(strategies.lists(st.text(min_size=2), min_size=2), st.text())
 def test_print_table(labels, title):
     table = inference.print_table(labels, title, print=False)
