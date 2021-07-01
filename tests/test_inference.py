@@ -153,6 +153,31 @@ def test_csv_header():
         inference.create_csv_header("string", Path("."))
 
 
+def test_csv_header_multi(tmp_path):
+    predicton = inference.MultiLabelImagePredictionItem(Path("."), [("label", 0.8)])
+    batch = inference.MultiPredictionBatch([predicton, predicton])
+    csv_fname = tmp_path / "test.csv"
+    inference.create_csv_header(batch, csv_fname)
+    with open(csv_fname, "r") as f:
+        reader = csv.DictReader(f)
+        list_of_column_names = [header for header in reader.fieldnames]
+    assert "path" in list_of_column_names
+    assert "directory" in list_of_column_names
+
+
+def test_csv_header_single(tmp_path):
+    predicton = inference.ImagePredictionItem(Path("."), "label", 0.6)
+    batch = inference.PredictionBatch([predicton])
+    csv_fname = tmp_path / "test.csv"
+    inference.create_csv_header(batch, csv_fname)
+    with open(csv_fname, "r") as f:
+        reader = csv.DictReader(f)
+        list_of_column_names = [header for header in reader.fieldnames]
+    assert "path" in list_of_column_names
+    assert "directory" in list_of_column_names
+    assert "confidence" in list_of_column_names
+
+
 @given(strategies.lists(st.text(min_size=2), min_size=2), st.text())
 def test_print_table(labels, title):
     table = inference.print_table(labels, title, print=False)
