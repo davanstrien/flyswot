@@ -15,6 +15,8 @@ from typing_extensions import runtime
 from flyswot import models
 from flyswot.models import app
 from flyswot.models import ensure_model_dir
+from flyswot.models import load_vocab
+from flyswot.models import vocab
 
 runner = CliRunner()
 
@@ -196,6 +198,31 @@ def test_ensure_model() -> None:
     model_dir = ensure_model_dir()
     model_parts = models.ensure_model(model_dir)
     assert model_parts
+
+
+def test_load_vocab() -> None:
+    vocab = models.load_vocab(Path("tests/test_files/test_vocab.txt"))
+    assert vocab
+    assert type(vocab) == list
+    assert type(vocab[0]) == list
+
+
+def test_vocab_raises() -> None:
+    with pytest.raises(NotImplementedError):
+        models.vocab(model="not_latest")
+
+
+def test_vocab() -> None:
+    vocab = models.vocab(model="latest", show=False)
+    assert vocab
+    assert isinstance(vocab, list)
+
+
+def test_vocab_print(capsys) -> None:
+    models.vocab(model="latest", show=True)
+    captured = capsys.readouterr()
+    assert len(captured.out) > 2
+    assert "Model Vocab" in captured.out
 
 
 def test_app(tmp_path: Any) -> None:

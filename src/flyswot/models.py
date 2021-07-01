@@ -11,16 +11,18 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import typer
 import validators  # type: ignore
 from rich.markdown import Markdown
+from toolz import itertoolz
+from toolz import recipes
 
 from flyswot.config import APP_NAME
 from flyswot.config import MODEL_REPO_URL
 from flyswot.console import console
-
 
 app = typer.Typer()
 
@@ -42,9 +44,9 @@ class GitHubRelease:
 class LocalModel:
     """A local model container"""
 
-    vocab: Optional[Path]
-    modelcard: Optional[Path]
-    model: Optional[Path]
+    vocab: Path
+    modelcard: Path
+    model: Path
 
 
 def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
@@ -70,7 +72,9 @@ def _url_callback(url: str) -> Union[str, None]:
         raise typer.BadParameter(f"Please check {url} is a valid url")
 
 
-def get_remote_release_json(url: str, single: bool = False) -> Dict[str, Any]:
+def get_remote_release_json(
+    url: str, single: bool = False
+) -> Dict[str, Any]:  # pragma : no cover
     """Returns all releases found at `url`"""
     with urllib.request.urlopen(url) as response:  # pragma: no cover
         try:
@@ -167,7 +171,6 @@ def _get_latest_model(model_dir: Path) -> Optional[Path]:
 def _get_model_parts(model_dir: Path) -> LocalModel:
     """Returns model path, vocab and metadata for a model"""
     model_files = Path(model_dir / "model").iterdir()
-    vocab, modelcard, model = None, None, None
     for file in model_files:
         if fnmatch.fnmatch(file.name, "vocab.txt"):
             vocab = file
@@ -188,6 +191,11 @@ def _compare_remote_local(local_model: Path) -> bool:  # pragma: no cover
         release_metadata.updated_at.isoformat()
         > _get_model_date(local_model).isoformat()
     )
+
+
+def load_model(model_dir: Path):  # pragma: no cover
+    """returns a local model"""
+    return _get_model_parts(model_dir)
 
 
 def ensure_model(
@@ -218,10 +226,21 @@ def ensure_model(
         raise typer.Exit()
 
 
-def load_vocab(vocab: Path) -> List[str]:
-    """loads vocab from `vocab` and returns as list"""
+def is_pipe(c: Tuple) -> bool:
+    """Checks if | in c"""
+    return "|" in c
+
+
+def load_vocab(vocab: Path) -> List[List[str]]:
+    """loads vocab from `vocab` and returns as list contaning lists of vocab"""
     with open(vocab, "r") as f:
-        return [line.strip("\n") for line in f.readlines()]
+        raw_vocab = [line.strip("\n") for line in f.readlines()]
+        return list(
+            map(
+                list,
+                (itertoolz.remove(is_pipe, (recipes.partitionby(is_pipe, raw_vocab)))),
+            )
+        )
 
 
 @app.command()
@@ -241,9 +260,6 @@ def vocab(
                 console.print(Markdown("# Model Vocab"))
                 console.print(vocab)
             return vocab
-    if not model_path:
-        typer.echo(f"No models currently found in {model_path}")
-        raise typer.Exit()
 
 
 if __name__ == "__main__":  # pragma: no cover

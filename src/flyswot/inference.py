@@ -4,20 +4,26 @@ import mimetypes
 import time
 from abc import ABC
 from abc import abstractmethod
+from collections import defaultdict
+from collections import OrderedDict
 from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
+from functools import singledispatch
 from pathlib import Path
 from typing import Iterable
-from typing import Iterator
 from typing import List
+from typing import Tuple
 from typing import Union
 
 import numpy as np
 import onnxruntime as rt  # type: ignore
 import typer
 from PIL import Image  # type: ignore
+from rich import print
+from rich.columns import Columns
+from rich.layout import Layout
 from rich.table import Table
 from toolz import itertoolz
 
@@ -35,7 +41,7 @@ class ImagePredictionItem:
     Attributes:
         path: The Path to the image
         predicted_label: The predicted label i.e. the argmax value for the prediction tensor
-        condidence: The confidence for `predicted_label` i.e. the max value for prediction tensor
+        confidence: The confidence for `predicted_label` i.e. the max value for prediction tensor
     """
 
     path: Path
@@ -51,14 +57,36 @@ class ImagePredictionItem:
 
 
 @dataclass
+class MultiLabelImagePredictionItem:
+    """Multiple predictions for a single image"""
+
+    path: Path
+    predictions: List[Tuple[str, float]]
+
+
+@dataclass
 class PredictionBatch:
     """Container for ImagePredictionItems"""
 
     batch: List[ImagePredictionItem]
 
     def __post_init__(self):
-        """Returns a list of all predicted labels in batch"""
-        self.batch_labels: Iterator[str] = (item.predicted_label for item in self.batch)
+        """Returns a iterable of all predicted labels in batch"""
+        self.batch_labels: Iterable[str] = (item.predicted_label for item in self.batch)
+
+
+@dataclass
+class MultiPredictionBatch:
+    """Container for MultiLabelImagePRedictionItems"""
+
+    batch: List[MultiLabelImagePredictionItem]
+
+    def __post_init__(self):
+        """Returns a iterable of lists containing all predicted labels in batch"""
+        self.batch_labels: Iterable = (
+            list(itertoolz.pluck(0, pred))
+            for pred in zip(*[o.predictions for o in self.batch])
+        )
 
 
 image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
@@ -70,6 +98,15 @@ def predict_image(
 ) -> None:
     """Predict a single image"""
     pass  # pragma: no cover
+
+
+def check_files(files: List, pattern: str, directory: Path) -> None:
+    """Check if files exist and raises error if not"""
+    if not files:
+        typer.echo(
+            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
+        )
+        raise typer.Exit(code=1)
 
 
 @app.command(name="directory")
@@ -91,7 +128,9 @@ def predict_directory(
     image_format: str = typer.Option(
         ".tif", help="Image format for flyswot to use for predictions"
     ),
-    check_latest: bool = typer.Option(True, help="Use latest available model"),
+    # check_latest: bool = typer.Option(True, help="Use latest available model"),
+    model_name: str = typer.Option("latest", help="Which model to use"),
+    model_path: str = None,
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -101,39 +140,57 @@ def predict_directory(
     """
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
-    # TODO add load learner function that can be passed a model name
-    model_parts = models.ensure_model(model_dir, check_latest)
-    model = model_parts.model
-    vocab = models.load_vocab(model_parts.vocab)
-    onnxinference = OnnxInferenceSession(model, vocab)
+    if model_name == "latest":
+        model_parts = models.ensure_model(model_dir, check_latest=True)
+    if model_name != "latest" and not model_path:
+        model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
+    if model_name != "latest" and model_path:
+        model_parts = models._get_model_parts(Path(model_path) / Path(model_name))
+    onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
-    if not files:
-        typer.echo(
-            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
-        )
-        raise typer.Exit(code=1)
+    check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
-    create_csv_header(csv_fname)
     with typer.progressbar(length=len(files)) as progress:
-        all_preds = []
-        predictions = []
-        for batch in itertoolz.partition_all(bs, files):
+        for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
-            all_preds.append(batch_predictions.batch_labels)
-            predictions.append(batch_predictions)
+            if i == 0:
+                create_csv_header(batch_predictions, csv_fname)
+            write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
-            write_batch_preds_to_csv(csv_fname, batch_predictions)
-        all_preds = list(itertoolz.concat(all_preds))
     typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
     typer.echo(f"Time taken to run:  {str(delta)}")
-    print_table(all_preds)
+    print_inference_summary(csv_fname)
 
 
-def print_table(decoded) -> None:
+def print_inference_summary(csv_fname):
+    """print_inference_summary from `fname`"""
+    labels_to_print = labels_from_csv(csv_fname)
+    tables = [
+        print_table(labels, f"Prediction summary {i+1}", print=False)
+        for i, labels in enumerate(labels_to_print)
+    ]
+    columns = Columns(tables)
+    print(columns)
+
+
+def labels_from_csv(fname: Path) -> List[List[str]]:
+    """Gets labels from csv `fname`"""
+    columns = defaultdict(list)
+    with open(fname, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            for (k, v) in row.items():
+                columns[k].append(v)
+    return [columns[k] for k in columns if "prediction" in k]
+
+
+def print_table(
+    decoded: list, header: str = "Prediction summary", print: bool = True
+) -> Table:
     """Prints table summary of predicted labels"""
-    table = Table(show_header=True, title="Prediction summary")
+    table = Table(show_header=True, title=header)
     table.add_column(
         "Class",
     )
@@ -150,7 +207,33 @@ def print_table(decoded) -> None:
             table.add_row("Total", str(total), "")
         else:
             table.add_row(key, str(count), f"{percentage}")
-    console.print(table)
+    if print:
+        console.print(table)
+    return table
+
+
+def make_layout():
+    """Define the layout."""
+    layout = Layout(name="root")
+    layout.split(Layout(name="header", size=4), Layout(name="main"))
+    layout["main"].split_column(
+        Layout(name="info", size=4), Layout(name="body", ratio=2, minimum_size=60)
+    )
+    layout["info"].split_row(Layout(name="time"), Layout(name="files"))
+    return layout
+
+
+# def print_summary(columns, time, files):
+#     layout = make_layout()
+#     MARKDOWN = """
+#     # Prediction summary
+#     """
+#     md = Markdown(MARKDOWN)
+#     layout["header"].update(md)
+#     layout["body"].update(columns)
+#     layout["time"].update(time)
+#     layout["files"].update(f"Number of files checked {len(files)}")
+#     print(layout)
 
 
 def create_csv_fname(csv_directory: Path) -> Path:
@@ -161,15 +244,44 @@ def create_csv_fname(csv_directory: Path) -> Path:
     return Path(csv_directory / fname)
 
 
-def create_csv_header(csv_path: Path) -> None:
+@singledispatch
+def create_csv_header(batch, csv_path) -> None:
+    """Print csv header"""
+    raise NotImplementedError(f"Not implemented for type {batch}")
+
+
+@create_csv_header.register
+def _(batch: PredictionBatch, csv_path):
     """Creates a header for csv `csv_path`"""
     with open(csv_path, mode="w", newline="") as csv_file:
-        field_names = ["path", "directory", "predicted_label", "confidence"]
+        field_names = ["path", "directory", "prediction", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         writer.writeheader()
 
 
-def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> None:
+@create_csv_header.register
+def _(batch: MultiPredictionBatch, csv_path):
+    item = batch.batch[0]
+    pred = OrderedDict()
+    pred["path"] = asdict(item)["path"]
+    pred["directory"] = asdict(item)["path"].parent
+    for k, v in enumerate(item.predictions):
+        pred[f"prediction_label_{k}"] = v[0]
+        pred[f"confidence__label_{k}"] = v[1]
+    with open(csv_path, mode="w", newline="") as csv_file:
+        field_names = list(pred.keys())
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+        writer.writeheader()
+
+
+@singledispatch
+def write_batch_preds_to_csv(predictions, csv_fpath: Path) -> None:
+    """print batch preds to csv"""
+    raise NotImplementedError(f"Not implemented for type {predictions}")
+
+
+@write_batch_preds_to_csv.register
+def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
     """Appends `predictions` batch to `csv_path`"""
     with open(csv_fpath, mode="a", newline="") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
@@ -180,22 +292,39 @@ def write_batch_preds_to_csv(csv_fpath: Path, predictions: PredictionBatch) -> N
             writer.writerow(row)
 
 
+@write_batch_preds_to_csv.register
+def _(predictions: MultiPredictionBatch, csv_fpath) -> None:
+    for pred in predictions.batch:
+        row = OrderedDict()
+        row["path"] = asdict(pred)["path"]
+        row["directory"] = asdict(pred)["path"].parent
+        for k, v in enumerate(pred.predictions):
+            row[f"prediction_label_{k}"] = v[0]
+            row[f"confidence__label_{k}"] = v[1]
+        with open(csv_fpath, mode="a", newline="") as csv_file:
+            field_names = list(row.keys())
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writerow(row)
+
+
 class InferenceSession(ABC):
     """Abstract class for inference sessions"""
 
     @abstractmethod
-    def __init__(self, model: Path, vocab: List):
+    def __init__(self, model: Path, vocab: List):  # pragma: no cover
         """Inference Sessions should init from a model file and vocab"""
         self.model = model
         self.vocab = vocab
 
     @abstractmethod
-    def predict_image(self, image: Path):
+    def predict_image(self, image: Path):  # pragma: no cover
         """Predict a single image"""
         pass
 
     @abstractmethod
-    def predict_batch(self, model: Path, batch: Iterable[Path], bs: int):
+    def predict_batch(
+        self, model: Path, batch: Iterable[Path], bs: int
+    ):  # pragma: no cover
         """Predict a batch"""
         pass
 
@@ -232,7 +361,7 @@ def softmax(x):
 #         return PredictionBatch(prediction_items)
 
 
-class OnnxInferenceSession(InferenceSession):
+class OnnxInferenceSession(InferenceSession):  # pragma: no cover
     """onnx inference session"""
 
     def __init__(self, model: Path, vocab: Path):
@@ -240,22 +369,31 @@ class OnnxInferenceSession(InferenceSession):
         self.model = model
         self.session = rt.InferenceSession(str(model))
 
-        self.vocab = vocab
-        self.vocab_mapping = dict(enumerate(self.vocab))
+        self.vocab = models.load_vocab(vocab)
+        self.vocab_mappings = [dict(enumerate(v)) for v in self.vocab]
 
-    def _load_vocab(self, vocab: Path) -> List:
-        with open(vocab, "r") as f:
-            return [item.strip("\n") for item in f.readlines()]
-
-    def predict_image(self, image: Path):
+    def predict_image(
+        self, image: Path
+    ) -> Union[ImagePredictionItem, MultiLabelImagePredictionItem]:
         """Predict a single image"""
         img = self._load_image(image)
-        raw_result = self.session.run(["output"], {"image": img})
-        pred = self._postprocess(raw_result)
-        arg_max = int(np.array(pred).argmax())
-        predicted_label = self.vocab_mapping[int(arg_max)]
-        confidence = float(np.array(pred).max())
-        return ImagePredictionItem(image, predicted_label, confidence)
+        output_names = [o.name for o in self.session.get_outputs()]
+        raw_result = self.session.run(output_names, {"image": img})
+        if len(self.vocab) < 2:
+            pred = self._postprocess(raw_result)
+            arg_max = int(np.array(pred).argmax())
+            predicted_label = self.vocab_mappings[0][int(arg_max)]
+            confidence = float(np.array(pred).max())
+            return ImagePredictionItem(image, predicted_label, confidence)
+        else:
+            prediction_tuples = []
+            for vocab_map, pred in zip(self.vocab_mappings, raw_result):
+                pred = self._postprocess(pred)
+                arg_max = int(np.array(pred).argmax())
+                predicted_label = vocab_map[int(arg_max)]
+                confidence = float(np.array(pred).max())
+                prediction_tuples.append((predicted_label, confidence))
+        return MultiLabelImagePredictionItem(image, prediction_tuples)
 
     def _preprocess(self, input_data: np.ndarray) -> np.ndarray:
         # converts the input data into the float32 input for onnx
@@ -285,11 +423,16 @@ class OnnxInferenceSession(InferenceSession):
         """process results from onnx session"""
         return softmax(np.array(result)).tolist()
 
-    def predict_batch(self, batch: Iterable[Path], bs: int):
+    def predict_batch(
+        self, batch: Iterable[Path], bs: int
+    ) -> Union[PredictionBatch, MultiPredictionBatch]:
         """predicts a batch of images"""
         prediction_items = [self.predict_image(file) for file in batch]
-        return PredictionBatch(prediction_items)
+        if len(self.vocab) < 2:
+            return PredictionBatch(prediction_items)
+        else:
+            return MultiPredictionBatch(prediction_items)
 
 
 if __name__ == "__main__":
-    app()
+    app()  # pragma: no cover
