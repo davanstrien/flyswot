@@ -1,4 +1,5 @@
 import csv
+import inspect
 import os
 import pathlib
 from collections import defaultdict
@@ -148,6 +149,50 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         )
 
 
+@pytest.mark.datafiles(
+    os.path.join(
+        FIXTURE_DIR,
+        "fly_fse.jpg",
+    )
+)
+def test_predict_directory_local_mult(datafiles, tmp_path) -> None:
+    inference.predict_directory(
+        datafiles,
+        tmp_path,
+        pattern="fse",
+        bs=1,
+        image_format=".jpg",
+        model_name="20210629",
+        model_path="tests/test_files/mult/",
+    )
+    csv_file = list(tmp_path.rglob("*.csv"))
+    assert csv_file
+    with open(csv_file[0], newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            assert row["path"]
+            assert row["directory"]
+        columns = defaultdict(list)
+    with open(csv_file[0], newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            for (k, v) in row.items():
+                columns[k].append(v)
+        assert any("prediction" in k for k in columns)
+        labels = [columns[k] for k in columns if "prediction" in k]
+        confidences = [columns[k] for k in columns if "confidence" in k]
+        # check all labels are strings
+        assert all(map(lambda x: isinstance(x, str), (itertoolz.concat(labels))))
+        # check all confidences can be cast to float
+        assert all(
+            map(
+                lambda x: isinstance(x, float),
+                map(lambda x: float(x), (itertoolz.concat(confidences))),
+            )
+        )
+
+
 def test_csv_header():
     with pytest.raises(NotImplementedError):
         inference.create_csv_header("string", Path("."))
@@ -228,3 +273,15 @@ def test_make_layout():
 #     test_dir.mkdir()
 #     with pytest.raises(typer.Exit):
 #         inference.predict_directory(test_dir)
+
+
+def test_onnx_session_attributes():
+    session = inference.OnnxInferenceSession(
+        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
+        Path("tests/test_files/mult/20210629/model/vocab.txt"),
+    )
+    assert session
+    assert inspect.ismethod(session.predict_image)
+    assert inspect.ismethod(session.predict_batch)
+    assert inspect.ismethod(session._postprocess)
+    assert inspect.ismethod(session._load_image)
