@@ -260,9 +260,6 @@ def vocab(
                 console.print(Markdown("# Model Vocab"))
                 console.print(vocab)
             return vocab
-    if not model_path:
-        typer.echo(f"No models currently found in {model_path}")
-        raise typer.Exit()
 
 
 if __name__ == "__main__":  # pragma: no cover
