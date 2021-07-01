@@ -72,7 +72,9 @@ def _url_callback(url: str) -> Union[str, None]:
         raise typer.BadParameter(f"Please check {url} is a valid url")
 
 
-def get_remote_release_json(url: str, single: bool = False) -> Dict[str, Any]:
+def get_remote_release_json(
+    url: str, single: bool = False
+) -> Dict[str, Any]:  # pragma : no cover
     """Returns all releases found at `url`"""
     with urllib.request.urlopen(url) as response:  # pragma: no cover
         try:
