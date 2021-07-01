@@ -218,5 +218,12 @@ def test_vocab() -> None:
     assert isinstance(vocab, list)
 
 
+def test_vocab_print(capsys) -> None:
+    models.vocab(model="latest", show=True)
+    captured = capsys.readouterr()
+    assert len(captured.out) > 2
+    assert "Model Vocab" in captured.out
+
+
 def test_app(tmp_path: Any) -> None:
     pass
