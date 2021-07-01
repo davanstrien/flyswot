@@ -148,6 +148,18 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         )
 
 
+@given(strategies.lists(st.text(min_size=2), min_size=2), st.text())
+def test_print_table(labels, title):
+    table = inference.print_table(labels, title, print=False)
+    assert isinstance(table, rich.table.Table)
+    assert table.title == title
+    unique = itertoolz.count(itertoolz.unique(labels))
+    assert table.row_count == unique + 1
+    assert all(
+        [label in getattr(itertoolz.first(table.columns), "_cells") for label in labels]
+    )
+
+
 @given(strategies.lists(st.text(), min_size=1))
 def test_check_files(l):
     inference.check_files(l, "fse", Path("."))
