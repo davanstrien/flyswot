@@ -204,6 +204,7 @@ def test_print_table(labels, title):
     assert all(
         label in getattr(itertoolz.first(table.columns), "_cells") for label in labels
     )
+    table = inference.print_table(labels, title, print=True)
 
 
 @given(strategies.lists(st.text(), min_size=1))
