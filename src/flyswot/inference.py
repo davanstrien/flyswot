@@ -145,7 +145,7 @@ def predict_directory(
     if model_name != "latest" and not model_path:
         model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
     if model_name != "latest" and model_path:
-        model_parts = models._get_model_parts(Path(model_path) / Path(model_name))
+        model_parts = models._get_model_parts(Path(model_path / Path(model_name)))
     onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
     files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
