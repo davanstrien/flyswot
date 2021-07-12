@@ -330,7 +330,7 @@ typing-extensions = ">=3.7.4.0"
 
 [[package]]
 name = "hypothesis"
-version = "6.14.1"
+version = "6.14.2"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
@@ -1158,7 +1158,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"
-content-hash = "db188ac2339185ffe15adfcd2dfdb6e1869348aef2ca3167105c34ccdeb7a665"
+content-hash = "9908157dcf95d98ce831fa63c3701c81b20d9fbe0b77b08013246e0a4804d3f8"
 
 [metadata.files]
 alabaster = [
@@ -1331,8 +1331,8 @@ gitpython = [
     {file = "GitPython-3.1.15.tar.gz", hash = "sha256:05af150f47a5cca3f4b0af289b73aef8cf3c4fe2385015b06220cbcdee48bb6e"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.14.1-py3-none-any.whl", hash = "sha256:6dad44da8962cc7c13cdc28cf9b78c6779b5a0b0279a9baac427ae6d109f70e3"},
-    {file = "hypothesis-6.14.1.tar.gz", hash = "sha256:88b0736a5691b68b8e16a4b7ee8e4c8596810c5a20989ea5b5f64870a7c25740"},
+    {file = "hypothesis-6.14.2-py3-none-any.whl", hash = "sha256:e226139ede20a3023e2e8dbbfc8e46bfb5a83cb278acf9e6f23823b4c41e2a62"},
+    {file = "hypothesis-6.14.2.tar.gz", hash = "sha256:93d9bbf4e5277e7a5f47857916cf8cde78b91bf8a819a61b6121e8bbcf219577"},
 ]
 identify = [
     {file = "identify-2.2.4-py2.py3-none-any.whl", hash = "sha256:ad9f3fa0c2316618dc4d840f627d474ab6de106392a4f00221820200f490f5a8"},
@@ -1520,6 +1520,11 @@ pep8-naming = [
     {file = "pep8_naming-0.12.0-py2.py3-none-any.whl", hash = "sha256:2321ac2b7bf55383dd19a6a9c8ae2ebf05679699927a3af33e60dd7d337099d3"},
 ]
 pillow = [
+    {file = "Pillow-8.3.1-1-cp36-cp36m-win_amd64.whl", hash = "sha256:fd7eef578f5b2200d066db1b50c4aa66410786201669fb76d5238b007918fb24"},
+    {file = "Pillow-8.3.1-1-cp37-cp37m-win_amd64.whl", hash = "sha256:75e09042a3b39e0ea61ce37e941221313d51a9c26b8e54e12b3ececccb71718a"},
+    {file = "Pillow-8.3.1-1-cp38-cp38-win_amd64.whl", hash = "sha256:c0e0550a404c69aab1e04ae89cca3e2a042b56ab043f7f729d984bf73ed2a093"},
+    {file = "Pillow-8.3.1-1-cp39-cp39-win_amd64.whl", hash = "sha256:479ab11cbd69612acefa8286481f65c5dece2002ffaa4f9db62682379ca3bb77"},
+    {file = "Pillow-8.3.1-1-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:f156d6ecfc747ee111c167f8faf5f4953761b5e66e91a4e6767e548d0f80129c"},
     {file = "Pillow-8.3.1-cp36-cp36m-macosx_10_10_x86_64.whl", hash = "sha256:196560dba4da7a72c5e7085fccc5938ab4075fd37fe8b5468869724109812edd"},
     {file = "Pillow-8.3.1-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:29c9569049d04aaacd690573a0398dbd8e0bf0255684fee512b413c2142ab723"},
     {file = "Pillow-8.3.1-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:c088a000dfdd88c184cc7271bfac8c5b82d9efa8637cd2b68183771e3cf56f04"},
