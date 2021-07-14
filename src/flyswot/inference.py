@@ -123,7 +123,7 @@ def predict_directory(
         resolve_path=True,
         help="Directory used to store the csv report",
     ),
-    pattern: str = typer.Option("fse", help="Pattern used to filter image filenames"),
+    pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
     image_format: str = typer.Option(
         ".tif", help="Image format for flyswot to use for predictions"
