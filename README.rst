@@ -158,7 +158,7 @@ To run predictions against a directory of images:
    $ flyswot predict directory manuscripts_folder .
 
 - *flyswot* will search inside the manuscripts_folder looking for image files.
-- By default it will look for files that contain :code:`FSE` in the filename since these are files which have been labelled as being "end flysheets".
+- By default it will look for files that contain :code:`FS` in the filename since these are files which have been labelled as being "end flysheets" or "front flysheets"
 - Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labelled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
 
@@ -170,9 +170,9 @@ This section provides additional guidance on the usage of *flyswot*. This is pri
 How flyswot searches for images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*flyswot* is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have ``fse`` as part of their filename so this is used by flyswot to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
+*flyswot* is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have ``fs`` as part of their filename so this is used by flyswot to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
 
-Since these images of concern will often be inside a directory structure *flyswot* will look in sub-folders from the input folder for images which contain ``fse`` in the name. For example in the following folder structure:
+Since these images of concern will often be inside a directory structure *flyswot* will look in sub-folders from the input folder for images which contain ``fs`` in the name. For example in the following folder structure:
 
 .. code:: console
 
@@ -186,7 +186,6 @@ Since these images of concern will often be inside a directory structure *flyswo
    │  ├─ sloane_ms_116_fbspi.tif
    │  ├─ sloane_ms_116_fse004r.tif
 
-All of the images containing ``fse`` would be checked but others such as files containing ``fbspi`` and ``fblefr`` won't be checked since these aren't labelled as flysheets so don't need to be checked.
 
 
 Running flyswot against a directory of images
