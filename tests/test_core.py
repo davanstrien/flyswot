@@ -67,6 +67,45 @@ def test_filter(fname, tmpdir):
     assert len(list(matches)) == 50 + 25
 
 
+patterns_to_test_with_front: List[str] = [
+    "fs",
+    "fse",
+    "fbspi",
+    "Rblefr",
+    "fblefv",
+    "fs001r",
+    "fs001v",
+    "f001r",
+    "f001v",
+    "f197ar",
+    "f197br",
+    "fse002av",
+    "fse002bv",
+    "fbrigr",
+    "fbrigv",
+]
+
+
+@pytest.mark.parametrize("fname", patterns_to_test_with_front)
+def test_filter_with_front(fname, tmpdir):
+    """It filters files from pattern"""
+    a_dir = tmpdir.mkdir("image_dir")
+    for number in range(50):
+        file = a_dir.join(f"file_{fname}_{number}.tif")
+        file.ensure()
+        file2 = a_dir.join(f"file_{number}.jpg")
+        file2.ensure()
+    for i in range(5):  # create 25 files in 5 subfolders
+        a_sub_dir = a_dir.mkdir(f"{i}_dir")
+        for i in range(5):
+            file = a_sub_dir.join(f"file_{fname}_{i}.tif")
+            file.ensure()
+    matches = core.get_image_files_from_pattern(a_dir, fname, ".tif")
+    files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
+    assert len(files) == (50 * 2) + 25
+    assert len(list(matches)) == 50 + 25
+
+
 @pytest.mark.parametrize("fname", patterns_to_test)
 def test_filter_matching_files(fname, tmp_path):
     """It filters files from pattern when file in both extensions"""
