@@ -267,7 +267,7 @@ def _(batch: MultiPredictionBatch, csv_path):
     pred["directory"] = asdict(item)["path"].parent
     for k, v in enumerate(item.predictions):
         pred[f"prediction_label_{k}"] = v[0]
-        pred[f"confidence__label_{k}"] = v[1]
+        pred[f"confidence_label_{k}"] = v[1]
     with open(csv_path, mode="w", newline="") as csv_file:
         field_names = list(pred.keys())
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
