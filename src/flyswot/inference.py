@@ -147,7 +147,7 @@ def predict_directory(
     if model_name != "latest" and model_path:
         model_parts = models._get_model_parts(Path(model_path / Path(model_name)))
     onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
-    files = list(core.get_image_files_from_pattern(directory, pattern, image_format))
+    files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
