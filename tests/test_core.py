@@ -86,6 +86,15 @@ patterns_to_test_with_front: List[str] = [
 ]
 
 
+def test_count_files_with_extension(tmpdir):
+    a_dir = tmpdir.mkdir("image_dir")
+    for number in range(50):
+        file = a_dir.join(f"file_{number}.tif")
+        file.ensure()
+    count = core.count_files_with_ext(a_dir, ".tif")
+    assert count == 50
+
+
 @pytest.mark.parametrize("fname", patterns_to_test_with_front)
 def test_filter_with_front(fname, tmpdir):
     """It filters files from pattern"""

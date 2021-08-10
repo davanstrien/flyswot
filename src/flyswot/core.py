@@ -19,13 +19,17 @@ image_extensions: Set[str] = {
 }
 
 
+def count_files_with_ext(directory: Path, ext: str) -> int:
+    """Counts files matching extension in directory"""
+    return itertoolz.count(Path(directory).rglob(f"*{ext}"))
+
+
 def get_image_files_from_pattern(
     directory: Path, pattern: str, ext: str = None
 ) -> Iterator[Path]:
     """yield image files from `directory` matching pattern `str` with `ext`"""
     with console.status(
-        f"Searching for files matching {pattern} in {directory}...",
-        spinner="dots",
+        f"Searching for files matching {pattern} in {directory}...", spinner="dots"
     ):
         time.sleep(1)
         match_files = Path(directory).rglob(f"**/*{pattern}*{ext}")
