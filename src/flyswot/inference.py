@@ -138,7 +138,7 @@ def predict_directory(
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
-    By default searches for filenames containing 'fse'.
+    By default searches for filenames containing 'fs'.
 
     Creates a CSV report saved to `csv_save_dir`
     """
