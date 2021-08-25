@@ -228,8 +228,7 @@ def get_inference_table_columns(csv_fname: Path) -> Columns:
         print_table(labels, f"Prediction summary {i+1}", print=False)
         for i, labels in enumerate(labels_to_print)
     ]
-    columns = Columns(tables)
-    return columns
+    return Columns(tables)
 
 
 def labels_from_csv(fname: Path) -> List[List[str]]:
