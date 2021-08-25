@@ -164,7 +164,6 @@ def predict_directory(
                 create_csv_header(batch_predictions, csv_fname)
             write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
-    typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
         str(delta), pattern, directory, csv_fname, image_format, len(files)
