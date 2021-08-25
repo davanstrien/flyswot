@@ -37,9 +37,6 @@ from flyswot.logo import flyswot_logo
 
 app = typer.Typer()
 
-# noqa: W605, F541
-
-
 @dataclass
 class ImagePredictionItem:
     """Prediction for an image.
