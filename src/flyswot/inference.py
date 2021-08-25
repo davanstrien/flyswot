@@ -18,20 +18,26 @@ from typing import Tuple
 from typing import Union
 
 import numpy as np
-import onnxruntime as rt  # type: ignore
+import onnxruntime as rt
 import typer
 from PIL import Image  # type: ignore
 from rich import print
 from rich.columns import Columns
 from rich.layout import Layout
+from rich.markdown import Markdown
+from rich.panel import Panel
 from rich.table import Table
+from rich.text import Text
 from toolz import itertoolz
 
 from flyswot import core
 from flyswot import models
 from flyswot.console import console
+from flyswot.logo import flyswot_logo
 
 app = typer.Typer()
+
+# noqa: W605, F541
 
 
 @dataclass
@@ -160,11 +166,63 @@ def predict_directory(
             progress.update(len(batch))
     typer.echo(f"CSV report stored in {csv_fname}")
     delta = timedelta(seconds=time.perf_counter() - start_time)
-    typer.echo(f"Time taken to run:  {str(delta)}")
-    print_inference_summary(csv_fname)
+    print_inference_summary(
+        str(delta), pattern, directory, csv_fname, image_format, len(files)
+    )
 
 
-def print_inference_summary(csv_fname):
+def print_inference_summary(
+    time_delta: str,
+    pattern: str,
+    directory: Path,
+    csv_fname: Path,
+    image_format: str,
+    matched_file_count: int,
+):
+    """prints summary report"""
+    print(flyswot_logo())
+    print(
+        Panel(
+            Text(
+                f"CSV report file at: {csv_fname.as_uri()}",
+            ),
+            title=" :clipboard: CSV report :clipboard:",
+        )
+    )
+    print(
+        Panel(
+            Text(f"{time_delta}", justify="center", style="bold green"),
+            title=":stopwatch: Time taken to run :stopwatch:",
+        )
+    )
+    print(
+        create_file_summary_markdown(
+            pattern, matched_file_count, directory, image_format
+        )
+    )
+    inference_summary_columns = get_inference_table_columns(csv_fname)
+    print(Panel(inference_summary_columns, title="Prediction Summary"))
+
+
+def create_file_summary_markdown(
+    pattern: str, matched_file_count: int, directory: Path, image_format: str
+) -> Panel:
+    """creates Markdown summary containing number of files checked by flyswot vs total images files under directory"""
+    total_image_file_count = core.count_files_with_ext(directory, image_format)
+    return Panel(
+        Markdown(
+            f"""
+    - flyswot searched for image files by matching the patern *{pattern}*
+    - flyswot search inside: `{directory}`
+    - In total the directory contained **{total_image_file_count}** images
+    - There were **{matched_file_count}** files matching the {pattern}* pattern which flyswot checked
+    """
+        ),
+        title=":file_folder: files checked :file_folder:",
+    )
+
+
+def get_inference_table_columns(csv_fname: Path) -> Columns:
     """print_inference_summary from `fname`"""
     labels_to_print = labels_from_csv(csv_fname)
     tables = [
@@ -172,7 +230,7 @@ def print_inference_summary(csv_fname):
         for i, labels in enumerate(labels_to_print)
     ]
     columns = Columns(tables)
-    print(columns)
+    return columns
 
 
 def labels_from_csv(fname: Path) -> List[List[str]]:
