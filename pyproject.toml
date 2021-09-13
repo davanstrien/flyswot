@@ -51,7 +51,7 @@ pre-commit-hooks = "^4.0.1"
 sphinx-rtd-theme = "^0.5.1"
 sphinx-click = "^3.0.1"
 Pygments = "^2.10.0"
-hypothesis = "^6.17.4"
+hypothesis = "^6.21.1"
 memory-profiler = "^0.58.0"
 pytest-datafiles = "^2.0"
 
