@@ -14,6 +14,6 @@ runner = CliRunner()
 def test_main_cli() -> None:
     """Basic tests for Cli"""
     result = runner.invoke(app)
-    #assert result.exit_code == 0
+    # assert result.exit_code == 0
     result = runner.invoke(app, ["model", "show-model-dir"])
-    #assert "models" in result.stdout
+    # assert "models" in result.stdout
