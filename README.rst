@@ -88,7 +88,7 @@ Install Python
 
 *flyswot* uses the `Python`_ programming language. You will therefore need to have Python installed on your computer to run *flyswot*.
 
-For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution of Python. If you are on a managed PC/laptop you should request this via Technology.
+For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution of Python. If you are on a managed PC/laptop you should request this to be installed via the Technology team.
 
 Create and activate a Conda Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
