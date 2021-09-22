@@ -47,6 +47,7 @@ Features
 
 * unix style search patterns for matching images to predict against
 * produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
+* produces a summary 'report' providing a high level summary of the predictions made by `flyswot`  
 
 Requirements
 ------------
