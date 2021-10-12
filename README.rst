@@ -38,7 +38,7 @@ flyswot
 Disclaimer
 -----------
 
-*flyswot* is a work in progress and is currently only intended to be used for testing by `HMD`_.
+`flyswot` is a work in progress and is currently only intended to be used for testing by `HMD`_.
 
 Features
 --------
@@ -47,8 +47,8 @@ Features
 
 * unix style search patterns for matching images to predict against
 * produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
-* produces a summary 'report' providing a high level summary of the predictions made by `flyswot` 
-* automatically downloads latest available [flyswot model](github.com/davanstrien/flyswot-models) 
+* produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
+* automatically downloads latest available [flyswot model](github.com/davanstrien/flyswot-models)
 
 Requirements
 ------------
