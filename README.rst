@@ -50,6 +50,10 @@ Features
 * produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
 * automatically downloads latest available [flyswot model](github.com/davanstrien/flyswot-models)
 
+.. image:: docs/_static/screenshot.png
+  :width: 600
+  :alt: Flyswot Screenshot
+
 Requirements
 ------------
 
