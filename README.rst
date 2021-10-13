@@ -38,15 +38,25 @@ flyswot
 Disclaimer
 -----------
 
-*flyswot* is a work in progress and is currently only intended to be used for testing by `HMD`_.
+`flyswot` is a work in progress and is currently only intended to be used for testing by `HMD`_.
+
+This code and documentation is a work in progress.
 
 Features
 --------
 
-`flyswot` is a Command Line Tool for detecting 'fake' flysheets. TODO add description of project
+`flyswot` is a Command Line Tool for detecting 'fake' flysheets.
 
 * unix style search patterns for matching images to predict against
 * produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
+* produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
+* automatically downloads latest available `flyswot model <github.com/davanstrien/flyswot-models>`_
+
+
+
+.. image:: docs/_static/screenshot.png
+  :width: 600
+  :alt: Flyswot Screenshot
 
 Requirements
 ------------
@@ -88,7 +98,7 @@ Install Python
 
 *flyswot* uses the `Python`_ programming language. You will therefore need to have Python installed on your computer to run *flyswot*.
 
-For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution of Python. If you are on a managed PC/laptop you should request this via Technology.
+For HMD users of `flyswot` it is suggested to use the `Anaconda`_ distribution of Python. If you are on a managed PC/laptop you should request this to be installed via the Technology team.
 
 Create and activate a Conda Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -170,7 +180,7 @@ This section provides additional guidance on the usage of *flyswot*. This is pri
 How flyswot searches for images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*flyswot* is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have ``fs`` as part of their filename so this is used by flyswot to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
+*flyswot* is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have ``fs`` as part of their filename so this is used by *flyswot* to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
 
 Since these images of concern will often be inside a directory structure *flyswot* will look in sub-folders from the input folder for images which contain ``fs`` in the name. For example in the following folder structure:
 
@@ -186,7 +196,7 @@ Since these images of concern will often be inside a directory structure *flyswo
    │  ├─ sloane_ms_116_fbspi.tif
    │  ├─ sloane_ms_116_fse004r.tif
 
-
+All of the files which have ``fs`` in the filname will be check but files which don't contains `fs` such as ``add_ms_9403_fbspi.tif`` will be ignored since these aren't labelled as flysheets.
 
 Running flyswot against a directory of images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -194,7 +204,7 @@ Running flyswot against a directory of images
 To run *flyswot* against a directory of images you need to give it the path to that directory/folder.
 There are different ways you could do this. The following is suggested for people who are not very familiar (yet 😜) with terminal interfaces.
 
-Identify the folder you want to flyswot to check for "fake" flysheets. If you are using *flyswot* for the first time it may make sense to choose a folder which doesn't contain a huge number of collection items so you don't have to wait to long for *flyswot* to finish running. Once you have found a directory you want to predict against copy the path. This path should be the full path to the item.
+Identify the folder you want to *flyswot* to check for "fake" flysheets. If you are using *flyswot* for the first time it may make sense to choose a folder which doesn't contain a huge number of collection items so you don't have to wait to long for *flyswot* to finish running. Once you have found a directory you want to predict against copy the path. This path should be the full path to the item.
 
 For example something that looks like:
 
