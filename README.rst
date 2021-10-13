@@ -40,10 +40,12 @@ Disclaimer
 
 `flyswot` is a work in progress and is currently only intended to be used for testing by `HMD`_.
 
+This code and documentation is a work in progress.
+
 Features
 --------
 
-`flyswot` is a Command Line Tool for detecting 'fake' flysheets. TODO add description of project
+`flyswot` is a Command Line Tool for detecting 'fake' flysheets.
 
 * unix style search patterns for matching images to predict against
 * produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
@@ -194,7 +196,7 @@ Since these images of concern will often be inside a directory structure *flyswo
    │  ├─ sloane_ms_116_fbspi.tif
    │  ├─ sloane_ms_116_fse004r.tif
 
-All of the files which have ``fs`` in the filname will be check but files which don't contains `fs` such as ``add_ms_9403_fbspi.tif`` will be ignored since these aren't labelled as flysheets. 
+All of the files which have ``fs`` in the filname will be check but files which don't contains `fs` such as ``add_ms_9403_fbspi.tif`` will be ignored since these aren't labelled as flysheets.
 
 Running flyswot against a directory of images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
