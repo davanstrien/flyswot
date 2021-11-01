@@ -12,9 +12,9 @@ from datetime import datetime
 from datetime import timedelta
 from functools import singledispatch
 from pathlib import Path
+from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -65,7 +65,7 @@ class MultiLabelImagePredictionItem:
     """Multiple predictions for a single image"""
 
     path: Path
-    predictions: List[Tuple[str, float]]
+    predictions: List[Dict[float, str]]
 
 
 @dataclass
@@ -442,11 +442,12 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
         else:
             prediction_tuples = []
             for vocab_map, pred in zip(self.vocab_mappings, raw_result):
-                pred = self._postprocess(pred)
-                arg_max = int(np.array(pred).argmax())
-                predicted_label = vocab_map[int(arg_max)]
-                confidence = float(np.array(pred).max())
-                prediction_tuples.append((predicted_label, confidence))
+                predictions = self._postprocess(pred)
+                prediction_dict = {
+                    float(prediction): vocab_map[i]
+                    for i, prediction in enumerate(predictions)
+                }
+                prediction_tuples.append(prediction_dict)
         return MultiLabelImagePredictionItem(image, prediction_tuples)
 
     def _preprocess(self, input_data: np.ndarray) -> np.ndarray:
