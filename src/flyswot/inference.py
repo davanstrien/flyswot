@@ -81,16 +81,17 @@ class PredictionBatch:
 
 @dataclass
 class MultiPredictionBatch:
-    """Container for MultiLabelImagePRedictionItems"""
+    """Container for MultiLabelImagePredictionItems"""
 
     batch: List[MultiLabelImagePredictionItem]
 
     def __post_init__(self):
         """Returns a iterable of lists containing all predicted labels in batch"""
-        self.batch_labels: Iterable = (
-            list(itertoolz.pluck(0, pred))
-            for pred in zip(*[o.predictions for o in self.batch])
-        )
+        # self.batch_labels: Iterable = (
+        #     list(itertoolz.pluck(0, pred))
+        #     for pred in zip(*[o.predictions for o in self.batch])
+        # )
+        self.batch_labels = [list(item.values()) for item in self.batch]
 
 
 image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
