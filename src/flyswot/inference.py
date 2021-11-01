@@ -67,6 +67,19 @@ class MultiLabelImagePredictionItem:
     path: Path
     predictions: List[Dict[float, str]]
 
+    def _get_top_labels(self) -> List[str]:
+        """Get top labels"""
+        top_labels = []
+        for prediction in self.predictions:
+            top_label = sorted(prediction.items(), reverse=True)[0][1]
+            top_labels.append(top_label)
+        return top_labels
+
+    # Post init that gets top prediction label from predictions
+    def __post_init__(self) -> List[str]:
+        """Get top prediction label"""
+        self.predicted_labels = self._get_top_labels()
+
 
 @dataclass
 class PredictionBatch:
@@ -85,13 +98,17 @@ class MultiPredictionBatch:
 
     batch: List[MultiLabelImagePredictionItem]
 
+    def _get_predicted_labels(self) -> Iterable:
+        """Returns a iterable of all predicted labels in batch"""
+        return (item.predicted_labels for item in self.batch)
+
     def __post_init__(self):
         """Returns a iterable of lists containing all predicted labels in batch"""
         # self.batch_labels: Iterable = (
         #     list(itertoolz.pluck(0, pred))
         #     for pred in zip(*[o.predictions for o in self.batch])
         # )
-        self.batch_labels = [list(item.values()) for item in self.batch]
+        self.batch_labels = self._get_predicted_labels()
 
 
 image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
@@ -441,15 +458,15 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
             confidence = float(np.array(pred).max())
             return ImagePredictionItem(image, predicted_label, confidence)
         else:
-            prediction_tuples = []
+            prediction_dicts = []
             for vocab_map, pred in zip(self.vocab_mappings, raw_result):
                 predictions = self._postprocess(pred)
                 prediction_dict = {
                     float(prediction): vocab_map[i]
                     for i, prediction in enumerate(predictions)
                 }
-                prediction_tuples.append(prediction_dict)
-        return MultiLabelImagePredictionItem(image, prediction_tuples)
+                prediction_dicts.append(prediction_dict)
+        return MultiLabelImagePredictionItem(image, prediction_dicts)
 
     def _preprocess(self, input_data: np.ndarray) -> np.ndarray:
         # converts the input data into the float32 input for onnx
