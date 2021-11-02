@@ -1,6 +1,7 @@
 """Inference functionality"""
 import csv
 import mimetypes
+import string
 import time
 from abc import ABC
 from abc import abstractmethod
@@ -332,14 +333,15 @@ def _(batch: PredictionBatch, csv_path):
 
 
 @create_csv_header.register
-def _(batch: MultiPredictionBatch, csv_path):
+def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2):
     item = batch.batch[0]
     pred = OrderedDict()
     pred["path"] = asdict(item)["path"]
     pred["directory"] = asdict(item)["path"].parent
-    for k, v in enumerate(item.predictions):
-        pred[f"prediction_label_{k}"] = v[0]
-        pred[f"confidence_label_{k}"] = v[1]
+    for i, _v in enumerate(item.predictions):
+        for j in range(top_n):
+            pred[f"prediction_label_{string.ascii_letters[i]}_{j}"] = ""
+            pred[f"confidence_label_{string.ascii_letters[i]}_{j}"] = ""
     with open(csv_path, mode="w", newline="") as csv_file:
         field_names = list(pred.keys())
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
@@ -365,14 +367,33 @@ def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
 
 
 @write_batch_preds_to_csv.register
-def _(predictions: MultiPredictionBatch, csv_fpath) -> None:
+def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> None:
+    for pred in predictions.batch:
+        row = OrderedDict()
+        row["path"] = asdict(pred)["path"]
+        row["directory"] = asdict(pred)["path"].parent
+        for i, v in enumerate(pred.predictions):
+            sorted_predictions = sorted(v.items(), reverse=True)
+            for j in range(top_n):
+                row[f"prediction_label_{i}_{j}"] = sorted_predictions[j][1]
+                row[f"confidence_label_{i}_{j}"] = sorted_predictions[j][0]
+        with open(csv_fpath, mode="a", newline="") as csv_file:
+            field_names = list(row.keys())
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writerow(row)
     for pred in predictions.batch:
         row = OrderedDict()
         row["path"] = asdict(pred)["path"]
         row["directory"] = asdict(pred)["path"].parent
         for k, v in enumerate(pred.predictions):
-            row[f"prediction_label_{k}"] = v[0]
-            row[f"confidence__label_{k}"] = v[1]
+            label_one = sorted(v, reverse=True)[1]
+            confidence_one = sorted(v, reverse=True)[0]
+            row[f"prediction_label_{k}"] = label_one
+            row[f"confidence_label_{k}"] = confidence_one
+
+        # for k, v in enumerate(pred.predictions):
+        #     row[f"prediction_label_{k}"] = v[0]
+        #     row[f"confidence__label_{k}"] = v[1]
         with open(csv_fpath, mode="a", newline="") as csv_file:
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
