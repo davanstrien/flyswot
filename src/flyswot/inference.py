@@ -390,10 +390,6 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
             confidence_one = sorted(v, reverse=True)[0]
             row[f"prediction_label_{k}"] = label_one
             row[f"confidence_label_{k}"] = confidence_one
-
-        # for k, v in enumerate(pred.predictions):
-        #     row[f"prediction_label_{k}"] = v[0]
-        #     row[f"confidence__label_{k}"] = v[1]
         with open(csv_fpath, mode="a", newline="") as csv_file:
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
