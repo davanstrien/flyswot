@@ -201,8 +201,8 @@ def test_csv_header():
 
 
 def test_csv_header_multi(tmp_path):
-    predicton = inference.MultiLabelImagePredictionItem(Path("."), [("label", 0.8)])
-    batch = inference.MultiPredictionBatch([predicton, predicton])
+    prediction = inference.MultiLabelImagePredictionItem(Path("."), [{0.8: "label"}])
+    batch = inference.MultiPredictionBatch([prediction, prediction])
     csv_fname = tmp_path / "test.csv"
     inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
