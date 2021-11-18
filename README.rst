@@ -52,11 +52,9 @@ Features
 * produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
 * automatically downloads latest available `flyswot model <github.com/davanstrien/flyswot-models>`_
 
+.. image:: https://asciinema.org/a/449685.svg
+   :target: https://asciinema.org/a/449685
 
-
-.. image:: docs/_static/screenshot.png
-  :width: 600
-  :alt: Flyswot Screenshot
 
 Requirements
 ------------
