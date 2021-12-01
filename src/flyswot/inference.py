@@ -338,7 +338,7 @@ def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2):
     pred = OrderedDict()
     pred["path"] = asdict(item)["path"]
     pred["directory"] = asdict(item)["path"].parent
-    for i, _v in enumerate(item.predictions):
+    for i, _ in enumerate(item.predictions):
         for j in range(top_n):
             pred[f"prediction_label_{string.ascii_letters[i]}_{j}"] = ""
             pred[f"confidence_label_{string.ascii_letters[i]}_{j}"] = ""
