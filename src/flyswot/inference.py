@@ -1,6 +1,7 @@
 """Inference functionality"""
 import csv
 import mimetypes
+import re
 import string
 import time
 from abc import ABC
@@ -248,15 +249,18 @@ def get_inference_table_columns(csv_fname: Path) -> Columns:
     return Columns(tables)
 
 
+label_regex = re.compile(r"prediction_label_\D_0")
+
+
 def labels_from_csv(fname: Path) -> List[List[str]]:
-    """Gets labels from csv `fname`"""
+    """Gets top labels from csv `fname`"""
     columns = defaultdict(list)
     with open(fname, "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             for (k, v) in row.items():
                 columns[k].append(v)
-    return [columns[k] for k in columns if "prediction" in k]
+    return [columns[k] for k in columns if label_regex.match(k)]
 
 
 def print_table(
