@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flyswot"
-version = "0.2.5"
+version = "0.2.6"
 description = "flyswot"
 authors = ["Daniel van Strien <daniel.van-strien@bl.uk>"]
 license = "MIT"
