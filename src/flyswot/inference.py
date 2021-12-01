@@ -77,7 +77,7 @@ class MultiLabelImagePredictionItem:
         return top_labels
 
     # Post init that gets top prediction label from predictions
-    def __post_init__(self) -> List[str]:
+    def __post_init__(self):
         """Get top prediction label"""
         self.predicted_labels = self._get_top_labels()
 
