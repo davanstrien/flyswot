@@ -11,7 +11,7 @@ authors:
   given-names: "Catherine"
   orcid: "https://orcid.org/0000-0003-3550-4674"
 title: "flyswot"
-version: 0.2.5
+version: 0.2.6
 doi: 10.5281/zenodo.5521225
 date-released: 2021-05-04
 url: "https://github.com/davanstrien/flyswot"
