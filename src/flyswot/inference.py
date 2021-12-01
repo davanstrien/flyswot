@@ -382,6 +382,7 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow(row)
 
+
 class InferenceSession(ABC):
     """Abstract class for inference sessions"""
 
