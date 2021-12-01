@@ -381,20 +381,6 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow(row)
-    for pred in predictions.batch:
-        row = OrderedDict()
-        row["path"] = asdict(pred)["path"]
-        row["directory"] = asdict(pred)["path"].parent
-        for k, v in enumerate(pred.predictions):
-            label_one = sorted(v, reverse=True)[1]
-            confidence_one = sorted(v, reverse=True)[0]
-            row[f"prediction_label_{k}"] = label_one
-            row[f"confidence_label_{k}"] = confidence_one
-        with open(csv_fpath, mode="a", newline="") as csv_file:
-            field_names = list(row.keys())
-            writer = csv.DictWriter(csv_file, fieldnames=field_names)
-            writer.writerow(row)
-
 
 class InferenceSession(ABC):
     """Abstract class for inference sessions"""
