@@ -62,15 +62,11 @@ def test_image_prediction_item(confidence, label, imfile: Any):
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_multi_image_prediction_item(confidence, label, imfile: Any):
     item = inference.MultiLabelImagePredictionItem(
-        imfile, [(label, confidence), (label, confidence)]
+        imfile, [{confidence: label}, {confidence: label}]
     )
     assert item.path == imfile
     assert type(item.predictions) == list
-    assert type(item.predictions[0]) == tuple
-    assert item.predictions[0][0] == label
-    assert item.predictions[1][0] == label
-    assert item.predictions[0][1] == confidence
-    assert item.predictions[1][1] == confidence
+    assert type(item.predictions[0]) == dict
 
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
@@ -89,10 +85,10 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
 )
 def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
     item = inference.MultiLabelImagePredictionItem(
-        imfile, [(label, confidence), (label, confidence)]
+        imfile, [{confidence: label}, {confidence: label}]
     )
     item2 = inference.MultiLabelImagePredictionItem(
-        imfile, [(label, confidence), (label, confidence)]
+        imfile, [{confidence: label}, {confidence: label}]
     )
     batch = inference.MultiPredictionBatch([item, item2])
     assert batch.batch
@@ -205,8 +201,8 @@ def test_csv_header():
 
 
 def test_csv_header_multi(tmp_path):
-    predicton = inference.MultiLabelImagePredictionItem(Path("."), [("label", 0.8)])
-    batch = inference.MultiPredictionBatch([predicton, predicton])
+    prediction = inference.MultiLabelImagePredictionItem(Path("."), [{0.8: "label"}])
+    batch = inference.MultiPredictionBatch([prediction, prediction])
     csv_fname = tmp_path / "test.csv"
     inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:

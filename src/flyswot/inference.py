@@ -1,6 +1,8 @@
 """Inference functionality"""
 import csv
 import mimetypes
+import re
+import string
 import time
 from abc import ABC
 from abc import abstractmethod
@@ -12,9 +14,9 @@ from datetime import datetime
 from datetime import timedelta
 from functools import singledispatch
 from pathlib import Path
+from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -65,7 +67,20 @@ class MultiLabelImagePredictionItem:
     """Multiple predictions for a single image"""
 
     path: Path
-    predictions: List[Tuple[str, float]]
+    predictions: List[Dict[float, str]]
+
+    def _get_top_labels(self) -> List[str]:
+        """Get top labels"""
+        top_labels = []
+        for prediction in self.predictions:
+            top_label = sorted(prediction.items(), reverse=True)[0][1]
+            top_labels.append(top_label)
+        return top_labels
+
+    # Post init that gets top prediction label from predictions
+    def __post_init__(self):
+        """Get top prediction label"""
+        self.predicted_labels = self._get_top_labels()
 
 
 @dataclass
@@ -81,16 +96,21 @@ class PredictionBatch:
 
 @dataclass
 class MultiPredictionBatch:
-    """Container for MultiLabelImagePRedictionItems"""
+    """Container for MultiLabelImagePredictionItems"""
 
     batch: List[MultiLabelImagePredictionItem]
 
+    def _get_predicted_labels(self) -> Iterable:
+        """Returns a iterable of all predicted labels in batch"""
+        return (item.predicted_labels for item in self.batch)
+
     def __post_init__(self):
         """Returns a iterable of lists containing all predicted labels in batch"""
-        self.batch_labels: Iterable = (
-            list(itertoolz.pluck(0, pred))
-            for pred in zip(*[o.predictions for o in self.batch])
-        )
+        # self.batch_labels: Iterable = (
+        #     list(itertoolz.pluck(0, pred))
+        #     for pred in zip(*[o.predictions for o in self.batch])
+        # )
+        self.batch_labels = self._get_predicted_labels()
 
 
 image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
@@ -156,15 +176,17 @@ def predict_directory(
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     with typer.progressbar(length=len(files)) as progress:
+        images_checked = 0
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
             if i == 0:
                 create_csv_header(batch_predictions, csv_fname)
             write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
+            images_checked += len(batch)
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
-        str(delta), pattern, directory, csv_fname, image_format, len(files)
+        str(delta), pattern, directory, csv_fname, image_format, images_checked
     )
 
 
@@ -229,15 +251,18 @@ def get_inference_table_columns(csv_fname: Path) -> Columns:
     return Columns(tables)
 
 
+label_regex = re.compile(r"prediction_label_\D_0")
+
+
 def labels_from_csv(fname: Path) -> List[List[str]]:
-    """Gets labels from csv `fname`"""
+    """Gets top labels from csv `fname`"""
     columns = defaultdict(list)
     with open(fname, "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             for (k, v) in row.items():
                 columns[k].append(v)
-    return [columns[k] for k in columns if "prediction" in k]
+    return [columns[k] for k in columns if label_regex.match(k)]
 
 
 def print_table(
@@ -314,14 +339,15 @@ def _(batch: PredictionBatch, csv_path):
 
 
 @create_csv_header.register
-def _(batch: MultiPredictionBatch, csv_path):
+def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2):
     item = batch.batch[0]
     pred = OrderedDict()
     pred["path"] = asdict(item)["path"]
     pred["directory"] = asdict(item)["path"].parent
-    for k, v in enumerate(item.predictions):
-        pred[f"prediction_label_{k}"] = v[0]
-        pred[f"confidence_label_{k}"] = v[1]
+    for i, _ in enumerate(item.predictions):
+        for j in range(top_n):
+            pred[f"prediction_label_{string.ascii_letters[i]}_{j}"] = ""
+            pred[f"confidence_label_{string.ascii_letters[i]}_{j}"] = ""
     with open(csv_path, mode="w", newline="") as csv_file:
         field_names = list(pred.keys())
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
@@ -347,14 +373,16 @@ def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
 
 
 @write_batch_preds_to_csv.register
-def _(predictions: MultiPredictionBatch, csv_fpath) -> None:
+def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> None:
     for pred in predictions.batch:
         row = OrderedDict()
         row["path"] = asdict(pred)["path"]
         row["directory"] = asdict(pred)["path"].parent
-        for k, v in enumerate(pred.predictions):
-            row[f"prediction_label_{k}"] = v[0]
-            row[f"confidence__label_{k}"] = v[1]
+        for i, v in enumerate(pred.predictions):
+            sorted_predictions = sorted(v.items(), reverse=True)
+            for j in range(top_n):
+                row[f"prediction_label_{i}_{j}"] = sorted_predictions[j][1]
+                row[f"confidence_label_{i}_{j}"] = sorted_predictions[j][0]
         with open(csv_fpath, mode="a", newline="") as csv_file:
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
@@ -440,14 +468,15 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
             confidence = float(np.array(pred).max())
             return ImagePredictionItem(image, predicted_label, confidence)
         else:
-            prediction_tuples = []
+            prediction_dicts = []
             for vocab_map, pred in zip(self.vocab_mappings, raw_result):
-                pred = self._postprocess(pred)
-                arg_max = int(np.array(pred).argmax())
-                predicted_label = vocab_map[int(arg_max)]
-                confidence = float(np.array(pred).max())
-                prediction_tuples.append((predicted_label, confidence))
-        return MultiLabelImagePredictionItem(image, prediction_tuples)
+                predictions = self._postprocess(pred)
+                prediction_dict = {
+                    float(prediction): vocab_map[i]
+                    for i, prediction in enumerate(predictions)
+                }
+                prediction_dicts.append(prediction_dict)
+        return MultiLabelImagePredictionItem(image, prediction_dicts)
 
     def _preprocess(self, input_data: np.ndarray) -> np.ndarray:
         # converts the input data into the float32 input for onnx
