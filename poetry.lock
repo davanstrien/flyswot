@@ -462,7 +462,7 @@ python-versions = "*"
 
 [[package]]
 name = "memory-profiler"
-version = "0.58.0"
+version = "0.59.0"
 description = "A module for monitoring memory usage of a python program"
 category = "dev"
 optional = false
@@ -1182,7 +1182,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"
-content-hash = "bb6d440c0e0d4e72326524f17e40376a8bb79a0a380006871eecf0534bc21d80"
+content-hash = "997fcf681bc2345eeebb6fe43702f592304cf123b1ee7a33d3548b0cde5e998f"
 
 [metadata.files]
 alabaster = [
@@ -1443,7 +1443,7 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
 memory-profiler = [
-    {file = "memory_profiler-0.58.0.tar.gz", hash = "sha256:01385ac0fec944fcf7969814ec4406c6d8a9c66c079d09276723c5a7680f44e5"},
+    {file = "memory_profiler-0.59.0.tar.gz", hash = "sha256:880b6a92edec62ce7aa634c5f244da6c0395c531aa7e33b1d1312906cf513599"},
 ]
 mypy = [
     {file = "mypy-0.910-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a155d80ea6cee511a3694b108c4494a39f42de11ee4e61e72bc424c490e46457"},
