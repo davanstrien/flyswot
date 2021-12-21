@@ -25,9 +25,24 @@ app = typer.Typer()
 class LocalModel:
     """A local model container"""
 
-    vocab: Path
-    modelcard: Path
-    model: Path
+    hf_cache: Path
+
+    def __post_init__(self):
+        """Returns model parts contained under hf_cache"""
+        self._get_model_parts(self.hf_cache)
+
+    def _get_model_parts(self, hf_cache: Path):
+        """Returns model path, vocab and metadata for a model"""
+        model_files = Path(hf_cache).iterdir()
+        for file in model_files:
+            if fnmatch.fnmatch(file.name, "vocab.txt"):
+                self.vocab = file
+            if fnmatch.fnmatch(file.name, "README.md"):
+                self.modelcard = file
+            if fnmatch.fnmatch(file.name, "*.onnx") or fnmatch.fnmatch(
+                file.name, "*.pkl"
+            ):
+                self.model = file
 
 
 def _url_callback(url: str) -> Union[str, None]:
@@ -83,33 +98,33 @@ def get_model(
     return Path(model)
 
 
-def _get_model_parts(model_dir: Path) -> Optional[LocalModel]:
-    """Returns model path, vocab and metadata for a model"""
-    model_files = Path(model_dir).iterdir()
-    vocab = None
-    modelcard = None
-    model = None
-    for file in model_files:
-        if fnmatch.fnmatch(file.name, "vocab.txt"):
-            vocab = file
-        if fnmatch.fnmatch(file.name, "modelcard.md"):
-            modelcard = file
-        if fnmatch.fnmatch(file.name, "*.onnx") or fnmatch.fnmatch(file.name, "*.pkl"):
-            model = file
-    if vocab and modelcard and model is not None:
-        return LocalModel(vocab, modelcard, model)
+# def _get_model_parts(model_dir: Path) -> Optional[LocalModel]:
+#     """Returns model path, vocab and metadata for a model"""
+#     model_files = Path(model_dir).iterdir()
+#     vocab = None
+#     modelcard = None
+#     model = None
+#     for file in model_files:
+#         if fnmatch.fnmatch(file.name, "vocab.txt"):
+#             vocab = file
+#         if fnmatch.fnmatch(file.name, "README.md"):
+#             modelcard = file
+#         if fnmatch.fnmatch(file.name, "*.onnx") or fnmatch.fnmatch(file.name, "*.pkl"):
+#             model = file
+#     if vocab and modelcard and model is not None:
+#         return LocalModel(vocab, modelcard, model)
 
 
-def load_model(model_dir: Path):  # pragma: no cover
-    """returns a local model"""
-    return _get_model_parts(model_dir)
+# def load_model(model_dir: Path):  # pragma: no cover
+#     """returns a local model"""
+#     return _get_model_parts(model_dir)
 
 
 def ensure_model(model_dir: Path) -> Optional[LocalModel]:  # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
     model = get_model(model_dir=model_dir)
     if model:
-        return _get_model_parts(model)
+        return LocalModel(model)
     typer.echo("Not able to find a model")
     raise typer.Exit()
 
@@ -132,18 +147,16 @@ def load_vocab(vocab: Path) -> List[List[str]]:
 
 
 @app.command()
-def vocab(
-    model: str = typer.Argument("latest"), show: bool = typer.Option(True)
-) -> Optional[List[str]]:
+def vocab(model: str = typer.Argument("latest"), show: bool = typer.Option(True)):
     """Prints out vocab for latest model"""
     if model != "latest":
         raise NotImplementedError
     model_dir = ensure_model_dir()
     model_path = get_model(model_dir=model_dir)
     if model_path:
-        model_parts = _get_model_parts(model_path)
-        if model_parts.vocab:
-            vocab = load_vocab(model_parts.vocab)
+        local_model = LocalModel(model_path)
+        if local_model.vocab:
+            vocab = load_vocab(local_model.vocab)
             if show:
                 console.print(Markdown("# Model Vocab"))
                 console.print(vocab)
