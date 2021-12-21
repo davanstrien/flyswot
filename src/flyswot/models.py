@@ -1,10 +1,7 @@
 """Model Commands."""
-import datetime
 import fnmatch
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -25,36 +22,12 @@ app = typer.Typer()
 
 
 @dataclass
-class GitHubRelease:
-    """A GitHub Release of a model"""
-
-    html_url: str
-    body: str
-    updated_at: datetime.datetime
-    browser_download_url: str
-    model_name: str
-
-
-@dataclass
 class LocalModel:
     """A local model container"""
 
     vocab: Path
     modelcard: Path
     model: Path
-
-
-def get_release_metadata(release: Dict[str, Any]) -> GitHubRelease:
-    """Extracts required fields from `release` for `GitHubRelease`"""
-    html_url = release["html_url"]
-    body = release["body"]
-    assets_json = release["assets"][0]
-    updated_at = datetime.datetime.strptime(
-        assets_json["updated_at"], "%Y-%m-%dT%H:%M:%S%z"
-    )
-    browser_download_url = assets_json["browser_download_url"]
-    name = assets_json["name"]
-    return GitHubRelease(html_url, body, updated_at, browser_download_url, name)
 
 
 def _url_callback(url: str) -> Union[str, None]:
