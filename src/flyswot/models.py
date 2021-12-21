@@ -163,5 +163,12 @@ def vocab(model: str = typer.Argument("latest"), show: bool = typer.Option(True)
             return vocab
 
 
+def show_model_card(localmodel: LocalModel):
+    """Shows model card for model"""
+    with open(localmodel.modelcard, "r") as f:
+        md = Markdown(f.read())
+    console.print(md)
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()

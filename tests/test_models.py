@@ -102,5 +102,19 @@ def test_vocab_print(capsys) -> None:
     assert "Model Vocab" in captured.out
 
 
+def test_show_model_card(tmp_path):
+    model_dir = tmp_path / "model"
+    model_dir.mkdir(parents=True)
+    assert model_dir.is_dir()
+    vocab = model_dir / "vocab.txt"
+    vocab.touch()
+    model_card = model_dir / "README.md"
+    model_card.touch()
+    modelfile = model_dir / "20210331.onnx"
+    modelfile.touch()
+    localmodel = models.LocalModel(model_dir)
+    models.show_model_card(localmodel)
+
+
 def test_app(tmp_path: Any) -> None:
     pass
