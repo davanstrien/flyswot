@@ -4,7 +4,6 @@ import fnmatch
 import json
 import urllib.error
 import urllib.request
-import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -16,17 +15,16 @@ from typing import Union
 
 import typer
 import validators  # type: ignore
+from huggingface_hub import snapshot_download
 from rich.markdown import Markdown
 from toolz import itertoolz
 from toolz import recipes
 
 from flyswot.config import APP_NAME
-from flyswot.config import MODEL_REPO_URL
+from flyswot.config import MODEL_REPO_ID
 from flyswot.console import console
 
 app = typer.Typer()
-
-REPO_URL = "https://api.github.com/repos/davanstrien/learn-onnx/releases"
 
 
 @dataclass
@@ -111,66 +109,30 @@ def show_model_dir() -> None:
 
 
 @app.command(name="download")
-def download_model(
-    url: str = typer.Argument("latest", callback=_url_callback),
+def get_model(
+    revision: Optional[str] = typer.Argument(None, callback=_url_callback),
     model_dir: Path = typer.Argument(
         None,
         envvar="MODEL_DIR",
         help="Optionally specify a directory to store model files in",
     ),
-) -> None:  # pragma: no cover
+    local_only=False,
+) -> Path:  # pragma: no cover
     """Downloads models, defaults to the latest available model"""
-    if url != "latest":
-
-        raise NotImplementedError
-    url = MODEL_REPO_URL + "/latest"
-    remote_release_json = get_remote_release_json(url, single=True)
-    if not remote_release_json:
-        raise typer.Exit()
-    release_metadata = get_release_metadata(remote_release_json)
-    download_url = release_metadata.browser_download_url
-    updated_date = release_metadata.updated_at
-    typer.echo(f"Remote model updated on {updated_date}")
-    model_dir = ensure_model_dir()
-    model_save_path = model_dir / release_metadata.model_name
-    with console.status(
-        "Downloading model...",
-        spinner="aesthetic",
-    ):
-        urllib.request.urlretrieve(download_url, model_save_path)
-    typer.echo(f"Model saving to {model_save_path}...")
-    typer.echo("Extracting model...")
-    with zipfile.ZipFile(model_save_path, "r") as zip_ref:
-        zip_ref.extractall(model_dir / release_metadata.model_name.replace(".zip", ""))
+    repo_id = MODEL_REPO_ID
+    with console.status("Getting model", spinner="dots"):
+        model = snapshot_download(
+            repo_id, cache_dir=model_dir, revision=None, local_files_only=local_only
+        )
+    return Path(model)
 
 
-def _get_model_date(model: Path) -> datetime.datetime:
-    """Gets the date from a `model_name` fname"""
-    return datetime.datetime.strptime(model.name, "%Y%m%d")
-
-
-def _sort_local_models_by_date(model_dir: Path) -> List[Path]:
-    return sorted(
-        [
-            d
-            for d in Path(model_dir).iterdir()
-            if (d.is_dir() and not d.name.startswith("."))
-        ],
-        reverse=True,
-    )
-
-
-def _get_latest_model(model_dir: Path) -> Optional[Path]:
-    models = _sort_local_models_by_date(model_dir)
-    if not models:
-        return None
-    else:
-        return models[0]
-
-
-def _get_model_parts(model_dir: Path) -> LocalModel:
+def _get_model_parts(model_dir: Path) -> Optional[LocalModel]:
     """Returns model path, vocab and metadata for a model"""
-    model_files = Path(model_dir / "model").iterdir()
+    model_files = Path(model_dir).iterdir()
+    vocab = None
+    modelcard = None
+    model = None
     for file in model_files:
         if fnmatch.fnmatch(file.name, "vocab.txt"):
             vocab = file
@@ -178,19 +140,8 @@ def _get_model_parts(model_dir: Path) -> LocalModel:
             modelcard = file
         if fnmatch.fnmatch(file.name, "*.onnx") or fnmatch.fnmatch(file.name, "*.pkl"):
             model = file
-    return LocalModel(vocab, modelcard, model)
-
-
-def _compare_remote_local(local_model: Path) -> bool:  # pragma: no cover
-    url = MODEL_REPO_URL + "/latest"
-    remote_release_json = get_remote_release_json(url, single=True)
-    if not remote_release_json:
-        raise typer.Exit()
-    release_metadata = get_release_metadata(remote_release_json)
-    return (
-        release_metadata.updated_at.isoformat()
-        > _get_model_date(local_model).isoformat()
-    )
+    if vocab and modelcard and model is not None:
+        return LocalModel(vocab, modelcard, model)
 
 
 def load_model(model_dir: Path):  # pragma: no cover
@@ -198,30 +149,13 @@ def load_model(model_dir: Path):  # pragma: no cover
     return _get_model_parts(model_dir)
 
 
-def ensure_model(
-    model_dir: Path, check_latest: bool = False
-) -> Optional[LocalModel]:  # pragma: no cover
+def ensure_model(model_dir: Path) -> Optional[LocalModel]:  # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
-    local_model = _get_latest_model(model_dir)
-    if local_model and not check_latest:
-        model_parts = _get_model_parts(local_model)
+    model = get_model(model_dir=model_dir)
+    if model:
+        model_parts = _get_model_parts(model)
         return model_parts
-    if local_model and check_latest:
-        if _compare_remote_local(local_model):
-            download_model(url="latest", model_dir=model_dir)
-        local_model = _get_latest_model(model_dir)
-        if local_model:
-            model_parts = _get_model_parts(local_model)
-            return model_parts
-        else:
-            typer.echo("No model found locally...")
-
-    if not local_model:
-        download_model(url="latest", model_dir=model_dir)
-        local_model = _get_latest_model(model_dir)
-        if local_model:
-            model_parts = _get_model_parts(local_model)
-            return model_parts
+    if not model:
         typer.echo("Not able to find a model")
         raise typer.Exit()
 
@@ -251,7 +185,7 @@ def vocab(
     if model != "latest":
         raise NotImplementedError
     model_dir = ensure_model_dir()
-    model_path = _get_latest_model(model_dir)
+    model_path = get_model(model_dir=model_dir)
     if model_path:
         model_parts = _get_model_parts(model_path)
         if model_parts.vocab:
