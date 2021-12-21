@@ -1,9 +1,6 @@
 """Model Commands."""
 import datetime
 import fnmatch
-import json
-import urllib.error
-import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -68,20 +65,6 @@ def _url_callback(url: str) -> Union[str, None]:
         return url
     else:
         raise typer.BadParameter(f"Please check {url} is a valid url")
-
-
-def get_remote_release_json(
-    url: str, single: bool = False
-) -> Dict[str, Any]:  # pragma : no cover
-    """Returns all releases found at `url`"""
-    with urllib.request.urlopen(url) as response:  # pragma: no cover
-        try:
-            html = response.read()
-            response_json: Dict[str, Any] = json.loads(html)
-            return response_json
-        except ConnectionError as error:  # pragma: no cover
-            typer.echo(error)
-            raise typer.Exit(code=1)
 
 
 def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
