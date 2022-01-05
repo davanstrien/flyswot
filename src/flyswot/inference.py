@@ -179,7 +179,7 @@ def predict_directory(
         images_checked = 0
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
-            if i == 0:
+            if i == 0:  # pragma: no cover
                 create_csv_header(batch_predictions, csv_fname)
             write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
