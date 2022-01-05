@@ -366,18 +366,18 @@ torch = ["torch"]
 
 [[package]]
 name = "hypothesis"
-version = "6.31.6"
+version = "6.34.2"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 attrs = ">=19.2.0"
 sortedcontainers = ">=2.1.0,<3.0.0"
 
 [package.extras]
-all = ["black (>=19.10b0)", "click (>=7.0)", "django (>=2.2)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "libcst (>=0.3.16)", "numpy (>=1.9.0)", "pandas (>=0.25)", "pytest (>=4.6)", "python-dateutil (>=1.4)", "pytz (>=2014.1)", "redis (>=3.0.0)", "rich (>=9.0.0)", "importlib-resources (>=3.3.0)", "importlib-metadata (>=3.6)", "backports.zoneinfo (>=0.2.1)", "tzdata (>=2021.5)"]
+all = ["black (>=19.10b0)", "click (>=7.0)", "django (>=2.2)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "libcst (>=0.3.16)", "numpy (>=1.9.0)", "pandas (>=0.25)", "pytest (>=4.6)", "python-dateutil (>=1.4)", "pytz (>=2014.1)", "redis (>=3.0.0)", "rich (>=9.0.0)", "importlib-metadata (>=3.6)", "backports.zoneinfo (>=0.2.1)", "tzdata (>=2021.5)"]
 cli = ["click (>=7.0)", "black (>=19.10b0)", "rich (>=9.0.0)"]
 codemods = ["libcst (>=0.3.16)"]
 dateutil = ["python-dateutil (>=1.4)"]
@@ -390,7 +390,7 @@ pandas = ["pandas (>=0.25)"]
 pytest = ["pytest (>=4.6)"]
 pytz = ["pytz (>=2014.1)"]
 redis = ["redis (>=3.0.0)"]
-zoneinfo = ["importlib-resources (>=3.3.0)", "backports.zoneinfo (>=0.2.1)", "tzdata (>=2021.5)"]
+zoneinfo = ["backports.zoneinfo (>=0.2.1)", "tzdata (>=2021.5)"]
 
 [[package]]
 name = "identify"
@@ -1223,7 +1223,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"
-content-hash = "584433e73bf45fb0c6b7943905d82997e1bb5d4d59e20664eed75ac110e405e0"
+content-hash = "52bf6f67b16add14d5c178728f8f4e1dfa5595a5e71d5c3ec7a68fa1add7c041"
 
 [metadata.files]
 alabaster = [
@@ -1399,8 +1399,8 @@ huggingface-hub = [
     {file = "huggingface_hub-0.2.1.tar.gz", hash = "sha256:b2ef718ea108f0927118b80bef90bef2dd4ddb84454f2dc33267d90de8d33886"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.31.6-py3-none-any.whl", hash = "sha256:fbd31da5174f3da8d062017302071967b239a1b397d0e3181a44d43346bc6def"},
-    {file = "hypothesis-6.31.6.tar.gz", hash = "sha256:d54be6a80b160ad5ea4209b01a0d72e31d910510ed7142fa9907861911800771"},
+    {file = "hypothesis-6.34.2-py3-none-any.whl", hash = "sha256:803792d416ff71307d775fe760e2b2f07ca302a2c941b576629668092b9f3e3d"},
+    {file = "hypothesis-6.34.2.tar.gz", hash = "sha256:317f8d2f670fa69e258ab43e21c2befd413c559e386581f7e9641a80460b1063"},
 ]
 identify = [
     {file = "identify-2.2.4-py2.py3-none-any.whl", hash = "sha256:ad9f3fa0c2316618dc4d840f627d474ab6de106392a4f00221820200f490f5a8"},
