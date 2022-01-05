@@ -153,7 +153,7 @@ def vocab(model: str = typer.Argument("latest"), show: bool = typer.Option(True)
         raise NotImplementedError
     model_dir = ensure_model_dir()
     model_path = get_model(model_dir=model_dir)
-    if model_path:
+    if model_path:  # pragma: no cover
         local_model = LocalModel(model_path)
         if local_model.vocab:
             vocab = load_vocab(local_model.vocab)
