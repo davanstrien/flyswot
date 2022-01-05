@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Dict
 from typing import Iterable
 from typing import List
+from typing import Optional
 from typing import Union
 
 import numpy as np
@@ -164,12 +165,12 @@ def predict_directory(
     """
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
-    model_parts = models.ensure_model(model_dir)
+    model = models.ensure_model(model_dir)
     # if model_name != "latest" and not model_path:
     #     model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
     # if model_name != "latest" and model_path:
     #     model_parts = models._get_model_parts(Path(model_path / Path(model_name)))
-    onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
+    onnxinference = OnnxInferenceSession(model.model, model.vocab)
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
@@ -196,6 +197,7 @@ def print_inference_summary(
     csv_fname: Path,
     image_format: str,
     matched_file_count: int,
+    local_model: Optional[models.LocalModel] = None,
 ):
     """prints summary report"""
     print(flyswot_logo())
@@ -220,6 +222,8 @@ def print_inference_summary(
     )
     inference_summary_columns = get_inference_table_columns(csv_fname)
     print(Panel(inference_summary_columns, title="Prediction Summary"))
+    if local_model is not None:
+        print(models.show_model_card(localmodel=local_model))
 
 
 def create_file_summary_markdown(
