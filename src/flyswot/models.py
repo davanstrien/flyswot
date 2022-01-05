@@ -120,7 +120,7 @@ def get_model(
 #     return _get_model_parts(model_dir)
 
 
-def ensure_model(model_dir: Path) -> Optional[LocalModel]:  # pragma: no cover
+def ensure_model(model_dir: Path) -> LocalModel:  # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
     model = get_model(model_dir=model_dir)
     if model:
