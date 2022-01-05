@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Dict
 from typing import Iterable
 from typing import List
+from typing import Optional
 from typing import Union
 
 import numpy as np
@@ -164,13 +165,12 @@ def predict_directory(
     """
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
-    if model_name == "latest":
-        model_parts = models.ensure_model(model_dir, check_latest=True)
-    if model_name != "latest" and not model_path:
-        model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
-    if model_name != "latest" and model_path:
-        model_parts = models._get_model_parts(Path(model_path / Path(model_name)))
-    onnxinference = OnnxInferenceSession(model_parts.model, model_parts.vocab)
+    model = models.ensure_model(model_dir)
+    # if model_name != "latest" and not model_path:
+    #     model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
+    # if model_name != "latest" and model_path:
+    #     model_parts = models._get_model_parts(Path(model_path / Path(model_name)))
+    onnxinference = OnnxInferenceSession(model.model, model.vocab)
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
@@ -179,7 +179,7 @@ def predict_directory(
         images_checked = 0
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
             batch_predictions = onnxinference.predict_batch(batch, bs)
-            if i == 0:
+            if i == 0:  # pragma: no cover
                 create_csv_header(batch_predictions, csv_fname)
             write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
@@ -197,6 +197,7 @@ def print_inference_summary(
     csv_fname: Path,
     image_format: str,
     matched_file_count: int,
+    local_model: Optional[models.LocalModel] = None,
 ):
     """prints summary report"""
     print(flyswot_logo())
@@ -221,6 +222,8 @@ def print_inference_summary(
     )
     inference_summary_columns = get_inference_table_columns(csv_fname)
     print(Panel(inference_summary_columns, title="Prediction Summary"))
+    if local_model is not None:
+        print(models.show_model_card(localmodel=local_model))
 
 
 def create_file_summary_markdown(
