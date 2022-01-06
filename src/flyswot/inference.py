@@ -151,10 +151,12 @@ def predict_directory(
     pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
     image_format: str = typer.Option(
-        ".tif", help="Image format for flyswot to use for predictions"
+        ".tif",
+        help="Image format for flyswot to use for predictions, defaults to `*.tif`",
     ),
-    # check_latest: bool = typer.Option(True, help="Use latest available model"),
-    model_name: str = typer.Option("latest", help="Which model to use"),
+    model_name: str = typer.Option(
+        "latest", help="Which model flyswot should use for making predictions"
+    ),
     model_path: str = None,
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
