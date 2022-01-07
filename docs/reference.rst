@@ -6,8 +6,40 @@ Reference
     :backlinks: none
 
 
-flyswot.__main__
+flyswot.cli
 ----------------
 
-.. automodule:: flyswot.__main__
+.. automodule:: flyswot.cli
+   :members:
+
+
+flyswot.models
+--------------
+
+.. automodule:: flyswot.models
+   :members:
+
+
+flyswot.inference
+-----------------
+
+.. automodule:: flyswot.inference
+   :members:
+
+flyswot.core
+------------
+
+.. automodule:: flyswot.core
+   :members:
+
+flyswot.congig
+--------------
+
+.. automodule:: flyswot.config
+   :members:
+
+flyswot.console
+---------------
+
+.. automodule:: flyswot.console
    :members:

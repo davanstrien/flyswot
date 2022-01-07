@@ -1,4 +1,4 @@
-"""main flyswot cli entrypoint"""
+"""flyswot command line"""
 import typer
 
 from flyswot import inference
