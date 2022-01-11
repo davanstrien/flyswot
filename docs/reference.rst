@@ -32,7 +32,7 @@ flyswot.core
 .. automodule:: flyswot.core
    :members:
 
-flyswot.congig
+flyswot.config
 --------------
 
 .. automodule:: flyswot.config
