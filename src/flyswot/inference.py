@@ -22,6 +22,7 @@ from typing import Union
 
 import numpy as np
 import onnxruntime as rt
+import PIL
 import typer
 from PIL import Image  # type: ignore
 from rich import print
@@ -175,13 +176,29 @@ def predict_directory(
     csv_fname = create_csv_fname(csv_save_dir)
     with typer.progressbar(length=len(files)) as progress:
         images_checked = 0
+        bad_batch = []
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
-            batch_predictions = onnxinference.predict_batch(batch, bs)
-            if i == 0:  # pragma: no cover
+            try:
+                batch_predictions = onnxinference.predict_batch(batch, bs)
+            except PIL.UnidentifiedImageError:
+                typer.echo(f"Corrupt image found in batch {batch}")
+                bad_batch.append(batch)
+                batch_predictions = None
+            if i == 0 and batch_predictions is not None:  # pragma: no cover
                 create_csv_header(batch_predictions, csv_fname)
-            write_batch_preds_to_csv(batch_predictions, csv_fname)
-            progress.update(len(batch))
-            images_checked += len(batch)
+            if batch_predictions is not None:
+                write_batch_preds_to_csv(batch_predictions, csv_fname)
+                progress.update(len(batch))
+                images_checked += len(batch)
+    corrupt_images = set()
+    for batch in bad_batch:
+        for file in batch:
+            try:
+                batch_predictions = onnxinference.predict_batch(files, bs)
+                write_batch_preds_to_csv(batch_predictions)
+            except PIL.UnidentifiedImageError:
+                corrupt_images.add(file)
+    print(corrupt_images)
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
         str(delta), pattern, directory, csv_fname, image_format, images_checked
