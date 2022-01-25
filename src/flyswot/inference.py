@@ -168,10 +168,6 @@ def predict_directory(
     start_time = time.perf_counter()
     model_dir = models.ensure_model_dir()
     model = models.ensure_model(model_dir)
-    # if model_name != "latest" and not model_path:
-    #     model_parts = models._get_model_parts(Path(model_dir / Path(model_name)))
-    # if model_name != "latest" and model_path:
-    #     model_parts = models._get_model_parts(Path(model_path / Path(model_name)))
     onnxinference = OnnxInferenceSession(model.model, model.vocab)
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
