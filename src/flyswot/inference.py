@@ -135,6 +135,45 @@ def check_files(files: List, pattern: str, directory: Path) -> None:
         raise typer.Exit(code=1)
 
 
+def try_predict_batch(batch, inference_session, bs):
+    """try and predict a batch of files"""
+    bad_batch = False
+    try:
+        batch_predictions = inference_session.predict_batch(batch, bs)
+        return batch_predictions, bad_batch
+    except PIL.UnidentifiedImageError:
+        typer.echo("Corrupt imagess found in batch")
+        bad_batch = True
+        return batch, bad_batch
+
+
+def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
+    """Predict files"""
+    with typer.progressbar(length=len(files)) as progress:
+        images_checked = 0
+        bad_batch_files = []
+        for i, batch in enumerate(itertoolz.partition_all(bs, files)):
+            batch_predictions, bad_batch = try_predict_batch(
+                batch, inference_session, bs
+            )
+            if bad_batch:
+                bad_batch_files.append(batch)
+            if i == 0:  # pragma: no cover
+                create_csv_header(batch_predictions, csv_fname)
+            write_batch_preds_to_csv(batch_predictions, csv_fname)
+            progress.update(len(batch))
+            images_checked += len(batch)
+        corrupt_images = set()
+        for batch in bad_batch_files:
+            for file in batch:
+                try:
+                    batch_predictions = inference_session.predict_batch(files, bs)
+                    write_batch_preds_to_csv(batch_predictions)
+                except PIL.UnidentifiedImageError:
+                    corrupt_images.add(file)
+        return corrupt_images, images_checked
+
+
 @app.command(name="directory")
 def predict_directory(
     directory: Path = typer.Argument(
@@ -174,31 +213,11 @@ def predict_directory(
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
-    with typer.progressbar(length=len(files)) as progress:
-        images_checked = 0
-        bad_batch = []
-        for i, batch in enumerate(itertoolz.partition_all(bs, files)):
-            try:
-                batch_predictions = onnxinference.predict_batch(batch, bs)
-            except PIL.UnidentifiedImageError:
-                typer.echo(f"Corrupt image found in batch {batch}")
-                bad_batch.append(batch)
-                batch_predictions = None
-            if i == 0 and batch_predictions is not None:  # pragma: no cover
-                create_csv_header(batch_predictions, csv_fname)
-            if batch_predictions is not None:
-                write_batch_preds_to_csv(batch_predictions, csv_fname)
-                progress.update(len(batch))
-                images_checked += len(batch)
-    corrupt_images = set()
-    for batch in bad_batch:
-        for file in batch:
-            try:
-                batch_predictions = onnxinference.predict_batch(files, bs)
-                write_batch_preds_to_csv(batch_predictions)
-            except PIL.UnidentifiedImageError:
-                corrupt_images.add(file)
-    print(corrupt_images)
+    corrupt_images, images_checked = predict_files(
+        files, inference_session=onnxinference, bs=bs, csv_fname=csv_fname
+    )
+    if corrupt_images:
+        print(corrupt_images)
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
         str(delta), pattern, directory, csv_fname, image_format, images_checked
