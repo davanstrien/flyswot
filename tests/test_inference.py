@@ -2,6 +2,7 @@ import csv
 import inspect
 import os
 import pathlib
+import shutil
 import string
 from collections import defaultdict
 from pathlib import Path
@@ -99,13 +100,85 @@ def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
     assert hasattr(batch.batch_labels, "__next__")
     for labels in batch.batch_labels:
         for label in labels:
-            assert label == label
+            assert True
 
 
 FIXTURE_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "test_files",
 )
+
+
+@pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
+def test_try_predict_batch(datafiles, tmp_path) -> None:
+    session = inference.OnnxInferenceSession(
+        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
+        Path("tests/test_files/mult/20210629/model/vocab.txt"),
+    )
+    files = list(Path(datafiles).rglob("*.jpg"))
+    batch, bad_batch = inference.try_predict_batch(files, session, bs=1)
+    assert files
+    assert bad_batch is False
+    assert batch
+    assert isinstance(
+        batch, (inference.MultiPredictionBatch, inference.PredictionBatch)
+    )
+
+
+@pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
+def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
+    session = inference.OnnxInferenceSession(
+        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
+        Path("tests/test_files/mult/20210629/model/vocab.txt"),
+    )
+    files = list(Path(datafiles).rglob("*.jpg"))
+    batch, bad_batch = inference.try_predict_batch(files, session, bs=1)
+    assert files
+    assert bad_batch is True
+    assert isinstance(batch, list)
+
+
+@pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
+def test_predict_files(datafiles, tmp_path) -> None:
+    session = inference.OnnxInferenceSession(
+        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
+        Path("tests/test_files/mult/20210629/model/vocab.txt"),
+    )
+    files = list(Path(datafiles).rglob("*.jpg"))
+    tmp_csv = tmp_path / "test.csv"
+    corrupt_images, images_checked = inference.predict_files(files, session, 1, tmp_csv)
+    assert not corrupt_images
+    assert images_checked == 1
+
+
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -> None:
+    image_dir = tmpdir_factory.mktemp("images")
+    session = inference.OnnxInferenceSession(
+        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
+        Path("tests/test_files/mult/20210629/model/vocab.txt"),
+    )
+    files = list(Path(datafiles).rglob("*.jpg"))
+    for file in files:
+        for i in range(10):
+            im_file = image_dir / f"{file.name}_{i}.jpg"
+            shutil.copyfile(file, im_file)
+
+    files = list(Path(image_dir).rglob("*.jpg"))
+    files = sorted(
+        files, reverse=True
+    )  # temporary sorting to make sure first image isn't corrupt
+    assert len(files) == 20
+    assert files[0].name.startswith("fly_fse")
+    tmp_csv = tmp_path / "test.csv"
+    # good batch
+    corrupt_images, images_checked = inference.predict_files(files, session, 1, tmp_csv)
+    # # bad batch
+    # corrupt_images, images_checked = inference.predict_files(
+    #     [files[1]], session, 1, tmp_csv
+    # )
+    assert corrupt_images
+    assert images_checked == 20
 
 
 @pytest.mark.datafiles(
@@ -207,7 +280,7 @@ def test_csv_header_multi(tmp_path):
     inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
-        list_of_column_names = [header for header in reader.fieldnames]
+        list_of_column_names = list(reader.fieldnames)
     assert "path" in list_of_column_names
     assert "directory" in list_of_column_names
 
@@ -219,7 +292,7 @@ def test_csv_header_single(tmp_path):
     inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
-        list_of_column_names = [header for header in reader.fieldnames]
+        list_of_column_names = list(reader.fieldnames)
     assert "path" in list_of_column_names
     assert "directory" in list_of_column_names
     assert "confidence" in list_of_column_names
