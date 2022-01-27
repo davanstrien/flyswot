@@ -158,7 +158,7 @@ def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
             )
             if bad_batch:
                 bad_batch_files.append(batch)
-            if i == 0 and not bad_batch:  # pragma: no cover
+            if i == 0 and not bad_batch:
                 create_csv_header(batch_predictions, csv_fname)
             if not bad_batch:
                 write_batch_preds_to_csv(batch_predictions, csv_fname)
