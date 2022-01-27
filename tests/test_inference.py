@@ -109,7 +109,7 @@ FIXTURE_DIR = os.path.join(
 
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
-def test__try_predict_batch(datafiles, tmp_path) -> None:
+def test_try_predict_batch(datafiles, tmp_path) -> None:
     session = inference.OnnxInferenceSession(
         Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
