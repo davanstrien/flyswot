@@ -99,7 +99,7 @@ def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
     assert hasattr(batch.batch_labels, "__next__")
     for labels in batch.batch_labels:
         for label in labels:
-            assert label == label
+            assert True
 
 
 FIXTURE_DIR = os.path.join(
@@ -119,8 +119,8 @@ def test_try_predict_batch(datafiles, tmp_path) -> None:
     assert files
     assert bad_batch is False
     assert batch
-    assert isinstance(batch, inference.MultiPredictionBatch) or isinstance(
-        batch, inference.PredictionBatch
+    assert isinstance(
+        batch, (inference.MultiPredictionBatch, inference.PredictionBatch)
     )
 
 
@@ -236,7 +236,7 @@ def test_csv_header_multi(tmp_path):
     inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
-        list_of_column_names = [header for header in reader.fieldnames]
+        list_of_column_names = list(reader.fieldnames)
     assert "path" in list_of_column_names
     assert "directory" in list_of_column_names
 
@@ -248,7 +248,7 @@ def test_csv_header_single(tmp_path):
     inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
-        list_of_column_names = [header for header in reader.fieldnames]
+        list_of_column_names = list(reader.fieldnames)
     assert "path" in list_of_column_names
     assert "directory" in list_of_column_names
     assert "confidence" in list_of_column_names
