@@ -41,7 +41,7 @@ Disclaimer
 `flyswot` is a work in progress and is currently only intended to be used for testing by `HMD <https://www.bl.uk/projects/heritage-made-digital>`_
 
 
-This code and documentation is a work in progress.
+This code and documentation is a work in progress and will be improved further. 
 
 Features
 --------
