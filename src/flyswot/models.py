@@ -68,7 +68,7 @@ def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
             model_dir.mkdir(parents=True)
         except PermissionError as e:  # pragma: no cover
             typer.echo(f"{model_dir} is not writeable: {e}")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from None
     typer.echo(f"Models stored in {model_dir}")
     return model_dir
 
