@@ -31,7 +31,7 @@ typing_extensions = ">=3.10,<5.0"
 huggingface-hub = ">=0.2.1,<0.5.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.0.0"
+pytest = "^7.0.1"
 coverage = {extras = ["toml"], version = "^6.3"}
 safety = "^1.10.3"
 mypy = "^0.931"
