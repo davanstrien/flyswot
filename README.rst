@@ -31,6 +31,9 @@ flyswot
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
    :alt: Black
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6123039.svg
+   :target: https://doi.org/10.5281/zenodo.6123039
+   :alt: DOI
 
 .. image:: https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII
 
