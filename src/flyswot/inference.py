@@ -212,9 +212,9 @@ def predict_directory(
     Creates a CSV report saved to `csv_save_dir`
     """
     start_time = time.perf_counter()
-    model_dir = models.ensure_model_dir()
-    model = models.ensure_model(model_dir)
-    onnxinference = OnnxInferenceSession(model.model, model.vocab)
+    # model_dir = models.ensure_model_dir()
+    # model = models.ensure_model(model_dir)
+    # onnxinference = OnnxInferenceSession(model.model, model.vocab)
     huggingfaceinference = HuggingFaceInferenceSession()
 
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
@@ -564,7 +564,7 @@ class HuggingFaceInferenceSession(InferenceSession):
     "Huggingface inference session"
 
     def __init__(self):
-
+        """Create Hugging Face Inference Session"""
         self.model = AutoModelForImageClassification.from_pretrained(
             "davanstrien/deit_flyswot"
         )
@@ -578,23 +578,23 @@ class HuggingFaceInferenceSession(InferenceSession):
         )
 
     def predict_image(self, image: Path):
+        """Predict single Image."""
         prediction = self.session(image, top_k=10)
         return prediction
 
     def predict_batch(self, batch: Iterable[Path], bs: int):
+        """Predict batch of images"""
         str_batch = [str(file) for file in batch]
         predictions: List[List[Dict[Any]]] = self.session(
             str_batch, batch_size=bs, top_k=20
         )
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
-        assert len(str_batch) == len(prediction_dicts)
         all_pred = []
         for file, pred in zip(str_batch, prediction_dicts):
             item_pred = []
             flysheet_other_pred = self._create_flysheet_other_predictions(pred)
             item_pred.append(flysheet_other_pred)
             item_pred.append(pred)
-            # print(flysheet_other_pred)
             prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
             all_pred.append(prediction)
         return MultiPredictionBatch(all_pred)
