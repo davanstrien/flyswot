@@ -363,3 +363,9 @@ def test_onnx_session_attributes():
     assert inspect.ismethod(session.predict_batch)
     assert inspect.ismethod(session._postprocess)
     assert inspect.ismethod(session._load_image)
+
+
+# def test_huggingface_seccion_attributes():
+#     session = inference.HuggingFaceInferenceSession("davanstrien/deit_flyswot")
+#     assert session
+#     assert isinstance(session, inference.HuggingFaceInferenceSession)
