@@ -65,7 +65,6 @@ Requirements
 
 * Python 3.7 or greater
 
-TODO update this section with requirements and uses.
 
 Installation
 ------------
