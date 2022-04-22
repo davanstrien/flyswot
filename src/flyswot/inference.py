@@ -364,7 +364,7 @@ def create_csv_fname(csv_directory: Path) -> Path:
     """Creates a csv filename"""
     date_now = datetime.now()
     date_now = date_now.strftime("%Y_%m_%d_%H_%M")
-    fname = Path(date_now + ".csv")
+    fname = Path(f"{date_now}.csv")
     return Path(csv_directory / fname)
 
 
@@ -507,7 +507,7 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
         if len(self.vocab) < 2:
             pred = self._postprocess(raw_result)
             arg_max = int(np.array(pred).argmax())
-            predicted_label = self.vocab_mappings[0][int(arg_max)]
+            predicted_label = self.vocab_mappings[0][arg_max]
             confidence = float(np.array(pred).max())
             return ImagePredictionItem(image, predicted_label, confidence)
         else:
@@ -579,8 +579,7 @@ class HuggingFaceInferenceSession(InferenceSession):
 
     def predict_image(self, image: Path):
         """Predict single Image."""
-        prediction = self.session(image, top_k=10)
-        return prediction
+        return self.session(image, top_k=10)
 
     def predict_batch(self, batch: Iterable[Path], bs: int):
         """Predict batch of images"""
@@ -591,10 +590,8 @@ class HuggingFaceInferenceSession(InferenceSession):
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
         all_pred = []
         for file, pred in zip(str_batch, prediction_dicts):
-            item_pred = []
             flysheet_other_pred = self._create_flysheet_other_predictions(pred)
-            item_pred.append(flysheet_other_pred)
-            item_pred.append(pred)
+            item_pred = [flysheet_other_pred, pred]
             prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
             all_pred.append(prediction)
         return MultiPredictionBatch(all_pred)
