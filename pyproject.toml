@@ -9,7 +9,6 @@ homepage = "https://github.com/davanstrien/flyswot"
 repository = "https://github.com/davanstrien/flyswot"
 documentation = "https://flyswot.readthedocs.io"
 classifiers = [
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
 ]
@@ -19,7 +18,7 @@ classifiers = [
 Changelog = "https://github.com/davanstrien/flyswot/releases"
 
 [tool.poetry.dependencies]
-python = "^3.7.0"
+python = "^3.8.0"
 rich = ">=10.1,<13.0"
 typer = ">=0.3.2,<0.5.0"
 validators = "^0.18.2"
