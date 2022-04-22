@@ -566,10 +566,10 @@ class HuggingFaceInferenceSession(InferenceSession):
     def __init__(self):
         """Create Hugging Face Inference Session"""
         self.model = AutoModelForImageClassification.from_pretrained(
-            "davanstrien/deit_flyswot"
+            "flyswot/convnext-tiny-224_flyswot"
         )
         self.feature_extractor = AutoFeatureExtractor.from_pretrained(
-            "davanstrien/deit_flyswot"
+            "flyswot/convnext-tiny-224_flyswot"
         )
         self.session = pipeline(
             "image-classification",
