@@ -98,9 +98,6 @@ def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
     assert batch.batch_labels
     assert len(list(batch.batch_labels)) == 2
     assert hasattr(batch.batch_labels, "__next__")
-    for labels in batch.batch_labels:
-        for label in labels:
-            assert True
 
 
 FIXTURE_DIR = os.path.join(
@@ -363,3 +360,9 @@ def test_onnx_session_attributes():
     assert inspect.ismethod(session.predict_batch)
     assert inspect.ismethod(session._postprocess)
     assert inspect.ismethod(session._load_image)
+
+
+# def test_huggingface_seccion_attributes():
+#     session = inference.HuggingFaceInferenceSession("davanstrien/deit_flyswot")
+#     assert session
+#     assert isinstance(session, inference.HuggingFaceInferenceSession)

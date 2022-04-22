@@ -14,6 +14,7 @@ from datetime import datetime
 from datetime import timedelta
 from functools import singledispatch
 from pathlib import Path
+from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -33,6 +34,10 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from toolz import itertoolz
+from toolz.dicttoolz import merge
+from transformers import AutoFeatureExtractor
+from transformers import AutoModelForImageClassification
+from transformers import pipeline
 
 from flyswot import core
 from flyswot import models
@@ -142,7 +147,7 @@ def try_predict_batch(batch, inference_session, bs):
         batch_predictions = inference_session.predict_batch(batch, bs)
         return batch_predictions, bad_batch
     except PIL.UnidentifiedImageError:
-        typer.echo("Corrupt imagess found in batch")
+        typer.echo("Corrupt images found in batch")
         bad_batch = True
         return batch, bad_batch
 
@@ -207,15 +212,17 @@ def predict_directory(
     Creates a CSV report saved to `csv_save_dir`
     """
     start_time = time.perf_counter()
-    model_dir = models.ensure_model_dir()
-    model = models.ensure_model(model_dir)
-    onnxinference = OnnxInferenceSession(model.model, model.vocab)
+    # model_dir = models.ensure_model_dir()
+    # model = models.ensure_model(model_dir)
+    # onnxinference = OnnxInferenceSession(model.model, model.vocab)
+    huggingfaceinference = HuggingFaceInferenceSession()
+
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
     corrupt_images, images_checked = predict_files(
-        files, inference_session=onnxinference, bs=bs, csv_fname=csv_fname
+        files, inference_session=huggingfaceinference, bs=bs, csv_fname=csv_fname
     )
     if corrupt_images:
         print(corrupt_images)
@@ -357,7 +364,7 @@ def create_csv_fname(csv_directory: Path) -> Path:
     """Creates a csv filename"""
     date_now = datetime.now()
     date_now = date_now.strftime("%Y_%m_%d_%H_%M")
-    fname = Path(date_now + ".csv")
+    fname = Path(f"{date_now}.csv")
     return Path(csv_directory / fname)
 
 
@@ -431,7 +438,7 @@ class InferenceSession(ABC):
     """Abstract class for inference sessions"""
 
     @abstractmethod
-    def __init__(self, model: Path, vocab: List):  # pragma: no cover
+    def __init__(self, model: Path, vocab: Optional[List] = None):  # pragma: no cover
         """Inference Sessions should init from a model file and vocab"""
         self.model = model
         self.vocab = vocab
@@ -442,9 +449,7 @@ class InferenceSession(ABC):
         pass
 
     @abstractmethod
-    def predict_batch(
-        self, model: Path, batch: Iterable[Path], bs: int
-    ):  # pragma: no cover
+    def predict_batch(self, batch: Iterable[Path], bs: int):  # pragma: no cover
         """Predict a batch"""
         pass
 
@@ -502,7 +507,7 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
         if len(self.vocab) < 2:
             pred = self._postprocess(raw_result)
             arg_max = int(np.array(pred).argmax())
-            predicted_label = self.vocab_mappings[0][int(arg_max)]
+            predicted_label = self.vocab_mappings[0][arg_max]
             confidence = float(np.array(pred).max())
             return ImagePredictionItem(image, predicted_label, confidence)
         else:
@@ -553,6 +558,67 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
             return PredictionBatch(prediction_items)
         else:
             return MultiPredictionBatch(prediction_items)
+
+
+class HuggingFaceInferenceSession(InferenceSession):
+    "Huggingface inference session"
+
+    def __init__(self):
+        """Create Hugging Face Inference Session"""
+        self.model = AutoModelForImageClassification.from_pretrained(
+            "flyswot/convnext-tiny-224_flyswot"
+        )
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+            "flyswot/convnext-tiny-224_flyswot"
+        )
+        self.session = pipeline(
+            "image-classification",
+            model=self.model,
+            feature_extractor=self.feature_extractor,
+        )
+
+    def predict_image(self, image: Path):
+        """Predict single Image."""
+        return self.session(image, top_k=10)
+
+    def predict_batch(self, batch: Iterable[Path], bs: int):
+        """Predict batch of images"""
+        str_batch = [str(file) for file in batch]
+        predictions: List[List[Dict[Any]]] = self.session(
+            str_batch, batch_size=bs, top_k=20
+        )
+        prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
+        all_pred = []
+        for file, pred in zip(str_batch, prediction_dicts):
+            flysheet_other_pred = self._create_flysheet_other_predictions(pred)
+            item_pred = [flysheet_other_pred, pred]
+            prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
+            all_pred.append(prediction)
+        return MultiPredictionBatch(all_pred)
+
+    def _process_prediction_dict(
+        self, prediction_item: List[Dict[str, float]]
+    ) -> Dict[float, str]:
+        return merge(
+            [
+                {prediction["score"]: prediction["label"]}
+                for prediction in prediction_item
+            ]
+        )
+
+    def _create_flysheet_other_predictions(
+        self, prediction_dictionary: Dict[float, str]
+    ) -> Dict[float, str]:
+        """Generates a flysheet other prediction dictionary"""
+        flysheet_other_dict = {}
+        count = []
+        for key, value in prediction_dictionary.items():
+            if value.lower() == "flysheet":
+                flysheet_other_dict[key] = value
+            else:
+                count.append(key)
+        flysheet_other_dict[sum(count)] = "other"
+        return flysheet_other_dict
 
 
 if __name__ == "__main__":
