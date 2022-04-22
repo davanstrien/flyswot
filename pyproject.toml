@@ -9,7 +9,6 @@ homepage = "https://github.com/davanstrien/flyswot"
 repository = "https://github.com/davanstrien/flyswot"
 documentation = "https://flyswot.readthedocs.io"
 classifiers = [
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
 ]
