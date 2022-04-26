@@ -48,8 +48,8 @@ app = typer.Typer()
 
 
 @dataclass
-class ImagePredictionItem:
-    """Prediction for an image.
+class ImagePredictionArgmaxItem:
+    """Most confident predicted label for an item.
 
     Attributes:
         path: The Path to the image
@@ -94,7 +94,7 @@ class MultiLabelImagePredictionItem:
 class PredictionBatch:
     """Container for ImagePredictionItems"""
 
-    batch: List[ImagePredictionItem]
+    batch: List[ImagePredictionArgmaxItem]
 
     def __post_init__(self):
         """Returns a iterable of all predicted labels in batch"""
@@ -499,7 +499,7 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
 
     def predict_image(
         self, image: Path
-    ) -> Union[ImagePredictionItem, MultiLabelImagePredictionItem]:
+    ) -> Union[ImagePredictionArgmaxItem, MultiLabelImagePredictionItem]:
         """Predict a single image"""
         img = self._load_image(image)
         output_names = [o.name for o in self.session.get_outputs()]
@@ -509,7 +509,7 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
             arg_max = int(np.array(pred).argmax())
             predicted_label = self.vocab_mappings[0][arg_max]
             confidence = float(np.array(pred).max())
-            return ImagePredictionItem(image, predicted_label, confidence)
+            return ImagePredictionArgmaxItem(image, predicted_label, confidence)
         else:
             prediction_dicts = []
             for vocab_map, pred in zip(self.vocab_mappings, raw_result):

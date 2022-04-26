@@ -28,14 +28,14 @@ text_strategy = st.text(string.ascii_letters, min_size=1)
 def test__image_prediction_item_raises_error_when_too_few_params():
     """It raises Typerror when passed too few items"""
     with pytest.raises(TypeError):
-        item = inference.ImagePredictionItem("A")
+        item = inference.ImagePredictionArgmaxItem("A")
 
 
 def test_image_prediction_items_match(tmp_path):
     im_path = tmp_path / "image.tif"
     label = "flysheet"
     confidence = 0.9
-    item = inference.ImagePredictionItem(im_path, label, confidence)
+    item = inference.ImagePredictionArgmaxItem(im_path, label, confidence)
     assert item.path == im_path
     assert item.predicted_label == "flysheet"
     assert item.confidence == 0.9
@@ -53,7 +53,7 @@ def imfile(tmpdir_factory):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_image_prediction_item(confidence, label, imfile: Any):
-    item = inference.ImagePredictionItem(imfile, label, confidence)
+    item = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
     assert item.path == imfile
     assert item.predicted_label == label
     assert item.confidence == confidence
@@ -72,8 +72,8 @@ def test_multi_image_prediction_item(confidence, label, imfile: Any):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_prediction_batch(confidence: float, label: str, imfile: Any):
-    item = inference.ImagePredictionItem(imfile, label, confidence)
-    item2 = inference.ImagePredictionItem(imfile, label, confidence)
+    item = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
+    item2 = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
     batch = inference.PredictionBatch([item, item2])
     assert batch.batch_labels
     assert len(list(batch.batch_labels)) == 2
@@ -283,7 +283,7 @@ def test_csv_header_multi(tmp_path):
 
 
 def test_csv_header_single(tmp_path):
-    predicton = inference.ImagePredictionItem(Path("."), "label", 0.6)
+    predicton = inference.ImagePredictionArgmaxItem(Path("."), "label", 0.6)
     batch = inference.PredictionBatch([predicton])
     csv_fname = tmp_path / "test.csv"
     inference.create_csv_header(batch, csv_fname)
@@ -301,7 +301,7 @@ def test_csv_batch():
 
 
 def test_csv_batch_single(tmp_path):
-    predicton = inference.ImagePredictionItem(Path("."), "label", 0.6)
+    predicton = inference.ImagePredictionArgmaxItem(Path("."), "label", 0.6)
     batch = inference.PredictionBatch([predicton])
     csv_fname = tmp_path / "test.csv"
     inference.write_batch_preds_to_csv(batch, csv_fname)
