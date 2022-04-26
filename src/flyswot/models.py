@@ -98,10 +98,9 @@ def get_model(
     return Path(model)
 
 
-def ensure_model(model_dir: Path) -> LocalModel:  # pragma: no cover
+def ensure_model(model_dir: Path) -> LocalModel:    # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
-    model = get_model(model_dir=model_dir)
-    if model:
+    if model := get_model(model_dir=model_dir):
         return LocalModel(model)
     typer.echo("Not able to find a model")
     raise typer.Exit()
@@ -130,8 +129,7 @@ def vocab(model: str = typer.Argument("latest"), show: bool = typer.Option(True)
     if model != "latest":
         raise NotImplementedError
     model_dir = ensure_model_dir()
-    model_path = get_model(model_dir=model_dir)
-    if model_path:  # pragma: no cover
+    if model_path := get_model(model_dir=model_dir):
         local_model = LocalModel(model_path)
         if local_model.vocab:
             vocab = load_vocab(local_model.vocab)
