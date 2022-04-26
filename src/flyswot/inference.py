@@ -197,16 +197,17 @@ def predict_directory(
         resolve_path=True,
         help="Directory used to store the csv report",
     ),
+    model_id: str = typer.Option(
+        "flyswot/convnext-tiny-224_flyswot",
+        help="Which model flyswot should use for making predictions",
+    ),
+    model_path: str = None,
     pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
     image_format: str = typer.Option(
         ".tif",
         help="Image format for flyswot to use for predictions, defaults to `*.tif`",
     ),
-    model_name: str = typer.Option(
-        "latest", help="Which model flyswot should use for making predictions"
-    ),
-    model_path: str = None,
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -218,9 +219,7 @@ def predict_directory(
     # model_dir = models.ensure_model_dir()
     # model = models.ensure_model(model_dir)
     # onnxinference = OnnxInferenceSession(model.model, model.vocab)
-    huggingfaceinference = HuggingFaceInferenceSession(
-        model="flyswot/convnext-tiny-224_flyswot"
-    )
+    huggingfaceinference = HuggingFaceInferenceSession(model=model_id)
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
