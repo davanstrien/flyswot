@@ -98,28 +98,6 @@ def get_model(
     return Path(model)
 
 
-# def _get_model_parts(model_dir: Path) -> Optional[LocalModel]:
-#     """Returns model path, vocab and metadata for a model"""
-#     model_files = Path(model_dir).iterdir()
-#     vocab = None
-#     modelcard = None
-#     model = None
-#     for file in model_files:
-#         if fnmatch.fnmatch(file.name, "vocab.txt"):
-#             vocab = file
-#         if fnmatch.fnmatch(file.name, "README.md"):
-#             modelcard = file
-#         if fnmatch.fnmatch(file.name, "*.onnx") or fnmatch.fnmatch(file.name, "*.pkl"):
-#             model = file
-#     if vocab and modelcard and model is not None:
-#         return LocalModel(vocab, modelcard, model)
-
-
-# def load_model(model_dir: Path):  # pragma: no cover
-#     """returns a local model"""
-#     return _get_model_parts(model_dir)
-
-
 def ensure_model(model_dir: Path) -> LocalModel:  # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
     model = get_model(model_dir=model_dir)
