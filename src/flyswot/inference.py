@@ -603,20 +603,6 @@ class HuggingFaceInferenceSession(InferenceSession):
             ]
         )
 
-    # def _create_flysheet_other_predictions(
-    #     self, prediction_dictionary: Dict[float, str]
-    # ) -> Dict[float, str]:
-    #     """Generates a flysheet other prediction dictionary"""
-    #     flysheet_other_dict = {}
-    #     count = []
-    #     for key, value in prediction_dictionary.items():
-    #         if value.lower() == "flysheet":
-    #             flysheet_other_dict[key] = value
-    #         else:
-    #             count.append(key)
-    #     flysheet_other_dict[sum(count)] = "other"
-    #     return flysheet_other_dict
-
 
 if __name__ == "__main__":
     app()  # pragma: no cover
