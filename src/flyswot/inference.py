@@ -19,6 +19,7 @@ from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -151,7 +152,9 @@ def try_predict_batch(batch, inference_session, bs):
         return batch, bad_batch
 
 
-def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
+def predict_files(
+    files: List[Path], inference_session, bs, csv_fname
+) -> Tuple[set, int]:
     """Predict files"""
     with typer.progressbar(length=len(files)) as progress:
         images_checked = 0
@@ -177,7 +180,7 @@ def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
                         write_batch_preds_to_csv(batch_predictions, csv_fname)
                     except PIL.UnidentifiedImageError:
                         corrupt_images.add(file)
-            return corrupt_images, images_checked
+        return corrupt_images, images_checked
 
 
 @app.command(name="directory")
