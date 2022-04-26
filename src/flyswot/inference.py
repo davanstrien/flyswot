@@ -199,13 +199,13 @@ def predict_directory(
     ),
     model_id: str = typer.Option(
         "flyswot/convnext-tiny-224_flyswot",
-        help="Which model flyswot should use for making predictions",
+        help="The model flyswot should use for making predictions",
     ),
     model_path: str = None,
     pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
-    image_format: str = typer.Option(
-        ".tif",
+    image_formats: List[str] = typer.Option(
+        [".tif"],
         help="Image format for flyswot to use for predictions, defaults to `*.tif`",
     ),
 ):
@@ -220,7 +220,12 @@ def predict_directory(
     # model = models.ensure_model(model_dir)
     # onnxinference = OnnxInferenceSession(model.model, model.vocab)
     huggingfaceinference = HuggingFaceInferenceSession(model=model_id)
-    files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
+    files = sorted(
+        itertoolz.concat(
+            core.get_image_files_from_pattern(directory, pattern, image_format)
+            for image_format in image_formats
+        )
+    )
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
@@ -231,7 +236,7 @@ def predict_directory(
         print(corrupt_images)
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
-        str(delta), pattern, directory, csv_fname, image_format, images_checked
+        str(delta), pattern, directory, csv_fname, image_formats, images_checked
     )
 
 

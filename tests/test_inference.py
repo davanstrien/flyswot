@@ -190,7 +190,7 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         tmp_path,
         pattern="fse",
         bs=1,
-        image_format=".jpg",
+        image_formats=[".jpg"],
         model_id="flyswot/convnext-tiny-224_flyswot",
     )
     csv_file = list(tmp_path.rglob("*.csv"))
