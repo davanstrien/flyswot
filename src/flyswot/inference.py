@@ -563,14 +563,10 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
 class HuggingFaceInferenceSession(InferenceSession):
     "Huggingface inference session"
 
-    def __init__(self):
+    def __init__(self, model: str):
         """Create Hugging Face Inference Session"""
-        self.model = AutoModelForImageClassification.from_pretrained(
-            "flyswot/convnext-tiny-224_flyswot"
-        )
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(
-            "flyswot/convnext-tiny-224_flyswot"
-        )
+        self.model = AutoModelForImageClassification.from_pretrained(model)
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(model)
         self.session = pipeline(
             "image-classification",
             model=self.model,
