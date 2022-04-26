@@ -147,7 +147,6 @@ def try_predict_batch(batch, inference_session, bs):
         batch_predictions = inference_session.predict_batch(batch, bs)
         return batch_predictions, bad_batch
     except PIL.UnidentifiedImageError:
-        typer.echo("Corrupt images found in batch")
         bad_batch = True
         return batch, bad_batch
 
@@ -170,14 +169,15 @@ def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
             progress.update(len(batch))
             images_checked += len(batch)
         corrupt_images = set()
-        for batch in bad_batch_files:
-            for file in batch:
-                try:
-                    batch_predictions = inference_session.predict_batch(files, bs)
-                    write_batch_preds_to_csv(batch_predictions)
-                except PIL.UnidentifiedImageError:
-                    corrupt_images.add(file)
-        return corrupt_images, images_checked
+        if bad_batch_files:
+            for batch in bad_batch_files:
+                for file in batch:
+                    try:
+                        batch_predictions = inference_session.predict_batch([file], bs)
+                        write_batch_preds_to_csv(batch_predictions, csv_fname)
+                    except PIL.UnidentifiedImageError:
+                        corrupt_images.add(file)
+            return corrupt_images, images_checked
 
 
 @app.command(name="directory")
@@ -215,8 +215,9 @@ def predict_directory(
     # model_dir = models.ensure_model_dir()
     # model = models.ensure_model(model_dir)
     # onnxinference = OnnxInferenceSession(model.model, model.vocab)
-    huggingfaceinference = HuggingFaceInferenceSession()
-
+    huggingfaceinference = HuggingFaceInferenceSession(
+        model="flyswot/convnext-tiny-224_flyswot"
+    )
     files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
@@ -586,8 +587,8 @@ class HuggingFaceInferenceSession(InferenceSession):
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
         all_pred = []
         for file, pred in zip(str_batch, prediction_dicts):
-            flysheet_other_pred = self._create_flysheet_other_predictions(pred)
-            item_pred = [flysheet_other_pred, pred]
+            # flysheet_other_pred = self._create_flysheet_other_predictions(pred)
+            item_pred = [pred]
             prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
             all_pred.append(prediction)
         return MultiPredictionBatch(all_pred)
@@ -602,19 +603,19 @@ class HuggingFaceInferenceSession(InferenceSession):
             ]
         )
 
-    def _create_flysheet_other_predictions(
-        self, prediction_dictionary: Dict[float, str]
-    ) -> Dict[float, str]:
-        """Generates a flysheet other prediction dictionary"""
-        flysheet_other_dict = {}
-        count = []
-        for key, value in prediction_dictionary.items():
-            if value.lower() == "flysheet":
-                flysheet_other_dict[key] = value
-            else:
-                count.append(key)
-        flysheet_other_dict[sum(count)] = "other"
-        return flysheet_other_dict
+    # def _create_flysheet_other_predictions(
+    #     self, prediction_dictionary: Dict[float, str]
+    # ) -> Dict[float, str]:
+    #     """Generates a flysheet other prediction dictionary"""
+    #     flysheet_other_dict = {}
+    #     count = []
+    #     for key, value in prediction_dictionary.items():
+    #         if value.lower() == "flysheet":
+    #             flysheet_other_dict[key] = value
+    #         else:
+    #             count.append(key)
+    #     flysheet_other_dict[sum(count)] = "other"
+    #     return flysheet_other_dict
 
 
 if __name__ == "__main__":
