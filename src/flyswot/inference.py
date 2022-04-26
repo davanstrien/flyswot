@@ -19,6 +19,7 @@ from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -147,12 +148,13 @@ def try_predict_batch(batch, inference_session, bs):
         batch_predictions = inference_session.predict_batch(batch, bs)
         return batch_predictions, bad_batch
     except PIL.UnidentifiedImageError:
-        typer.echo("Corrupt images found in batch")
         bad_batch = True
         return batch, bad_batch
 
 
-def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
+def predict_files(
+    files: List[Path], inference_session, bs, csv_fname
+) -> Tuple[set, int]:
     """Predict files"""
     with typer.progressbar(length=len(files)) as progress:
         images_checked = 0
@@ -170,13 +172,14 @@ def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
             progress.update(len(batch))
             images_checked += len(batch)
         corrupt_images = set()
-        for batch in bad_batch_files:
-            for file in batch:
-                try:
-                    batch_predictions = inference_session.predict_batch(files, bs)
-                    write_batch_preds_to_csv(batch_predictions)
-                except PIL.UnidentifiedImageError:
-                    corrupt_images.add(file)
+        if bad_batch_files:
+            for batch in bad_batch_files:
+                for file in batch:
+                    try:
+                        batch_predictions = inference_session.predict_batch([file], bs)
+                        write_batch_preds_to_csv(batch_predictions, csv_fname)
+                    except PIL.UnidentifiedImageError:
+                        corrupt_images.add(file)
         return corrupt_images, images_checked
 
 
@@ -194,16 +197,17 @@ def predict_directory(
         resolve_path=True,
         help="Directory used to store the csv report",
     ),
-    pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
-    bs: int = typer.Option(16, help="Batch Size"),
-    image_format: str = typer.Option(
-        ".tif",
-        help="Image format for flyswot to use for predictions, defaults to `*.tif`",
-    ),
-    model_name: str = typer.Option(
-        "latest", help="Which model flyswot should use for making predictions"
+    model_id: str = typer.Option(
+        "flyswot/convnext-tiny-224_flyswot",
+        help="The model flyswot should use for making predictions",
     ),
     model_path: str = None,
+    pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
+    bs: int = typer.Option(16, help="Batch Size"),
+    image_formats: List[str] = typer.Option(
+        [".tif"],
+        help="Image format for flyswot to use for predictions, defaults to `*.tif`",
+    ),
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -215,9 +219,13 @@ def predict_directory(
     # model_dir = models.ensure_model_dir()
     # model = models.ensure_model(model_dir)
     # onnxinference = OnnxInferenceSession(model.model, model.vocab)
-    huggingfaceinference = HuggingFaceInferenceSession()
-
-    files = sorted(core.get_image_files_from_pattern(directory, pattern, image_format))
+    huggingfaceinference = HuggingFaceInferenceSession(model=model_id)
+    files = sorted(
+        itertoolz.concat(
+            core.get_image_files_from_pattern(directory, pattern, image_format)
+            for image_format in image_formats
+        )
+    )
     check_files(files, pattern, directory)
     typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
     csv_fname = create_csv_fname(csv_save_dir)
@@ -228,7 +236,7 @@ def predict_directory(
         print(corrupt_images)
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
-        str(delta), pattern, directory, csv_fname, image_format, images_checked
+        str(delta), pattern, directory, csv_fname, image_formats, images_checked
     )
 
 
@@ -563,14 +571,10 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
 class HuggingFaceInferenceSession(InferenceSession):
     "Huggingface inference session"
 
-    def __init__(self):
+    def __init__(self, model: str):
         """Create Hugging Face Inference Session"""
-        self.model = AutoModelForImageClassification.from_pretrained(
-            "flyswot/convnext-tiny-224_flyswot"
-        )
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(
-            "flyswot/convnext-tiny-224_flyswot"
-        )
+        self.model = AutoModelForImageClassification.from_pretrained(model)
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(model)
         self.session = pipeline(
             "image-classification",
             model=self.model,
@@ -590,8 +594,8 @@ class HuggingFaceInferenceSession(InferenceSession):
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
         all_pred = []
         for file, pred in zip(str_batch, prediction_dicts):
-            flysheet_other_pred = self._create_flysheet_other_predictions(pred)
-            item_pred = [flysheet_other_pred, pred]
+            # flysheet_other_pred = self._create_flysheet_other_predictions(pred)
+            item_pred = [pred]
             prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
             all_pred.append(prediction)
         return MultiPredictionBatch(all_pred)
@@ -605,20 +609,6 @@ class HuggingFaceInferenceSession(InferenceSession):
                 for prediction in prediction_item
             ]
         )
-
-    def _create_flysheet_other_predictions(
-        self, prediction_dictionary: Dict[float, str]
-    ) -> Dict[float, str]:
-        """Generates a flysheet other prediction dictionary"""
-        flysheet_other_dict = {}
-        count = []
-        for key, value in prediction_dictionary.items():
-            if value.lower() == "flysheet":
-                flysheet_other_dict[key] = value
-            else:
-                count.append(key)
-        flysheet_other_dict[sum(count)] = "other"
-        return flysheet_other_dict
 
 
 if __name__ == "__main__":
