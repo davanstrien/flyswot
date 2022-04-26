@@ -168,8 +168,8 @@ def predict_files(files: List[Path], inference_session, bs, csv_fname) -> set:
                 write_batch_preds_to_csv(batch_predictions, csv_fname)
             progress.update(len(batch))
             images_checked += len(batch)
-        corrupt_images = set()
         if bad_batch_files:
+            corrupt_images = set()
             for batch in bad_batch_files:
                 for file in batch:
                     try:
