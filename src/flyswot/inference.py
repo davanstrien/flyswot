@@ -216,9 +216,6 @@ def predict_directory(
     Creates a CSV report saved to `csv_save_dir`
     """
     start_time = time.perf_counter()
-    # model_dir = models.ensure_model_dir()
-    # model = models.ensure_model(model_dir)
-    # onnxinference = OnnxInferenceSession(model.model, model.vocab)
     huggingfaceinference = HuggingFaceInferenceSession(model=model_id)
     files = sorted(
         itertoolz.concat(
