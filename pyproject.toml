@@ -34,7 +34,7 @@ transformers = {extras = ["torch"], version = "^4.16.2"}
 pytest = "^7.1.2"
 coverage = {extras = ["toml"], version = "^6.3"}
 safety = "^1.10.3"
-mypy = "^0.942"
+mypy = "^0.950"
 xdoctest = {extras = ["colors"], version = "^1.0.0"}
 sphinx = "^4.5.0"
 sphinx-autobuild = "^2021.3.14"
