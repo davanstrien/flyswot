@@ -466,31 +466,6 @@ def softmax(x):
     return e_x / e_x.sum(axis=0)
 
 
-# class FastaiInferenceModel(InferenceSession):
-#     def __init__(self, model):
-#         self.model = model
-#         self.learn = load_learner(model)
-
-#     def predict_image(self, image: Path) -> Any:
-#         return self.learn.predict(image)
-
-#     def predict_batch(self, batch: Iterable[Path], bs: int) -> PredictionBatch:
-#         test_dl = self.learn.dls.test_dl(batch, bs=bs)
-#         vocab = dict(enumerate(self.learn.dls.vocab))
-#         with self.learn.no_bar():
-#             fastai_preds: Any = self.learn.get_preds(dl=test_dl, with_decoded=True)
-#             prediction_tensors: Iterable[Any] = fastai_preds[0]
-#             prediction_items = []
-#             for file, pred in zip(batch, prediction_tensors):
-#                 arg_max = int(np.array(pred).argmax())
-#                 predicted_label = vocab[int(arg_max)]
-#                 confidence = float(np.array(pred).max())
-#                 prediction_items.append(
-#                     ImagePredictionItem(file, predicted_label, confidence)
-#                 )
-#         return PredictionBatch(prediction_items)
-
-
 class OnnxInferenceSession(InferenceSession):  # pragma: no cover
     """onnx inference session"""
 
