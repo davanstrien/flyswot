@@ -205,7 +205,7 @@ def predict_directory(
     pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
     image_formats: List[str] = typer.Option(
-        [".tif"],
+        default=[".tif"],
         help="Image format for flyswot to use for predictions, defaults to `*.tif`",
     ),
 ):
@@ -242,7 +242,7 @@ def print_inference_summary(
     pattern: str,
     directory: Path,
     csv_fname: Path,
-    image_format: str,
+    image_format: Union[List[str], str],
     matched_file_count: int,
     local_model: Optional[models.LocalModel] = None,
 ):
@@ -274,14 +274,21 @@ def print_inference_summary(
 
 
 def create_file_summary_markdown(
-    pattern: str, matched_file_count: int, directory: Path, image_format: str
+    pattern: str,
+    matched_file_count: int,
+    directory: Path,
+    image_formats: Union[List[str], str],
 ) -> Panel:
     """creates Markdown summary containing number of files checked by flyswot vs total images files under directory"""
-    total_image_file_count = core.count_files_with_ext(directory, image_format)
+    if isinstance(image_formats, list):
+        counts = [core.count_files_with_ext(directory, ext) for ext in image_formats]
+        return sum(counts)
+    total_image_file_count = core.count_files_with_ext(directory, image_formats)
+
     return Panel(
         Markdown(
             f"""
-    - flyswot searched for image files by matching the patern *{pattern}*
+    - flyswot searched for image files by matching the patern *{pattern}* with extension(s) {image_formats}
     - flyswot search inside: `{directory}`
     - In total the directory contained **{total_image_file_count}** images
     - There were **{matched_file_count}** files matching the {pattern}* pattern which flyswot checked
