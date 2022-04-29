@@ -366,3 +366,12 @@ def test_onnx_session_attributes():
 #     session = inference.HuggingFaceInferenceSession("davanstrien/deit_flyswot")
 #     assert session
 #     assert isinstance(session, inference.HuggingFaceInferenceSession)
+
+
+def test_file_summary_markdown():
+    output = inference.create_file_summary_markdown("fs", 3, Path("."), ".jpg")
+    assert output
+    assert isinstance(output, rich.panel.Panel)
+    output = inference.create_file_summary_markdown(
+        "fs", 3, Path("."), [".jpg", ".png"]
+    )
