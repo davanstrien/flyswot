@@ -10,7 +10,9 @@ from typing import Union
 import typer
 import validators  # type: ignore
 from huggingface_hub import snapshot_download
+from huggingface_hub.hf_api import ModelInfo
 from rich.markdown import Markdown
+from rich.table import Table
 from toolz import itertoolz
 from toolz import recipes
 
@@ -146,6 +148,29 @@ def show_model_card(localmodel: LocalModel):
     with open(localmodel.modelcard, "r") as f:
         md = Markdown(f.read())
     console.print(md)
+
+
+def create_metrics_tables(model_info: ModelInfo) -> List[Table]:
+    """Creates a list of rich tables for metrics contained in `model_info`"""
+    model_indexes = [model_info for model_info in model_info.cardData["model-index"]]
+    metrics = []
+    for model in model_indexes:
+        for result in model["results"]:
+            for metric in result["metrics"]:
+                metrics.append(metric)
+    tables = []
+    for metric in metrics:
+        table = Table()
+        for name in metric.keys():
+            table.add_column(name.title())
+    metric_values = [item for item in metric.values()]
+    rounded_metric_values = [
+        round(item, ndigits=3) if isinstance(item, float) else item
+        for item in metric_values
+    ]
+    table.add_row(*list(map(str, rounded_metric_values)))
+    tables.append(table)
+    return tables
 
 
 if __name__ == "__main__":  # pragma: no cover
