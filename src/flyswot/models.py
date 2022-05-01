@@ -7,8 +7,10 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
+import requests
 import typer
 import validators  # type: ignore
+from huggingface_hub import hf_hub_url
 from huggingface_hub import snapshot_download
 from huggingface_hub.hf_api import ModelInfo
 from rich.markdown import Markdown
@@ -146,6 +148,20 @@ def show_model_card(localmodel: LocalModel):
     with open(localmodel.modelcard, "r") as f:
         md = Markdown(f.read())
     console.print(md)
+
+
+def hub_model_link(model_id: str):
+    """Creates rich link for model card"""
+    url = f"https://huggingface.co/{model_id}"
+    return f"View [link={url}]model card[/link]!"
+
+
+def create_markdown_model_card(model_id: str):
+    """Creates rich Markdown wrapper for hub readme"""
+    readme_url = hf_hub_url(model_id, filename="README.md")
+    r = requests.get(readme_url)
+    r.raise_for_status()
+    return Markdown(r.text)
 
 
 def create_metrics_tables(model_info: ModelInfo) -> List[Table]:
