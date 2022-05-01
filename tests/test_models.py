@@ -128,3 +128,9 @@ def test_create_metrics_tables():
     assert metric_table
     assert isinstance(metric_table, list)
     assert isinstance(metric_table[0], rich.table.Table)
+
+
+def test_create_model_card():
+    card = models.create_markdown_model_card("flyswot/convnext-tiny-224_flyswot")
+    assert card
+    assert isinstance(card, rich.markdown.Markdown)
