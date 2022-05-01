@@ -134,3 +134,9 @@ def test_create_model_card():
     card = models.create_markdown_model_card("flyswot/convnext-tiny-224_flyswot")
     assert card
     assert isinstance(card, rich.markdown.Markdown)
+
+
+def test_model_card_link():
+    link = models.hub_model_link("flyswot/convnext-tiny-224_flyswot")
+    assert link
+    assert isinstance(link, str)

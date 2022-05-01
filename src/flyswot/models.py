@@ -150,6 +150,12 @@ def show_model_card(localmodel: LocalModel):
     console.print(md)
 
 
+def hub_model_link(model_id: str):
+    """Creates rich link for model card"""
+    url = f"https://huggingface.co/{model_id}"
+    return f"View [link={url}]model card[/link]!"
+
+
 def create_markdown_model_card(model_id: str):
     """Creates rich Markdown wrapper for hub readme"""
     readme_url = hf_hub_url(model_id, filename="README.md")
