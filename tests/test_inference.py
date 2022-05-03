@@ -151,7 +151,7 @@ def test_predict_files(datafiles, tmp_path) -> None:
 @pytest.mark.datafiles(FIXTURE_DIR)
 def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -> None:
     image_dir = tmpdir_factory.mktemp("images")
-    session = inference.OnnxInferenceSession(
+    session = onnx_inference.OnnxInferenceSession(
         Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )

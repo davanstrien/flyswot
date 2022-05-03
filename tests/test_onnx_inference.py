@@ -44,7 +44,11 @@ def test_onnx_session_attributes():
 
 
 def test_softmax():
-    data = np.array([1, 4, 3])
+    scores = [3.0, 1.0, 0.2]
+    scores = np.array(scores)
+    data = np.array([[10, 20, 40], [1, 4, 3]])
     output = onnx_inference.softmax(data)
     assert output is not None
     assert isinstance(output, np.ndarray)
+    output = onnx_inference.softmax(scores)
+    assert np.isclose(output, np.array([0.8360188, 0.11314284, 0.05083836])).all()
