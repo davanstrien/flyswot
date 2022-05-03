@@ -37,10 +37,10 @@ from transformers import pipeline
 from flyswot import core
 from flyswot import models
 from flyswot.console import console
+from flyswot.inference import InferenceSession
 from flyswot.inference import MultiLabelImagePredictionItem
 from flyswot.inference import MultiPredictionBatch
 from flyswot.inference import PredictionBatch
-from flyswot.inferencesession import InferenceSession
 from flyswot.logo import flyswot_logo
 
 app = typer.Typer()

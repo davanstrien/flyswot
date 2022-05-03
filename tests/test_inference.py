@@ -18,6 +18,7 @@ from hypothesis.core import given
 from rich.table import Column
 from toolz import itertoolz
 
+from flyswot import cli_inference
 from flyswot import inference
 from flyswot import onnx_inference
 
@@ -29,14 +30,14 @@ text_strategy = st.text(string.ascii_letters, min_size=1)
 def test__image_prediction_item_raises_error_when_too_few_params():
     """It raises Typerror when passed too few items"""
     with pytest.raises(TypeError):
-        item = inferencesession.ImagePredictionArgmaxItem("A")
+        item = inference.ImagePredictionArgmaxItem("A")
 
 
 def test_image_prediction_items_match(tmp_path):
     im_path = tmp_path / "image.tif"
     label = "flysheet"
     confidence = 0.9
-    item = inferencesession.ImagePredictionArgmaxItem(im_path, label, confidence)
+    item = inference.ImagePredictionArgmaxItem(im_path, label, confidence)
     assert item.path == im_path
     assert item.predicted_label == "flysheet"
     assert item.confidence == 0.9
@@ -54,7 +55,7 @@ def imfile(tmpdir_factory):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_image_prediction_item(confidence, label, imfile: Any):
-    item = inferencesession.ImagePredictionArgmaxItem(imfile, label, confidence)
+    item = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
     assert item.path == imfile
     assert item.predicted_label == label
     assert item.confidence == confidence
@@ -63,7 +64,7 @@ def test_image_prediction_item(confidence, label, imfile: Any):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_multi_image_prediction_item(confidence, label, imfile: Any):
-    item = inferencesession.MultiLabelImagePredictionItem(
+    item = inference.MultiLabelImagePredictionItem(
         imfile, [{confidence: label}, {confidence: label}]
     )
     assert item.path == imfile
@@ -73,9 +74,9 @@ def test_multi_image_prediction_item(confidence, label, imfile: Any):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_prediction_batch(confidence: float, label: str, imfile: Any):
-    item = inferencesession.ImagePredictionArgmaxItem(imfile, label, confidence)
-    item2 = inferencesession.ImagePredictionArgmaxItem(imfile, label, confidence)
-    batch = inferencesession.PredictionBatch([item, item2])
+    item = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
+    item2 = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
+    batch = inference.PredictionBatch([item, item2])
     assert batch.batch_labels
     assert len(list(batch.batch_labels)) == 2
     assert hasattr(batch.batch_labels, "__next__")
@@ -86,16 +87,16 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
     label=text_strategy,
 )
 def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
-    item = inferencesession.MultiLabelImagePredictionItem(
+    item = inference.MultiLabelImagePredictionItem(
         imfile, [{confidence: label}, {confidence: label}]
     )
-    item2 = inferencesession.MultiLabelImagePredictionItem(
+    item2 = inference.MultiLabelImagePredictionItem(
         imfile, [{confidence: label}, {confidence: label}]
     )
-    batch = inferencesession.MultiPredictionBatch([item, item2])
+    batch = inference.MultiPredictionBatch([item, item2])
     assert batch.batch
     assert type(batch.batch) == list
-    assert type(batch.batch[0]) == inferencesession.MultiLabelImagePredictionItem
+    assert type(batch.batch[0]) == inference.MultiLabelImagePredictionItem
     assert batch.batch_labels
     assert len(list(batch.batch_labels)) == 2
     assert hasattr(batch.batch_labels, "__next__")
@@ -114,7 +115,7 @@ def test_try_predict_batch(datafiles, tmp_path) -> None:
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
     files = list(Path(datafiles).rglob("*.jpg"))
-    batch, bad_batch = inference.try_predict_batch(files, session, bs=1)
+    batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
     assert files
     assert bad_batch is False
     assert batch
@@ -130,7 +131,7 @@ def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
     files = list(Path(datafiles).rglob("*.jpg"))
-    batch, bad_batch = inference.try_predict_batch(files, session, bs=1)
+    batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
     assert files
     assert bad_batch is True
     assert isinstance(batch, list)
@@ -144,7 +145,9 @@ def test_predict_files(datafiles, tmp_path) -> None:
     )
     files = list(Path(datafiles).rglob("*.jpg"))
     tmp_csv = tmp_path / "test.csv"
-    corrupt_images, images_checked = inference.predict_files(files, session, 1, tmp_csv)
+    corrupt_images, images_checked = cli_inference.predict_files(
+        files, session, 1, tmp_csv
+    )
     assert not corrupt_images
     assert images_checked == 1
 
@@ -170,7 +173,9 @@ def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -
     assert files[0].name.startswith("fly_fse")
     tmp_csv = tmp_path / "test.csv"
     # good batch
-    corrupt_images, images_checked = inference.predict_files(files, session, 1, tmp_csv)
+    corrupt_images, images_checked = cli_inference.predict_files(
+        files, session, 1, tmp_csv
+    )
     # # bad batch
     # corrupt_images, images_checked = inference.predict_files(
     #     [files[1]], session, 1, tmp_csv
@@ -186,7 +191,7 @@ def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -
     )
 )
 def test_predict_directory(datafiles, tmp_path) -> None:
-    inference.predict_directory(
+    cli_inference.predict_directory(
         datafiles,
         tmp_path,
         pattern="fse",
@@ -224,14 +229,14 @@ def test_predict_directory(datafiles, tmp_path) -> None:
 
 def test_csv_header():
     with pytest.raises(NotImplementedError):
-        inference.create_csv_header("string", Path("."))
+        cli_inference.create_csv_header("string", Path("."))
 
 
 def test_csv_header_multi(tmp_path):
     prediction = inference.MultiLabelImagePredictionItem(Path("."), [{0.8: "label"}])
     batch = inference.MultiPredictionBatch([prediction, prediction])
     csv_fname = tmp_path / "test.csv"
-    inference.create_csv_header(batch, csv_fname)
+    cli_inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
         list_of_column_names = list(reader.fieldnames)
@@ -243,7 +248,7 @@ def test_csv_header_single(tmp_path):
     predicton = inference.ImagePredictionArgmaxItem(Path("."), "label", 0.6)
     batch = inference.PredictionBatch([predicton])
     csv_fname = tmp_path / "test.csv"
-    inference.create_csv_header(batch, csv_fname)
+    cli_inference.create_csv_header(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
         list_of_column_names = list(reader.fieldnames)
@@ -254,14 +259,14 @@ def test_csv_header_single(tmp_path):
 
 def test_csv_batch():
     with pytest.raises(NotImplementedError):
-        inference.write_batch_preds_to_csv("string", Path("."))
+        cli_inference.write_batch_preds_to_csv("string", Path("."))
 
 
 def test_csv_batch_single(tmp_path):
     predicton = inference.ImagePredictionArgmaxItem(Path("."), "label", 0.6)
     batch = inference.PredictionBatch([predicton])
     csv_fname = tmp_path / "test.csv"
-    inference.write_batch_preds_to_csv(batch, csv_fname)
+    cli_inference.write_batch_preds_to_csv(batch, csv_fname)
     with open(csv_fname, "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -273,7 +278,7 @@ def test_csv_batch_single(tmp_path):
     text_strategy,
 )
 def test_print_table(labels, title):
-    table = inference.print_table(labels, title, print=False)
+    table = cli_inference.print_table(labels, title, print=False)
     assert isinstance(table, rich.table.Table)
     assert table.title == title
     unique = itertoolz.count(itertoolz.unique(labels))
@@ -281,54 +286,33 @@ def test_print_table(labels, title):
     assert all(
         label in getattr(itertoolz.first(table.columns), "_cells") for label in labels
     )
-    table = inference.print_table(labels, title, print=True)
+    table = cli_inference.print_table(labels, title, print=True)
 
 
 @given(strategies.lists(text_strategy, min_size=1))
 def test_check_files(l):
-    inference.check_files(l, "fse", Path("."))
+    cli_inference.check_files(l, "fse", Path("."))
 
 
 def test_check_files_emopty():
     with pytest.raises(typer.Exit):
-        inference.check_files([], "fse", Path("."))
+        cli_inference.check_files([], "fse", Path("."))
 
 
 def test_make_layout():
-    layout = inference.make_layout()
+    layout = cli_inference.make_layout()
     assert layout
     assert isinstance(layout, rich.layout.Layout)
 
-
-# def test_predict_empty_directory(tmp_path) -> None:
-#     test_dir = tmp_path / "test"
-#     test_dir.mkdir()
-#     with pytest.raises(typer.Exit):
-#         inference.predict_directory(test_dir)
-
-
-def test_onnx_session_attributes():
-    session = inference.OnnxInferenceSession(
-        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
-        Path("tests/test_files/mult/20210629/model/vocab.txt"),
-    )
+    session = cli_inference.HuggingFaceInferenceSession("davanstrien/deit_flyswot")
     assert session
-    assert inspect.ismethod(session.predict_image)
-    assert inspect.ismethod(session.predict_batch)
-    assert inspect.ismethod(session._postprocess)
-    assert inspect.ismethod(session._load_image)
-
-
-# def test_huggingface_seccion_attributes():
-#     session = inference.HuggingFaceInferenceSession("davanstrien/deit_flyswot")
-#     assert session
-#     assert isinstance(session, inference.HuggingFaceInferenceSession)
+    assert isinstance(session, cli_inference.HuggingFaceInferenceSession)
 
 
 def test_file_summary_markdown():
-    output = inference.create_file_summary_markdown("fs", 3, Path("."), ".jpg")
+    output = cli_inference.create_file_summary_markdown("fs", 3, Path("."), ".jpg")
     assert output
     assert isinstance(output, rich.panel.Panel)
-    output = inference.create_file_summary_markdown(
+    output = cli_inference.create_file_summary_markdown(
         "fs", 3, Path("."), [".jpg", ".png"]
     )
