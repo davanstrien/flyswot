@@ -8,15 +8,15 @@ import numpy as np
 from PIL import Image
 
 from flyswot import models
-from flyswot.inferencesession import ImagePredictionArgmaxItem
-from flyswot.inferencesession import InferenceSession
-from flyswot.inferencesession import MultiLabelImagePredictionItem
-from flyswot.inferencesession import MultiPredictionBatch
-from flyswot.inferencesession import PredictionBatch
+from flyswot.inference import ImagePredictionArgmaxItem
+from flyswot.inference import InferenceSession
+from flyswot.inference import MultiLabelImagePredictionItem
+from flyswot.inference import MultiPredictionBatch
+from flyswot.inference import PredictionBatch
 
-try:
+try:  # pragma: no cover
     import onnxruntime as rt
-except ImportError:
+except ImportError:  # pragma: no cover
     print("onnxruntime not found")
 
 
