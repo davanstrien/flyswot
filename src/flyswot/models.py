@@ -9,7 +9,6 @@ from typing import Union
 
 import requests
 import typer
-import validators  # type: ignore
 from huggingface_hub import hf_hub_url
 from huggingface_hub import snapshot_download
 from huggingface_hub.hf_api import ModelInfo
@@ -49,14 +48,14 @@ class LocalModel:
                 self.model = file
 
 
-def _url_callback(url: str) -> Union[str, None]:
-    """Checks url is valid"""
-    if url == "latest":
-        return url
-    if validators.url(url):
-        return url
-    else:
-        raise typer.BadParameter(f"Please check {url} is a valid url")
+# def _url_callback(url: str) -> Union[str, None]:
+#     """Checks url is valid"""
+#     if url == "latest":
+#         return url
+#     if validators.url(url):
+#         return url
+#     else:
+#         raise typer.BadParameter(f"Please check {url} is a valid url")
 
 
 def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
@@ -85,7 +84,7 @@ def show_model_dir() -> None:
 
 @app.command(name="download")
 def get_model(
-    revision: Optional[str] = typer.Argument(None, callback=_url_callback),
+    revision: Optional[str] = typer.Argument(None),
     model_dir: Path = typer.Argument(
         None,
         envvar="MODEL_DIR",
