@@ -39,9 +39,7 @@ This code and documentation is a work in progress.
 - produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
 - automatically downloads latest available [flyswot model](https://huggingface.co/davanstrien/flyswot)
 
-```{image} https://asciinema.org/a/449685.svg
-:target: https://asciinema.org/a/449685
-```
+[![asciicast](https://asciinema.org/a/449685.svg)](https://asciinema.org/a/449685)
 
 ## Requirements
 
