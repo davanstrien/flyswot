@@ -1,3 +1,5 @@
+# flyswot
+
 [![PyPI](https://img.shields.io/pypi/v/flyswot.svg)][pypi_]
 [![Status](https://img.shields.io/pypi/status/hugit.svg)][status]
 [![Python Version](https://img.shields.io/pypi/pyversions/hugit)][python version]
@@ -20,12 +22,7 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-
-# flyswot
-
 ![flyswot logo](https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII)
-
-
 
 ## Disclaimer
 
