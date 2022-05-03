@@ -31,16 +31,6 @@ def test_app_exists() -> None:
     assert models.app
 
 
-def test_url_callback() -> None:
-    url_latest = "latest"
-    assert models._url_callback(url_latest) == url_latest
-    valid_url = "https://google.com"
-    assert models._url_callback(valid_url) == valid_url
-    with pytest.raises(typer.BadParameter):
-        bad_url = "nope"
-        models._url_callback(bad_url)
-
-
 def test_ensure_model_dir_returns_path(tmp_path: Any) -> None:
     """It returns paths"""
     model_dir_path = tmp_path / "app"
