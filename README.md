@@ -1,13 +1,13 @@
 # flyswot
 
 [![PyPI](https://img.shields.io/pypi/v/flyswot.svg)][pypi_]
-[![Status](https://img.shields.io/pypi/status/hugit.svg)][status]
-[![Python Version](https://img.shields.io/pypi/pyversions/hugit)][python version]
-[![License](https://img.shields.io/pypi/l/hugit)][license]
+[![Status](https://img.shields.io/pypi/status/flyswot.svg)][status]
+[![Python Version](https://img.shields.io/pypi/pyversions/flyswot)][python version]
+[![License](https://img.shields.io/pypi/l/flyswot)][license]
 
-[![Read the documentation at https://hugit.readthedocs.io/](https://img.shields.io/readthedocs/hugit/latest.svg?label=Read%20the%20Docs)][read the docs]
+[![Read the documentation at https://flyswot.readthedocs.io/](https://img.shields.io/readthedocs/flyswot/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/davanstrien/flyswot/actions/workflows/tests.yml/badge.svg)](https://github.com/davanstrien/flyswot/actions/workflows/tests.yml)
-[![Codecov](https://codecov.io/gh/davanstrien/hugit/branch/main/graph/badge.svg)][codecov]
+[![Codecov](https://codecov.io/gh/davanstrien/flyswot/branch/main/graph/badge.svg)][codecov]
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
