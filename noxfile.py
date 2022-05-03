@@ -129,7 +129,12 @@ def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
     session.install(
-        "coverage[toml]", "pytest", "pygments", "hypothesis", "pytest-datafiles"
+        "coverage[toml]",
+        "pytest",
+        "pygments",
+        "hypothesis",
+        "pytest-datafiles",
+        "onnxruntime",
     )
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)

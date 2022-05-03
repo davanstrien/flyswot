@@ -12,3 +12,4 @@ __pycache__/
 .hypothesis/
 images/
 .vscode/settings.json
+*.DS_Store
