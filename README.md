@@ -1,63 +1,31 @@
----
-substitutions:
-  Black: |-
-    ```{image} https://img.shields.io/badge/code%20style-black-000000.svg
-    :alt: Black
-    :target: https://github.com/psf/black
-    ```
-  Codecov: |-
-    ```{image} https://codecov.io/gh/davanstrien/flyswot/branch/main/graph/badge.svg
-    :alt: Codecov
-    :target: https://codecov.io/gh/davanstrien/flyswot
-    ```
-  License: |-
-    ```{image} https://img.shields.io/pypi/l/flyswot
-    :alt: License
-    :target: https://opensource.org/licenses/MIT
-    ```
-  PyPI: |-
-    ```{image} https://img.shields.io/pypi/v/flyswot.svg
-    :alt: PyPI
-    :target: https://pypi.org/project/flyswot/
-    ```
-  Python Version: |-
-    ```{image} https://img.shields.io/pypi/pyversions/flyswot
-    :alt: Python Version
-    :target: https://pypi.org/project/flyswot
-    ```
-  Read the Docs: |-
-    ```{image} https://img.shields.io/readthedocs/flyswot/latest.svg?label=Read%20the%20Docs
-    :alt: Read the documentation at https://flyswot.readthedocs.io/
-    :target: https://flyswot.readthedocs.io/
-    ```
-  Tests: |-
-    ```{image} https://github.com/davanstrien/flyswot/workflows/Tests/badge.svg
-    :alt: Tests
-    :target: https://github.com/davanstrien/flyswot/actions?workflow=Tests
-    ```
-  pre-commit: |-
-    ```{image} https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-    :alt: pre-commit
-    :target: https://github.com/pre-commit/pre-commit
-    ```
----
+[![PyPI](https://img.shields.io/pypi/v/flyswot.svg)][pypi_]
+[![Status](https://img.shields.io/pypi/status/hugit.svg)][status]
+[![Python Version](https://img.shields.io/pypi/pyversions/hugit)][python version]
+[![License](https://img.shields.io/pypi/l/hugit)][license]
+
+[![Read the documentation at https://hugit.readthedocs.io/](https://img.shields.io/readthedocs/hugit/latest.svg?label=Read%20the%20Docs)][read the docs]
+[![Tests](https://github.com/davanstrien/hugit/workflows/Tests/badge.svg)][tests]
+[![Codecov](https://codecov.io/gh/davanstrien/hugit/branch/main/graph/badge.svg)][codecov]
+
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
+
+[pypi_]: https://pypi.org/project/flyswot/
+[status]: https://pypi.org/project/flyswot/
+[python version]: https://pypi.org/project/flyswot
+[license]: https://opensource.org/licenses/MIT
+[read the docs]: https://flyswot.readthedocs.io/
+[tests]: https://github.com/davanstrien/flyswot/actions?workflow=Tests
+[codecov]: https://app.codecov.io/gh/davanstrien/flyswot
+[pre-commit]: https://github.com/pre-commit/pre-commit
+[black]: https://github.com/psf/black
+
 
 # flyswot
 
-{{ PyPI }} {{ Python Version }} {{ License }}
+![flyswot logo](https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII)
 
-{{ Read the Docs }} {{ Tests }} {{ Codecov }}
 
-{{ pre-commit }} {{ Black }}
-
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.6123039.svg
-:alt: DOI
-:target: https://doi.org/10.5281/zenodo.6123039
-```
-
-```{image} https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII
-
-```
 
 ## Disclaimer
 
@@ -261,19 +229,14 @@ please [file an issue] along with a detailed description.
 
 This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter] template.
 
-% github-only
-
 [@cjolowicz]: https://github.com/cjolowicz
-[anaconda]: https://www.anaconda.com/products/individual
-[anaconda documentation]: https://docs.anaconda.com/anaconda/navigator/tutorials/manage-environments/#creating-a-new-environment
-[anaconda navigator]: https://docs.anaconda.com/anaconda/navigator/
-[contributor guide]: CONTRIBUTING.rst
 [cookiecutter]: https://github.com/audreyr/cookiecutter
-[file an issue]: https://github.com/davanstrien/flyswot/issues
-[hmd]: https://www.bl.uk/projects/heritage-made-digital
-[hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 [mit license]: https://opensource.org/licenses/MIT
-[pip]: https://pip.pypa.io/
 [pypi]: https://pypi.org/
-[python]: https://www.python.org/
-[usage]: https://flyswot.readthedocs.io/en/latest/usage.html
+[hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
+[file an issue]: https://github.com/davanstrien/flyswot/issues
+[pip]: https://pip.pypa.io/
+
+<!-- github-only -->
+
+[contributor guide]: https://github.com/davanstrien/flyswot/blob/main/CONTRIBUTING.md
