@@ -1,45 +1,45 @@
-Reference
-=========
+# Reference
 
-.. contents::
-    :local:
-    :backlinks: none
+## flyswot.cli
 
-
-flyswot.cli
-----------------
-
+```{eval-rst}
 .. automodule:: flyswot.cli
    :members:
 
+```
 
-flyswot.models
---------------
+## flyswot.models
 
+```{eval-rst}
 .. automodule:: flyswot.models
    :members:
 
+```
 
-flyswot.inference
------------------
+## flyswot.inference
 
+```{eval-rst}
 .. automodule:: flyswot.inference
    :members:
+```
 
-flyswot.core
-------------
+## flyswot.core
 
+```{eval-rst}
 .. automodule:: flyswot.core
    :members:
+```
 
-flyswot.config
---------------
+## flyswot.config
 
+```{eval-rst}
 .. automodule:: flyswot.config
    :members:
+```
 
-flyswot.console
----------------
+## flyswot.console
 
+```{eval-rst}
 .. automodule:: flyswot.console
    :members:
+```
