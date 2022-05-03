@@ -57,6 +57,7 @@ pytest-datafiles = "^2.0"
 onnxruntime = "^1.11.1"
 furo = "^2022.4.7"
 myst-parser = "^0.17.2"
+cogapp = "^3.3.0"
 
 [tool.poetry.scripts]
 flyswot = "flyswot.cli:main"

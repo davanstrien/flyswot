@@ -132,6 +132,83 @@ $ pip install flyswot --upgrade
 
 ## Usage
 
+You can see help for `flyswot` using `flyswot --help`
+
+<!-- [[[cog
+import cog
+from flyswot.cli import app
+from typer.testing import CliRunner
+runner = CliRunner()
+result = runner.invoke(app, ["--help"])
+help = result.output.replace("Usage: root", "Usage: flyswot")
+cog.out(
+    "```\n{}\n```".format(help)
+)
+]]] -->
+
+```
+Usage: flyswot [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --install-completion [bash|zsh|fish|powershell|pwsh]
+                                  Install completion for the specified shell.
+  --show-completion [bash|zsh|fish|powershell|pwsh]
+                                  Show completion for the specified shell, to
+                                  copy it or customize the installation.
+  --help                          Show this message and exit.
+
+Commands:
+  model    flyswot commands for interacting with models
+  predict  flyswot commands for making predictions
+
+```
+
+<!-- [[[end]]] -->
+
+### Making predictions
+
+You can get help for the prediction functionality for `flyswot` as follows:
+
+<!-- [[[cog
+import cog
+from flyswot.cli import app
+from typer.testing import CliRunner
+runner = CliRunner()
+result = runner.invoke(app,  ["predict", "directory", "--help"])
+help = result.output.replace("Usage: root", "Usage: flyswot")
+cog.out(
+    "```\n{}\n```".format(help)
+)
+]]] -->
+
+```
+Usage: flyswot predict directory [OPTIONS] DIRECTORY CSV_SAVE_DIR
+
+  Predicts against all images stored under DIRECTORY which match PATTERN in the
+  filename.
+
+  By default searches for filenames containing 'fs'.
+
+  Creates a CSV report saved to `csv_save_dir`
+
+Arguments:
+  DIRECTORY     Directory to start searching for images from  [required]
+  CSV_SAVE_DIR  Directory used to store the csv report  [required]
+
+Options:
+  --model-id TEXT       The model flyswot should use for making predictions
+                        [default: flyswot/convnext-tiny-224_flyswot]
+  --model-path TEXT
+  --pattern TEXT        Pattern used to filter image filenames  [default: fs]
+  --bs INTEGER          Batch Size  [default: 16]
+  --image-formats TEXT  Image format for flyswot to use for predictions,
+                        defaults to `*.tif`  [default: .tif]
+  --help                Show this message and exit.
+
+```
+
+<!-- [[[end]]] -->
+
 To run predictions against a directory of images:
 
 ```console

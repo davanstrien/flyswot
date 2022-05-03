@@ -1,10 +1,5 @@
 # Reference
 
-```{contents}
-:backlinks: none
-:local: true
-```
-
 ## flyswot.cli
 
 ```{eval-rst}
