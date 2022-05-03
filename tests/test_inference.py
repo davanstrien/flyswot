@@ -19,6 +19,7 @@ from rich.table import Column
 from toolz import itertoolz
 
 from flyswot import inference
+from flyswot import onnx_inference
 
 # flake8: noqa
 
@@ -28,14 +29,14 @@ text_strategy = st.text(string.ascii_letters, min_size=1)
 def test__image_prediction_item_raises_error_when_too_few_params():
     """It raises Typerror when passed too few items"""
     with pytest.raises(TypeError):
-        item = inference.ImagePredictionArgmaxItem("A")
+        item = inferencesession.ImagePredictionArgmaxItem("A")
 
 
 def test_image_prediction_items_match(tmp_path):
     im_path = tmp_path / "image.tif"
     label = "flysheet"
     confidence = 0.9
-    item = inference.ImagePredictionArgmaxItem(im_path, label, confidence)
+    item = inferencesession.ImagePredictionArgmaxItem(im_path, label, confidence)
     assert item.path == im_path
     assert item.predicted_label == "flysheet"
     assert item.confidence == 0.9
@@ -53,7 +54,7 @@ def imfile(tmpdir_factory):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_image_prediction_item(confidence, label, imfile: Any):
-    item = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
+    item = inferencesession.ImagePredictionArgmaxItem(imfile, label, confidence)
     assert item.path == imfile
     assert item.predicted_label == label
     assert item.confidence == confidence
@@ -62,7 +63,7 @@ def test_image_prediction_item(confidence, label, imfile: Any):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_multi_image_prediction_item(confidence, label, imfile: Any):
-    item = inference.MultiLabelImagePredictionItem(
+    item = inferencesession.MultiLabelImagePredictionItem(
         imfile, [{confidence: label}, {confidence: label}]
     )
     assert item.path == imfile
@@ -72,9 +73,9 @@ def test_multi_image_prediction_item(confidence, label, imfile: Any):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_prediction_batch(confidence: float, label: str, imfile: Any):
-    item = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
-    item2 = inference.ImagePredictionArgmaxItem(imfile, label, confidence)
-    batch = inference.PredictionBatch([item, item2])
+    item = inferencesession.ImagePredictionArgmaxItem(imfile, label, confidence)
+    item2 = inferencesession.ImagePredictionArgmaxItem(imfile, label, confidence)
+    batch = inferencesession.PredictionBatch([item, item2])
     assert batch.batch_labels
     assert len(list(batch.batch_labels)) == 2
     assert hasattr(batch.batch_labels, "__next__")
@@ -85,16 +86,16 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
     label=text_strategy,
 )
 def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
-    item = inference.MultiLabelImagePredictionItem(
+    item = inferencesession.MultiLabelImagePredictionItem(
         imfile, [{confidence: label}, {confidence: label}]
     )
-    item2 = inference.MultiLabelImagePredictionItem(
+    item2 = inferencesession.MultiLabelImagePredictionItem(
         imfile, [{confidence: label}, {confidence: label}]
     )
-    batch = inference.MultiPredictionBatch([item, item2])
+    batch = inferencesession.MultiPredictionBatch([item, item2])
     assert batch.batch
     assert type(batch.batch) == list
-    assert type(batch.batch[0]) == inference.MultiLabelImagePredictionItem
+    assert type(batch.batch[0]) == inferencesession.MultiLabelImagePredictionItem
     assert batch.batch_labels
     assert len(list(batch.batch_labels)) == 2
     assert hasattr(batch.batch_labels, "__next__")
@@ -108,7 +109,7 @@ FIXTURE_DIR = os.path.join(
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
 def test_try_predict_batch(datafiles, tmp_path) -> None:
-    session = inference.OnnxInferenceSession(
+    session = onnx_inference.OnnxInferenceSession(
         Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
@@ -124,7 +125,7 @@ def test_try_predict_batch(datafiles, tmp_path) -> None:
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
 def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
-    session = inference.OnnxInferenceSession(
+    session = onnx_inference.OnnxInferenceSession(
         Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
@@ -137,7 +138,7 @@ def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
 def test_predict_files(datafiles, tmp_path) -> None:
-    session = inference.OnnxInferenceSession(
+    session = onnx_inference.OnnxInferenceSession(
         Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
