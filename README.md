@@ -98,7 +98,7 @@ A virtual environment allows us to isolate the requirements of different python 
 
 There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use [Anaconda Navigator](https://docs.anaconda.com/anaconda/navigator/index.html).
 
-You can find more detailed instructions for creating a new virtual environments in the [Anaconda documentation]. Briefly you should:
+You can find more detailed instructions for creating a new virtual environments in the [Anaconda documentation](https://docs.anaconda.com/). Briefly you should:
 
 - Open Anaconda Navigator
 - Navigate to the _Environments_ tab
