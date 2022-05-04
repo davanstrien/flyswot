@@ -144,11 +144,9 @@ Arguments:
 Options:
   --model-id TEXT       The model flyswot should use for making predictions
                         [default: flyswot/convnext-tiny-224_flyswot]
-  --model-path TEXT
   --pattern TEXT        Pattern used to filter image filenames  [default: fs]
   --bs INTEGER          Batch Size  [default: 16]
-  --image-formats TEXT  Image format for flyswot to use for predictions,
-                        defaults to `*.tif`  [default: .tif]
+  --image-formats TEXT  Image format(s) to check  [default: .tif]
   --help                Show this message and exit.
 
 ```

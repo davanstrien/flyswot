@@ -126,7 +126,6 @@ def predict_directory(
         "flyswot/convnext-tiny-224_flyswot",
         help="The model flyswot should use for making predictions",
     ),
-    model_path: str = None,
     pattern: str = typer.Option("fs", help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
     image_formats: List[str] = typer.Option(
