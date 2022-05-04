@@ -158,9 +158,14 @@ def predict_directory(
         print(corrupt_images)
     delta = timedelta(seconds=time.perf_counter() - start_time)
     print_inference_summary(
-        str(delta), pattern, directory, csv_fname, image_formats, images_checked
+        str(delta),
+        pattern,
+        directory,
+        csv_fname,
+        image_formats,
+        images_checked,
+        model_id,
     )
-    print(models.hub_model_link(model_id))
 
 
 def print_inference_summary(
@@ -170,10 +175,13 @@ def print_inference_summary(
     csv_fname: Path,
     image_format: Union[List[str], str],
     matched_file_count: int,
-    local_model: Optional[models.LocalModel] = None,
+    model_id: Optional[str] = None,
 ):
     """prints summary report"""
     print(flyswot_logo())
+    if model_id:
+        print(Panel(Columns([models.hub_model_link(model_id)]), title="Model Info"))
+
     print(
         Panel(
             Text(
@@ -194,9 +202,7 @@ def print_inference_summary(
         )
     )
     inference_summary_columns = get_inference_table_columns(csv_fname)
-    print(Panel(inference_summary_columns, title="Prediction Summary"))
-    if local_model is not None:
-        print(models.show_model_card(localmodel=local_model))
+    print(Panel(Columns(inference_summary_columns), title="Prediction Summary"))
 
 
 def create_file_summary_markdown(
@@ -206,17 +212,16 @@ def create_file_summary_markdown(
     image_formats: Union[List[str], str],
 ) -> Panel:
     """creates Markdown summary containing number of files checked by flyswot vs total images files under directory"""
-    if isinstance(image_formats, list):
-        counts = [core.count_files_with_ext(directory, ext) for ext in image_formats]
-        return sum(counts)
-    total_image_file_count = core.count_files_with_ext(directory, image_formats)
-
+    # if isinstance(image_formats, list):
+    #     counts = [core.count_files_with_ext(directory, ext) for ext in image_formats]
+    #     total_image_file_count = sum(counts)
+    # else:
+    #     total_image_file_count = core.count_files_with_ext(directory, image_formats)
     return Panel(
         Markdown(
             f"""
     - flyswot searched for image files by matching the patern *{pattern}* with extension(s) {image_formats}
     - flyswot search inside: `{directory}`
-    - In total the directory contained **{total_image_file_count}** images
     - There were **{matched_file_count}** files matching the {pattern}* pattern which flyswot checked
     """
         ),
@@ -224,14 +229,14 @@ def create_file_summary_markdown(
     )
 
 
-def get_inference_table_columns(csv_fname: Path) -> Columns:
+def get_inference_table_columns(csv_fname: Path) -> List[Table]:
     """print_inference_summary from `fname`"""
     labels_to_print = labels_from_csv(csv_fname)
     tables = [
         print_table(labels, f"Prediction summary {i+1}", print=False)
         for i, labels in enumerate(labels_to_print)
     ]
-    return Columns(tables)
+    return tables
 
 
 label_regex = re.compile(r"prediction_label_\D_0")
@@ -283,19 +288,6 @@ def make_layout():
     )
     layout["info"].split_row(Layout(name="time"), Layout(name="files"))
     return layout
-
-
-# def print_summary(columns, time, files):
-#     layout = make_layout()
-#     MARKDOWN = """
-#     # Prediction summary
-#     """
-#     md = Markdown(MARKDOWN)
-#     layout["header"].update(md)
-#     layout["body"].update(columns)
-#     layout["time"].update(time)
-#     layout["files"].update(f"Number of files checked {len(files)}")
-#     print(layout)
 
 
 def create_csv_fname(csv_directory: Path) -> Path:
