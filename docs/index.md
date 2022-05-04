@@ -13,6 +13,7 @@ end-before: <!-- github-only -->
 hidden:
 maxdepth: 1
 ---
+background
 usage
 contributing
 Code of Conduct <codeofconduct>

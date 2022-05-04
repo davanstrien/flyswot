@@ -26,24 +26,41 @@
 
 ## Disclaimer
 
-`flyswot` is a work in progress and is currently only intended to be used for testing by [HMD](https://www.bl.uk/projects/heritage-made-digital)
+`flyswot` is a work in progress. Things may not work and behaviour may change in the future!
 
-This code and documentation is a work in progress.
+## tl;dr
+
+`flyswot` is a Command Line Tool which allows you to run [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) against a directory of images. It returns a CSV report containing the models predictions.
+
+```console
+flyswot predict directory image_directory csv_reports --model_id flyswot/convnext-tiny-224_flyswot
+```
 
 ## Features
 
-`flyswot` is a Command Line Tool for detecting 'fake' flysheets.
+Currently `flyswot` supports:
 
-- unix style search patterns for matching images to predict against
-- produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
-- produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
-- automatically downloads latest available [flyswot model](https://huggingface.co/davanstrien/flyswot)
+- automatic downloading of models from the Hugging Face Hub
+- UNIX style search patterns for matching images to predict against
+- filtering by image extension
+- a CSV output report containing the paths to the input images, the predicted label and the models confidence for that prediction.
+- a summary 'report' on the command line providing a high level summary of the predictions made by `flyswot`
 
 [![asciicast](https://asciinema.org/a/449685.svg)](https://asciinema.org/a/449685)
 
-## Requirements
+## Why?
 
-- Python 3.8 or greater
+What is the point of this? Why not just write a Python script? This seems like a terrible idea...
+
+`flyswot` was originally for a project with the [Heritage Made Digital](https://www.bl.uk/projects/heritage-made-digital) team at the [British Library](https://www.bl.uk). In this project we wanted to detect 'fake flysheets'. We designed how `flyswot` works with this particular use case in mind.
+
+There are a few main reasons why we decided a command line tool was the best approaches to utilising the models we were developing.
+
+- The digitised images we are working with can be very large
+- The images we are working with are often subject to copyright
+- Inference speed isn't a big priority
+
+See [background] for further discussion of these considerations.
 
 ## Installation
 
@@ -312,3 +329,4 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 <!-- github-only -->
 
 [contributor guide]: https://github.com/davanstrien/flyswot/blob/main/CONTRIBUTING.md
+[background]: https://flyswot.readthedocs.io/en/latest/background.html
