@@ -26,24 +26,41 @@
 
 ## Disclaimer
 
-`flyswot` is a work in progress and is currently only intended to be used for testing by [HMD](https://www.bl.uk/projects/heritage-made-digital)
+`flyswot` is a work in progress. Things may not work and behaviour may change in the future!
 
-This code and documentation is a work in progress.
+## tl;dr
+
+`flyswot` is a Command Line Tool which allows you to run [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) against a directory of images. It returns a CSV report containing the models predictions.
+
+```console
+flyswot predict directory image_directory csv_reports --model_id flyswot/convnext-tiny-224_flyswot
+```
 
 ## Features
 
-`flyswot` is a Command Line Tool for detecting 'fake' flysheets.
+Currently `flyswot` supports:
 
-- unix style search patterns for matching images to predict against
-- produces a csv output containing the paths to the input images, the predicted label and the models confidence for that prediction.
-- produces a summary 'report' providing a high level summary of the predictions made by `flyswot`
-- automatically downloads latest available [flyswot model](https://huggingface.co/davanstrien/flyswot)
+- automatic downloading of models from the Hugging Face Hub
+- UNIX style search patterns for matching images to predict against
+- filtering by image extension
+- a CSV output report containing the paths to the input images, the predicted label and the models confidence for that prediction.
+- a summary 'report' on the command line providing a high level summary of the predictions made by `flyswot`
 
 [![asciicast](https://asciinema.org/a/449685.svg)](https://asciinema.org/a/449685)
 
-## Requirements
+## Why?
 
-- Python 3.8 or greater
+What is the point of this? Why not just write a Python script? This seems like a terrible idea...
+
+`flyswot` was originally for a project with the [Heritage Made Digital](https://www.bl.uk/projects/heritage-made-digital) team at the [British Library](https://www.bl.uk). In this project we wanted to detect 'fake flysheets'. We designed how `flyswot` works with this particular use case in mind.
+
+There are a few main reasons why we decided a command line tool was the best approaches to utilising the models we were developing.
+
+- The digitised images we are working with can be very large
+- The images we are working with are often subject to copyright
+- Inference speed isn't a big priority
+
+See [background] for further discussion of these considerations.
 
 ## Installation
 
@@ -57,7 +74,7 @@ This will install the latest release version of _flyswot_
 
 ## Detailed Installation Guide
 
-This section gives a more detailed instructions for installing _flyswot_. This guidance is aimed particularly at [HMD] users of _flyswot_. This set of instructions covers the steps required to install _flyswot_.
+This section gives a more detailed instructions for installing _flyswot_. This guidance is aimed particularly at [HMD](https://www.bl.uk/projects/heritage-made-digital) users of _flyswot_. This set of instructions covers the steps required to install _flyswot_.
 
 ### Note on the examples
 
@@ -73,13 +90,13 @@ The `$` symbol here is often used as a convention to show that this is input to 
 
 _flyswot_ uses the [Python] programming language. You will therefore need to have Python installed on your computer to run _flyswot_.
 
-For HMD users of `flyswot` it is suggested to use the [Anaconda] distribution of Python. If you are on a managed PC/laptop you should request this to be installed via the Technology team.
+For HMD users of `flyswot` it is suggested to use the [Anaconda](https://www.anaconda.com/) distribution of Python. If you are on a managed PC/laptop you should request this to be installed via the Technology team.
 
 ### Create and activate a Conda Environment
 
 A virtual environment allows us to isolate the requirements of different python packages. This can be useful since different python packages might have different requirements. Using a virtual environment allows us to install these in a way where you are less likely to have conflicts between these packages.
 
-There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use [Anaconda Navigator].
+There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use [Anaconda Navigator](https://docs.anaconda.com/anaconda/navigator/index.html).
 
 You can find more detailed instructions for creating a new virtual environments in the [Anaconda documentation]. Briefly you should:
 
@@ -214,13 +231,13 @@ $ flyswot predict directory manuscripts_folder .
 ```
 
 - _flyswot_ will search inside the manuscripts_folder looking for image files.
-- By default it will look for files that contain {code}`FS` in the filename since these are files which have been labelled as being "end flysheets" or "front flysheets"
+- By default it will look for files that contain `FS` in the filename since these are files which have been labelled as being "end flysheets" or "front flysheets"
 - Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labelled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
 
 ## Detailed Usage Guide
 
-This section provides additional guidance on the usage of _flyswot_. This is primarily aimed at [HMD] users of _flyswot_.
+This section provides additional guidance on the usage of _flyswot_. This is primarily aimed at [HMD](https://www.bl.uk/projects/heritage-made-digital) users of _flyswot_.
 
 ### How flyswot searches for images
 
@@ -312,3 +329,4 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 <!-- github-only -->
 
 [contributor guide]: https://github.com/davanstrien/flyswot/blob/main/CONTRIBUTING.md
+[background]: https://flyswot.readthedocs.io/en/latest/background.html
