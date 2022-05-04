@@ -74,7 +74,7 @@ This will install the latest release version of _flyswot_
 
 ## Detailed Installation Guide
 
-This section gives a more detailed instructions for installing _flyswot_. This guidance is aimed particularly at [HMD] users of _flyswot_. This set of instructions covers the steps required to install _flyswot_.
+This section gives a more detailed instructions for installing _flyswot_. This guidance is aimed particularly at [HMD](https://www.bl.uk/projects/heritage-made-digital) users of _flyswot_. This set of instructions covers the steps required to install _flyswot_.
 
 ### Note on the examples
 
@@ -90,13 +90,13 @@ The `$` symbol here is often used as a convention to show that this is input to 
 
 _flyswot_ uses the [Python] programming language. You will therefore need to have Python installed on your computer to run _flyswot_.
 
-For HMD users of `flyswot` it is suggested to use the [Anaconda] distribution of Python. If you are on a managed PC/laptop you should request this to be installed via the Technology team.
+For HMD users of `flyswot` it is suggested to use the [Anaconda](https://www.anaconda.com/) distribution of Python. If you are on a managed PC/laptop you should request this to be installed via the Technology team.
 
 ### Create and activate a Conda Environment
 
 A virtual environment allows us to isolate the requirements of different python packages. This can be useful since different python packages might have different requirements. Using a virtual environment allows us to install these in a way where you are less likely to have conflicts between these packages.
 
-There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use [Anaconda Navigator].
+There are various different ways of creating virtual environments within Python. Anaconda comes with a system for creating virtual environment's. Creating Conda environments within Conda can be done in various ways, if you are new to Python and Anaconda it is suggested to use [Anaconda Navigator](https://docs.anaconda.com/anaconda/navigator/index.html).
 
 You can find more detailed instructions for creating a new virtual environments in the [Anaconda documentation]. Briefly you should:
 
@@ -231,13 +231,13 @@ $ flyswot predict directory manuscripts_folder .
 ```
 
 - _flyswot_ will search inside the manuscripts_folder looking for image files.
-- By default it will look for files that contain {code}`FS` in the filename since these are files which have been labelled as being "end flysheets" or "front flysheets"
+- By default it will look for files that contain `FS` in the filename since these are files which have been labelled as being "end flysheets" or "front flysheets"
 - Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labelled correctly i.e. if it is indeed a flysheet or something else.
 - flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
 
 ## Detailed Usage Guide
 
-This section provides additional guidance on the usage of _flyswot_. This is primarily aimed at [HMD] users of _flyswot_.
+This section provides additional guidance on the usage of _flyswot_. This is primarily aimed at [HMD](https://www.bl.uk/projects/heritage-made-digital) users of _flyswot_.
 
 ### How flyswot searches for images
 
