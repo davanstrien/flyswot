@@ -28,7 +28,7 @@
 
 `flyswot` is a work in progress. Things may not work and behaviour may change in the future!
 
-## tl;dr 
+## tl;dr
 
 `flyswot` is a Command Line Tool which allows you to run [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) 🤗 against a directory of images. It returns a CSV report containing the models predictions.
 
@@ -40,7 +40,7 @@ flyswot predict directory image_directory csv_reports --model_id flyswot/convnex
 
 Currently `flyswot` supports:
 
-- 🚀 automatic downloading of models from the Hugging Face Hub 
+- 🚀 automatic downloading of models from the Hugging Face Hub
 - 🔎 UNIX style search patterns for matching images to predict against
 - 📸 filtering by image extension
 - 📜 a CSV output report containing the paths to the input images, the predicted label and the models confidence for that prediction.
