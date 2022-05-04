@@ -149,10 +149,10 @@ def show_model_card(localmodel: LocalModel):
     console.print(md)
 
 
-def hub_model_link(model_id: str):
+def hub_model_link(model_id: str) -> str:
     """Creates rich link for model card"""
     url = f"https://huggingface.co/{model_id}"
-    return f"View [link={url}]model card[/link]!"
+    return f"View [link={url}]model card[/link] for {model_id}!"
 
 
 def create_markdown_model_card(model_id: str):
