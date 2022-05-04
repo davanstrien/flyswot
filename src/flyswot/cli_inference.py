@@ -232,11 +232,10 @@ def create_file_summary_markdown(
 def get_inference_table_columns(csv_fname: Path) -> List[Table]:
     """print_inference_summary from `fname`"""
     labels_to_print = labels_from_csv(csv_fname)
-    tables = [
+    return [
         print_table(labels, f"Prediction summary {i+1}", print=False)
         for i, labels in enumerate(labels_to_print)
     ]
-    return tables
 
 
 label_regex = re.compile(r"prediction_label_\D_0")
