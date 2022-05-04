@@ -24,13 +24,13 @@
 
 ![flyswot logo](https://raw.githubusercontent.com/davanstrien/flyswot/main/docs/_static/fly.png?token=ACEUI5KJ2HPO4ZGNTBX6OE3ARMXII)
 
-## Disclaimer
+## Disclaimer 😬
 
 `flyswot` is a work in progress. Things may not work and behaviour may change in the future!
 
 ## tl;dr
 
-`flyswot` is a Command Line Tool which allows you to run [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) against a directory of images. It returns a CSV report containing the models predictions.
+`flyswot` is a Command Line Tool which allows you to run [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) 🤗 against a directory of images. It returns a CSV report containing the models predictions.
 
 ```console
 flyswot predict directory image_directory csv_reports --model_id flyswot/convnext-tiny-224_flyswot
@@ -40,11 +40,11 @@ flyswot predict directory image_directory csv_reports --model_id flyswot/convnex
 
 Currently `flyswot` supports:
 
-- automatic downloading of models from the Hugging Face Hub
-- UNIX style search patterns for matching images to predict against
-- filtering by image extension
-- a CSV output report containing the paths to the input images, the predicted label and the models confidence for that prediction.
-- a summary 'report' on the command line providing a high level summary of the predictions made by `flyswot`
+- 🚀 automatic downloading of models from the Hugging Face Hub
+- 🔎 UNIX style search patterns for matching images to predict against
+- 📸 filtering by image extension
+- 📜 a CSV output report containing the paths to the input images, the predicted label and the models confidence for that prediction.
+- 📊 a summary 'report' on the command line providing a high level summary of the predictions made by `flyswot`
 
 [![asciicast](https://asciinema.org/a/449685.svg)](https://asciinema.org/a/449685)
 
