@@ -131,7 +131,7 @@ def predict_directory(
     bs: int = typer.Option(16, help="Batch Size"),
     image_formats: List[str] = typer.Option(
         default=[".tif"],
-        help="Image format for flyswot to use for predictions, defaults to `*.tif`",
+        help="Image format(s) to check",
     ),
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
