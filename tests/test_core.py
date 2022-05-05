@@ -111,19 +111,19 @@ def test_get_all_images_with_pattern(pattern, tmpdir):
     """It gets all image files"""
     image_extensions = ["tif", "tiff", "jpg", "jpeg", "png"]
     a_dir = tmpdir.mkdir("image_dir")
-    for number in range(10):
+    for number in range(2):
         for ext in image_extensions:
             file = a_dir.join(f"file{pattern}_{number}.{ext}")
             file.ensure()
     for ext in image_extensions:
         matches = core.get_image_files_from_pattern(a_dir, None, ext)
         files = [f for f in Path(a_dir).rglob(f"**/{ext}") if f.is_file()]
-        assert len(list(matches)) == 10
+        assert len(list(matches)) == 2
 
     matches = core.get_image_files_from_pattern(a_dir, pattern, None)
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
-    assert len(files) == 10 * len(image_extensions)
-    assert len(list(matches)) == 10 * len(image_extensions)  # all image files matched
+    assert len(files) == 2 * len(image_extensions)
+    assert len(list(matches)) == 2 * len(image_extensions)  # all image files matched
 
 
 def test_count_files_with_extension(tmpdir):

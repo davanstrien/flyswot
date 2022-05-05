@@ -25,18 +25,28 @@ def count_files_with_ext(directory: Path, ext: str) -> int:
     return itertoolz.count(Path(directory).rglob(f"*{ext}"))
 
 
-def get_image_files_from_pattern(
+def create_file_search_message(
     directory: Path, pattern: Optional[str], ext: Optional[str]
-) -> Iterator[Path]:
-    """yield image files from `directory` matching pattern `str` with `ext`"""
+) -> str:
+    """Creates a message to show pattern and ext used for search"""
     if pattern and ext:
         message = f"Searching for files in {directory} matching {pattern} with extension {ext}"
     if pattern and not ext:
         message = f"Searching for image files in {directory} matching {pattern}"
     if not pattern and ext:
         message = f"Searching for all image files in {directory} with extension {ext}"
+    if not pattern and not ext:
+        message = f"Searching for all image files in {directory}"
+    return message
+
+
+def get_image_files_from_pattern(
+    directory: Path, pattern: Optional[str], ext: Optional[str]
+) -> Iterator[Path]:
+    """yield image files from `directory` matching pattern `str` with `ext`"""
+    message = create_file_search_message(directory, pattern, ext)
     with console.status(message, spinner="dots"):
-        time.sleep(10)
+        time.sleep(1)
         if pattern:
             yield from Path(directory).rglob(f"**/*{pattern}*{ext}")
             console.log("Search files complete...")
