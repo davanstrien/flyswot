@@ -226,10 +226,10 @@ if you are using Mac, Linux or have GitBash installed you should instead run:
 $ cd Desktop
 ```
 
-This will take you to your Desktop. We'll now run _flyswot_. As with many other command line tools, _flyswot_ has commands and sub-commands. We are interested in the `predict` command. This includes two sub-commands: `predict-image` and `directory`. We will mostly want to predict directories. To do this we use the following approach
+This will take you to your Desktop. We'll now run _flyswot_. As with many other command line tools, _flyswot_ has commands and sub-commands. We are interested in the `predict` command. This includes two sub-commands: `predict-image` and `directory`. We will mostly want to predict directories. To do this we use the following approach. Since we only care about checking things with `fs` in the filename we can specify this as our `pattern`.
 
 ```console
-$ flyswot predict directory input_directory output_directory
+$ flyswot predict directory input_directory output_directory --pattern fs
 ```
 
 The input directory is the folder containing our images and the output directory is where we want to save our CSV report. Using the folder we previously identified this would look like:
@@ -242,7 +242,7 @@ We can use `.` to indicate we want the CSV report to be saved to the current dir
 
 Once you run this command you should see some progress reported by _flyswot_, including a progress bar that shows how many of the images _flyswot_ has predicted against.
 
-When _flyswot_ has finshed you will have a CSV 'report' which contains the path to the image, the predicted label and the confidence for that prediction.
+When _flyswot_ has finished you will have a CSV 'report' which contains the path to the image, the predicted label and the confidence for that prediction.
 
 ## License
 
