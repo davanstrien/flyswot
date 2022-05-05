@@ -148,7 +148,11 @@ def predict_directory(
         )
     )
     check_files(files, pattern, directory)
-    typer.echo(f"Found {len(files)} files matching {pattern} in {directory}")
+    if not pattern:
+        pattern = "any pattern"
+    print(
+        f"Found {len(files)} files matching {pattern} in {directory} with extension(s) {image_formats}"
+    )
     csv_fname = create_csv_fname(csv_save_dir)
     corrupt_images, images_checked = predict_files(
         files, inference_session=huggingfaceinference, bs=bs, csv_fname=csv_fname
