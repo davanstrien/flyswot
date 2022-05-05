@@ -6,6 +6,7 @@ from typing import Any
 from typing import Iterable
 from typing import Iterator
 from typing import List
+from typing import Optional
 from typing import Set
 from typing import Tuple
 
@@ -24,19 +25,40 @@ def count_files_with_ext(directory: Path, ext: str) -> int:
     return itertoolz.count(Path(directory).rglob(f"*{ext}"))
 
 
+def create_file_search_message(
+    directory: Path, pattern: Optional[str], ext: Optional[str]
+) -> str:
+    """Creates a message to show pattern and ext used for search"""
+    if pattern and ext:
+        message = f"Searching for files in {directory} matching {pattern} with extension {ext}"
+    if pattern and not ext:
+        message = f"Searching for image files in {directory} matching {pattern}"
+    if not pattern and ext:
+        message = f"Searching for all image files in {directory} with extension {ext}"
+    if not pattern and not ext:
+        message = f"Searching for all image files in {directory}"
+    return message
+
+
 def get_image_files_from_pattern(
-    directory: Path, pattern: str, ext: str = None
+    directory: Path, pattern: Optional[str], ext: Optional[str]
 ) -> Iterator[Path]:
     """yield image files from `directory` matching pattern `str` with `ext`"""
-    with console.status(
-        f"Searching for files matching {pattern} in {directory}...", spinner="dots"
-    ):
+    message = create_file_search_message(directory, pattern, ext)
+    with console.status(message, spinner="dots"):
         time.sleep(1)
-        match_files = Path(directory).rglob(f"**/*{pattern}*{ext}")
-        for file in match_files:
-            if Path(file).suffix in image_extensions:
-                yield file
-        console.log("Search files complete...")
+        if pattern:
+            yield from Path(directory).rglob(f"**/*{pattern}*{ext}")
+            console.log("Search files complete...")
+        if pattern and not ext:
+            yield from Path(directory).rglob(f"*{pattern}*")
+        if not pattern and ext:
+            yield from Path(directory).rglob(f"*{ext}")
+        if not pattern and not ext:
+            match_files = Path(directory).rglob("*")
+            for file in match_files:
+                if file.suffix in image_extensions:
+                    yield file
 
 
 def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[Path]:
