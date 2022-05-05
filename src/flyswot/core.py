@@ -30,8 +30,8 @@ def get_image_files_from_pattern(
 ) -> Iterator[Path]:
     """yield image files from `directory` matching pattern `str` with `ext`"""
     with console.status(
-            f"Searching for files matching {pattern} in {directory}...", spinner="dots"
-        ):
+        f"Searching for files matching {pattern} in {directory}...", spinner="dots"
+    ):
         time.sleep(1)
         if pattern:
             yield from Path(directory).rglob(f"**/*{pattern}*{ext}")
