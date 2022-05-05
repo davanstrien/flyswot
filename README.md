@@ -26,11 +26,11 @@
 
 ## Disclaimer 😬
 
-`flyswot` is a work in progress. Things may not work and behaviour may change in the future!
+_flyswot_ is a work in progress. Things may not work and behaviour may change in the future!
 
 ## tl;dr
 
-`flyswot` is a Command Line Tool which allows you to run [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) 🤗 against a directory of images. It returns a CSV report containing the models predictions.
+_flyswot_ is a Command Line Tool which allows you to run [Hugging Face Transformers](https://huggingface.co/docs/transformers/) [image classification models](https://huggingface.co/models?pipeline_tag=image-classification&sort=downloads) available via the [Hugging Face Hub](https://huggingface.co/models) 🤗 against a directory of images. It returns a CSV report containing the models predictions.
 
 ```console
 flyswot predict directory image_directory csv_reports --model_id flyswot/convnext-tiny-224_flyswot
@@ -38,7 +38,7 @@ flyswot predict directory image_directory csv_reports --model_id flyswot/convnex
 
 ## Features
 
-Currently `flyswot` supports:
+Currently _flyswot_ supports:
 
 - 🚀 automatic downloading of models from the Hugging Face Hub
 - 🔎 UNIX style search patterns for matching images to predict against
@@ -52,7 +52,7 @@ Currently `flyswot` supports:
 
 What is the point of this? Why not just write a Python script? This seems like a terrible idea...
 
-`flyswot` was originally for a project with the [Heritage Made Digital](https://www.bl.uk/projects/heritage-made-digital) team at the [British Library](https://www.bl.uk). In this project we wanted to detect 'fake flysheets'. We designed how `flyswot` works with this particular use case in mind.
+_flyswot_ was originally for a project with the [Heritage Made Digital](https://www.bl.uk/projects/heritage-made-digital) team at the [British Library](https://www.bl.uk). In this project we wanted to detect 'fake flysheets'. We designed how _flyswot_ works with this particular use case in mind.
 
 There are a few main reasons why we decided a command line tool was the best approaches to utilising the models we were developing.
 
@@ -60,7 +60,7 @@ There are a few main reasons why we decided a command line tool was the best app
 - The images we are working with are often subject to copyright
 - Inference speed isn't a big priority
 
-See [background] for further discussion of these considerations.
+Since we're using computer vision for _assisting_ rather than _automation_ we felt a CLI was a useful interface for interacting with the models.
 
 ## Installation
 
@@ -74,11 +74,11 @@ This will install the latest release version of _flyswot_
 
 ## Detailed Installation Guide
 
-[Installation] provides a more detailed guide to installing `flyswot`. This more detailed guide is aimed at users of `flyswot` who may be less familiar with Python.
+[Installation] provides a more detailed guide to installing _flyswot_. This more detailed guide is aimed at users of _flyswot_ who may be less familiar with Python.
 
 ## Usage
 
-You can see help for `flyswot` using `flyswot --help`
+You can see help for _flyswot_ using `flyswot --help`
 
 <!-- [[[cog
 import cog
@@ -113,7 +113,7 @@ Commands:
 
 ### Making predictions
 
-You can get help for the prediction functionality for `flyswot` as follows:
+You can get help for the prediction functionality for _flyswot_ as follows:
 
 <!-- [[[cog
 import cog
@@ -162,18 +162,18 @@ $ flyswot predict directory manuscripts_folder .
 - _flyswot_ will search inside the manuscripts_folder looking for image files.
 - By default it will look for files that contain `FS` in the filename since these are files which have been labelled as being "end flysheets" or "front flysheets"
 - Once it has found all the files labelled as `flysheet` it will then run a computer vision model against these images to see if they are labelled correctly i.e. if it is indeed a flysheet or something else.
-- flyswot will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
+- _flyswot_ will save a csv report containing the paths to the image, the directory the image is stored in, the label, and the confidence for that prediction.
 
 #### Changing the model
 
-You can also tell `flyswot` to use a different image classification model via the `model-id` parameter. For example to use the [microsoft/dit-base-finetuned-rvlcdip](https://huggingface.co/microsoft/dit-base-finetuned-rvlcdip) model we could run:
+You can also tell _flyswot_ to use a different image classification model via the `model-id` parameter. For example to use the [microsoft/dit-base-finetuned-rvlcdip](https://huggingface.co/microsoft/dit-base-finetuned-rvlcdip) model we could run:
 
 ```console
 flyswot predict directory Documents/DS/hugit-cli/fs Desktop/ --model-id microsoft/dit-base-finetuned-rvlcdip
 
 ```
 
-This will download the latest available version of this model from the Hugging Face Hub and predict against the specified filenames. **Note** under the hood `flyswot` uses the Hugging Face [transformers](https://huggingface.co/docs/transformers/) [pipelines](https://huggingface.co/docs/transformers/pipeline_tutorial) for inference. The model you specific must therefore be compatible with this pipeline.
+This will download the latest available version of this model from the Hugging Face Hub and predict against the specified filenames. **Note** under the hood _flyswot_ uses the Hugging Face [transformers](https://huggingface.co/docs/transformers/) [pipelines](https://huggingface.co/docs/transformers/pipeline_tutorial) for inference. The model you specific must therefore be compatible with this pipeline.
 
 ## Detailed Usage Guide
 
@@ -181,7 +181,7 @@ This section provides additional guidance on the usage of _flyswot_. This is pri
 
 ### How flyswot searches for images
 
-_flyswot_ is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have `fs` as part of their filename so this is used by _flyswot_ to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
+_flyswot_ is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have `fs` as part of their filename so we can tell _flyswot_ to use this pattern in the filename to identify images which should be checked using the computer vision model. This can be changed if you also want to match other filename patterns.
 
 Since these images of concern will often be inside a directory structure _flyswot_ will look in sub-folders from the input folder for images which contain `fs` in the name. For example in the following folder structure:
 
