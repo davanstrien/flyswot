@@ -6,6 +6,7 @@ from typing import Any
 from typing import Iterable
 from typing import Iterator
 from typing import List
+from typing import Optional
 from typing import Set
 from typing import Tuple
 
@@ -25,18 +26,31 @@ def count_files_with_ext(directory: Path, ext: str) -> int:
 
 
 def get_image_files_from_pattern(
-    directory: Path, pattern: str, ext: str = None
+    directory: Path, pattern: Optional[str], ext: Optional[str]
 ) -> Iterator[Path]:
     """yield image files from `directory` matching pattern `str` with `ext`"""
     with console.status(
         f"Searching for files matching {pattern} in {directory}...", spinner="dots"
     ):
         time.sleep(1)
-        match_files = Path(directory).rglob(f"**/*{pattern}*{ext}")
-        for file in match_files:
-            if Path(file).suffix in image_extensions:
+        if pattern:
+            match_files = Path(directory).rglob(f"**/*{pattern}*{ext}")
+            for file in match_files:
                 yield file
-        console.log("Search files complete...")
+            console.log("Search files complete...")
+        if pattern and not ext:
+            match_files = Path(directory).rglob(f"*{pattern}*")
+            for file in match_files:
+                yield file
+        if not pattern and ext:
+            match_files = Path(directory).rglob(f"*{ext}")
+            for file in match_files:
+                yield file
+        if not pattern and not ext:
+            match_files = Path(directory).rglob("*")
+            for file in match_files:
+                if file.suffix in image_extensions:
+                    yield file
 
 
 def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[Path]:
