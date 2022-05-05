@@ -196,7 +196,7 @@ def test_filter_to_preferred_ext(image_files):
     assert len(tiff_files) == 2000
     jpeg_files = list(Path(image_files).glob("*.jpg"))
     assert len(jpeg_files) == 1000
-    image_files = [f for f in Path(image_files).iterdir()]
+    image_files = list(Path(image_files).iterdir())
     return_files = list(core.filter_to_preferred_ext(image_files, [".jpg"]))
     assert len(return_files) == 2000
 
