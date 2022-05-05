@@ -44,7 +44,7 @@ Currently _flyswot_ supports:
 - 🔎 UNIX style search patterns for matching images to predict against
 - 📸 filtering by image extension
 - 📜 a CSV output report containing the paths to the input images, the predicted label and the models confidence for that prediction.
-- 📊 a summary 'report' on the command line providing a high level summary of the predictions made by `flyswot`
+- 📊 a summary 'report' on the command line providing a high level summary of the predictions made
 
 [![asciicast](https://asciinema.org/a/492427.svg)](https://asciinema.org/a/492427)
 
