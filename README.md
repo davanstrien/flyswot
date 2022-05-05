@@ -60,7 +60,7 @@ There are a few main reasons why we decided a command line tool was the best app
 - The images we are working with are often subject to copyright
 - Inference speed isn't a big priority
 
-Since we're using computer vision for *assisting* rather than *automation* we felt a CLI was a useful interface for interacting with the models. 
+Since we're using computer vision for _assisting_ rather than _automation_ we felt a CLI was a useful interface for interacting with the models.
 
 ## Installation
 
@@ -181,7 +181,7 @@ This section provides additional guidance on the usage of _flyswot_. This is pri
 
 ### How flyswot searches for images
 
-_flyswot_ is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have `fs` as part of their filename so this is used by _flyswot_ to identify images which should be checked using the computer vision model. This can be channged if you also want to match other filename patterns.
+_flyswot_ is currently intended to identify images which have an incorrect label associated with them. In particular it is currently intended to identify "fake" flysheets. These images have `fs` as part of their filename so we can tell _flyswot_ to use this pattern in the filename to identify images which should be checked using the computer vision model. This can be changed if you also want to match other filename patterns.
 
 Since these images of concern will often be inside a directory structure _flyswot_ will look in sub-folders from the input folder for images which contain `fs` in the name. For example in the following folder structure:
 
