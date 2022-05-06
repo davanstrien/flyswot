@@ -11,7 +11,6 @@ from datetime import datetime
 from datetime import timedelta
 from functools import singledispatch
 from pathlib import Path
-from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -301,13 +300,13 @@ def create_csv_fname(csv_directory: Path) -> Path:
 
 
 @singledispatch
-def create_csv_header(batch, csv_path) -> None:
+def create_csv_header(batch, csv_path: Path) -> None:
     """Print csv header"""
     raise NotImplementedError(f"Not implemented for type {batch}")
 
 
 @create_csv_header.register
-def _(batch: PredictionBatch, csv_path):
+def _(batch: PredictionBatch, csv_path: Path):
     """Creates a header for csv `csv_path`"""
     with open(csv_path, mode="w", newline="") as csv_file:
         field_names = ["path", "directory", "prediction", "confidence"]
@@ -316,7 +315,7 @@ def _(batch: PredictionBatch, csv_path):
 
 
 @create_csv_header.register
-def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2):
+def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2) -> None:
     item = batch.batch[0]
     pred = OrderedDict()
     pred["path"] = asdict(item)["path"]
@@ -379,14 +378,14 @@ class HuggingFaceInferenceSession(InferenceSession):
             feature_extractor=self.feature_extractor,
         )
 
-    def predict_image(self, image: Path):
+    def predict_image(self, image: Path) -> List[Dict[str, float]]:
         """Predict single Image."""
         return self.session(image, top_k=10)
 
-    def predict_batch(self, batch: Iterable[Path], bs: int):
+    def predict_batch(self, batch: Iterable[Path], bs: int) -> MultiPredictionBatch:
         """Predict batch of images"""
         str_batch = [str(file) for file in batch]
-        predictions: List[List[Dict[Any]]] = self.session(
+        predictions: List[List[Dict[str, float]]] = self.session(
             str_batch, batch_size=bs, top_k=20
         )
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
