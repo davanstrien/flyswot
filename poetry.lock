@@ -912,7 +912,7 @@ docutils = ">=0.11,<1.0"
 
 [[package]]
 name = "rich"
-version = "12.4.1"
+version = "12.4.3"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
@@ -2035,8 +2035,8 @@ restructuredtext-lint = [
     {file = "restructuredtext_lint-1.4.0.tar.gz", hash = "sha256:1b235c0c922341ab6c530390892eb9e92f90b9b75046063e047cacfb0f050c45"},
 ]
 rich = [
-    {file = "rich-12.4.1-py3-none-any.whl", hash = "sha256:d13c6c90c42e24eb7ce660db397e8c398edd58acb7f92a2a88a95572b838aaa4"},
-    {file = "rich-12.4.1.tar.gz", hash = "sha256:d239001c0fb7de985e21ec9a4bb542b5150350330bbc1849f835b9cbc8923b91"},
+    {file = "rich-12.4.3-py3-none-any.whl", hash = "sha256:26ef784599a9ab905ade34ff28904e4fbe9bce16e02c33c78b0229551104c146"},
+    {file = "rich-12.4.3.tar.gz", hash = "sha256:e7550ca19aec51b216ae4c34bfce82e94a0c79bdbf95cafbf42f343d0fb3f45a"},
 ]
 "ruamel.yaml" = [
     {file = "ruamel.yaml-0.17.21-py3-none-any.whl", hash = "sha256:742b35d3d665023981bd6d16b3d24248ce5df75fdb4e2924e93a05c1f8b61ca7"},
