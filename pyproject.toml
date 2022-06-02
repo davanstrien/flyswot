@@ -30,7 +30,7 @@ transformers = {extras = ["torch"], version = "^4.16.2"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
-coverage = {extras = ["toml"], version = "^6.3"}
+coverage = {extras = ["toml"], version = "^6.4"}
 safety = "^1.10.3"
 mypy = "^0.960"
 xdoctest = {extras = ["colors"], version = "^1.0.0"}
