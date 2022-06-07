@@ -322,7 +322,7 @@ python-versions = "*"
 
 [[package]]
 name = "furo"
-version = "2022.6.4"
+version = "2022.6.4.1"
 description = "A clean customisable Sphinx documentation theme."
 category = "dev"
 optional = false
@@ -1576,8 +1576,8 @@ flatbuffers = [
     {file = "flatbuffers-2.0.tar.gz", hash = "sha256:12158ab0272375eab8db2d663ae97370c33f152b27801fa6024e1d6105fd4dd2"},
 ]
 furo = [
-    {file = "furo-2022.6.4-py3-none-any.whl", hash = "sha256:5e888a0cd68608006788dbb9e40a4efc7ef7f87563a6da045b6ae5f0c7ea5056"},
-    {file = "furo-2022.6.4.tar.gz", hash = "sha256:bb25b3f275d902441d7b87f42b7d85422c9b2efeac6411a9a5ed380bcbff24dc"},
+    {file = "furo-2022.6.4.1-py3-none-any.whl", hash = "sha256:79f2d3a61e3d971c0acd59f53d3202e7336789cd893f7bdc3cc7bc37d6ef252c"},
+    {file = "furo-2022.6.4.1.tar.gz", hash = "sha256:c927848edf3292030d0719ebdab9e16d56f1b91c68562b9be316aa5b843775ab"},
 ]
 gitdb = [
     {file = "gitdb-4.0.9-py3-none-any.whl", hash = "sha256:8033ad4e853066ba6ca92050b9df2f89301b8fc8bf7e9324d412a63f8bf1a8fd"},
