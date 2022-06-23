@@ -1,5 +1,6 @@
 import csv
 import inspect
+import itertools
 import os
 import pathlib
 import shutil
@@ -130,6 +131,16 @@ def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
         Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
+    files = list(Path(datafiles).rglob("*.jpg"))
+    batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
+    assert files
+    assert bad_batch is True
+    assert isinstance(batch, list)
+
+
+@pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
+def test_try_predict_batch_with_corrupt_image_huggingface(datafiles, tmp_path) -> None:
+    session = cli_inference.HuggingFaceInferenceSession("flyswot/flyswot")
     files = list(Path(datafiles).rglob("*.jpg"))
     batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
     assert files
