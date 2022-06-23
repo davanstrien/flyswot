@@ -61,8 +61,16 @@ def get_image_files_from_pattern(
                     yield file
 
 
-def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[Path]:
-    """filter_to_preferred_ext"""
+def filter_to_preferred_ext(
+    files: Iterable[Path], extensions: List[str]
+) -> Iterable[Path]:
+    """
+    filters files to preferred extension
+    Args:
+        files: files to filter
+        extensions: extensions to keep
+    Yields: Iterable of filtered files
+    """
     files = list(files)
     files_without_ext = (
         file.with_suffix("") for file in files if not file.name.startswith(".")
@@ -71,7 +79,7 @@ def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[
     unique = set(itertoolz.unique(file_names_without_ext))
     for file in files:
         file_without_suffix = file.with_suffix("")
-        for ext in exts:
+        for ext in extensions:
             if file_without_suffix.name in unique:
                 if file.with_suffix(ext).is_file():
                     yield file.with_suffix(ext)
