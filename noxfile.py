@@ -1,22 +1,34 @@
 """Nox sessions."""
 import os
+import shlex
 import shutil
 import sys
 from pathlib import Path
 from textwrap import dedent
 
 import nox
-from nox_poetry import Session
-from nox_poetry import session
+
+try:
+    from nox_poetry import Session, session
+except ImportError:
+    message = f"""\
+    Nox failed to import the 'nox-poetry' package.
+
+    Please install it using the following command:
+
+    {sys.executable} -m pip install nox-poetry"""
+    raise SystemExit(dedent(message)) from None
 
 
-package = "flyswot"
-python_versions = ["3.9", "3.8"]
+package = "{{cookiecutter.package_name}}"
+python_versions = ["3.10", "3.9", "3.8", "3.7"]
+nox.needs_version = ">= 2021.6.6"
 nox.options.sessions = (
     "pre-commit",
     "safety",
     "mypy",
     "tests",
+    "typeguard",
     "xdoctest",
     "docs-build",
 )
@@ -32,12 +44,41 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
     Args:
         session: The Session object.
     """
-    if session.bin is None:
-        return
+    assert session.bin is not None  # noqa: S101
+
+    # Only patch hooks containing a reference to this session's bindir. Support
+    # quoting rules for Python and bash, but strip the outermost quotes so we
+    # can detect paths within the bindir, like <bindir>/python.
+    bindirs = [
+        bindir[1:-1] if bindir[0] in "'\"" else bindir
+        for bindir in (repr(session.bin), shlex.quote(session.bin))
+    ]
 
     virtualenv = session.env.get("VIRTUAL_ENV")
     if virtualenv is None:
         return
+
+    headers = {
+        # pre-commit < 2.16.0
+        "python": f"""\
+            import os
+            os.environ["VIRTUAL_ENV"] = {virtualenv!r}
+            os.environ["PATH"] = os.pathsep.join((
+                {session.bin!r},
+                os.environ.get("PATH", ""),
+            ))
+            """,
+        # pre-commit >= 2.16.0
+        "bash": f"""\
+            VIRTUAL_ENV={shlex.quote(virtualenv)}
+            PATH={shlex.quote(session.bin)}"{os.pathsep}$PATH"
+            """,
+        # pre-commit >= 2.17.0 on Windows forces sh shebang
+        "/bin/sh": f"""\
+            VIRTUAL_ENV={shlex.quote(virtualenv)}
+            PATH={shlex.quote(session.bin)}"{os.pathsep}$PATH"
+            """,
+    }
 
     hookdir = Path(".git") / "hooks"
     if not hookdir.is_dir():
@@ -47,36 +88,35 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
         if hook.name.endswith(".sample") or not hook.is_file():
             continue
 
+        if not hook.read_bytes().startswith(b"#!"):
+            continue
+
         text = hook.read_text()
-        bindir = repr(session.bin)[1:-1]  # strip quotes
-        if not (
+
+        if not any(
             Path("A") == Path("a") and bindir.lower() in text.lower() or bindir in text
+            for bindir in bindirs
         ):
             continue
 
         lines = text.splitlines()
-        if not (lines[0].startswith("#!") and "python" in lines[0].lower()):
-            continue
 
-        header = dedent(
-            f"""\
-            import os
-            os.environ["VIRTUAL_ENV"] = {virtualenv!r}
-            os.environ["PATH"] = os.pathsep.join((
-                {session.bin!r},
-                os.environ.get("PATH", ""),
-            ))
-            """
-        )
-
-        lines.insert(1, header)
-        hook.write_text("\n".join(lines))
+        for executable, header in headers.items():
+            if executable in lines[0].lower():
+                lines.insert(1, dedent(header))
+                hook.write_text("\n".join(lines))
+                break
 
 
-@session(name="pre-commit", python="3.9")
+@session(name="pre-commit", python=python_versions[0])
 def precommit(session: Session) -> None:
     """Lint using pre-commit."""
-    args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
+    args = session.posargs or [
+        "run",
+        "--all-files",
+        "--hook-stage=manual",
+        "--show-diff-on-failure",
+    ]
     session.install(
         "black",
         "darglint",
@@ -85,39 +125,29 @@ def precommit(session: Session) -> None:
         "flake8-bugbear",
         "flake8-docstrings",
         "flake8-rst-docstrings",
+        "isort",
         "pep8-naming",
         "pre-commit",
         "pre-commit-hooks",
-        "reorder-python-imports",
+        "pyupgrade",
     )
     session.run("pre-commit", *args)
     if args and args[0] == "install":
         activate_virtualenv_in_precommit_hooks(session)
 
 
-@session(python="3.9")
+@session(python=python_versions[0])
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = session.poetry.export_requirements()
     session.install("safety")
-    session.run(
-        "safety",
-        "check",
-        "--full-report",
-        "-i",
-        "44716",
-        "-i",
-        "44717",
-        "-i",
-        "44715",
-        f"--file={requirements}",
-    )
+    session.run("safety", "check", "--full-report", f"--file={requirements}")
 
 
 @session(python=python_versions)
 def mypy(session: Session) -> None:
     """Type-check using mypy."""
-    args = session.posargs or ["src", "docs/conf.py"]
+    args = session.posargs or ["src", "tests", "docs/conf.py"]
     session.install(".")
     session.install("mypy", "pytest")
     session.run("mypy", *args)
@@ -129,56 +159,58 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install(
-        "coverage[toml]",
-        "pytest",
-        "pygments",
-        "hypothesis",
-        "pytest-datafiles",
-        "onnxruntime",
-    )
+    session.install("coverage[toml]", "pytest", "pygments")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
         if session.interactive:
-            session.notify("coverage")
+            session.notify("coverage", posargs=[])
 
 
-@session
+@session(python=python_versions[0])
 def coverage(session: Session) -> None:
     """Produce the coverage report."""
-    # Do not use session.posargs unless this is the only session.
-    nsessions = len(session._runner.manifest)  # type: ignore[attr-defined]
-    has_args = session.posargs and nsessions == 1
-    args = session.posargs if has_args else ["report"]
+    args = session.posargs or ["report"]
 
     session.install("coverage[toml]")
 
-    if not has_args and any(Path().glob(".coverage.*")):
+    if not session.posargs and any(Path().glob(".coverage.*")):
         session.run("coverage", "combine")
 
     session.run("coverage", *args)
 
 
+@session(python=python_versions[0])
+def typeguard(session: Session) -> None:
+    """Runtime type checking using Typeguard."""
+    session.install(".")
+    session.install("pytest", "typeguard", "pygments")
+    session.run("pytest", f"--typeguard-packages={package}", *session.posargs)
+
+
 @session(python=python_versions)
 def xdoctest(session: Session) -> None:
     """Run examples with xdoctest."""
-    args = session.posargs or ["all"]
+    if session.posargs:
+        args = [package, *session.posargs]
+    else:
+        args = [f"--modname={package}", "--command=all"]
+        if "FORCE_COLOR" in os.environ:
+            args.append("--colored=1")
+
     session.install(".")
     session.install("xdoctest[colors]")
-    session.run("python", "-m", "xdoctest", package, *args)
+    session.run("python", "-m", "xdoctest", *args)
 
 
-@session(name="docs-build", python=python_versions[1])
+@session(name="docs-build", python=python_versions[0])
 def docs_build(session: Session) -> None:
     """Build the documentation."""
-    session.install(".")
-    session.install("cogapp")
-    args = ["-r", "README.md"]
-    session.run("cog", *args)
     args = session.posargs or ["docs", "docs/_build"]
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
+
+    session.install(".")
     session.install("sphinx", "sphinx-click", "furo", "myst-parser")
 
     build_dir = Path("docs", "_build")
