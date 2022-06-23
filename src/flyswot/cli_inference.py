@@ -79,7 +79,6 @@ def try_predict_batch(batch, inference_session, bs):
         return batch, bad_batch
 
 
-
 def predict_files(
     files: List[Path], inference_session, bs, csv_fname
 ) -> Tuple[set, int]:
