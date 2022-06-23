@@ -74,6 +74,10 @@ def try_predict_batch(batch, inference_session, bs):
     except PIL.UnidentifiedImageError:
         bad_batch = True
         return batch, bad_batch
+    except ValueError:
+        bad_batch = True
+        return batch, bad_batch
+
 
 
 def predict_files(
