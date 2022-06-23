@@ -171,10 +171,9 @@ def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
     files = list(Path(datafiles).rglob("*.jpg"))
-    for file in files:
-        for i in range(10):
-            im_file = image_dir / f"{file.name}_{i}.jpg"
-            shutil.copyfile(file, im_file)
+    for file, i in itertools.product(files, range(10)):
+        im_file = image_dir / f"{file.name}_{i}.jpg"
+        shutil.copyfile(file, im_file)
 
     files = list(Path(image_dir).rglob("*.jpg"))
     files = sorted(
