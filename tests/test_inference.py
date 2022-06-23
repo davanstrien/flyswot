@@ -1,5 +1,6 @@
 import csv
 import inspect
+import itertools
 import os
 import pathlib
 import shutil
@@ -137,6 +138,16 @@ def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
     assert isinstance(batch, list)
 
 
+@pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
+def test_try_predict_batch_with_corrupt_image_huggingface(datafiles, tmp_path) -> None:
+    session = cli_inference.HuggingFaceInferenceSession("flyswot/flyswot")
+    files = list(Path(datafiles).rglob("*.jpg"))
+    batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
+    assert files
+    assert bad_batch is True
+    assert isinstance(batch, list)
+
+
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
 def test_predict_files(datafiles, tmp_path) -> None:
     session = onnx_inference.OnnxInferenceSession(
@@ -160,10 +171,9 @@ def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -
         Path("tests/test_files/mult/20210629/model/vocab.txt"),
     )
     files = list(Path(datafiles).rglob("*.jpg"))
-    for file in files:
-        for i in range(10):
-            im_file = image_dir / f"{file.name}_{i}.jpg"
-            shutil.copyfile(file, im_file)
+    for file, i in itertools.product(files, range(10)):
+        im_file = image_dir / f"{file.name}_{i}.jpg"
+        shutil.copyfile(file, im_file)
 
     files = list(Path(image_dir).rglob("*.jpg"))
     files = sorted(
