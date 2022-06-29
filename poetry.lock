@@ -394,7 +394,7 @@ torch = ["torch"]
 
 [[package]]
 name = "hypothesis"
-version = "6.48.1"
+version = "6.48.2"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
@@ -1413,7 +1413,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.0"
-content-hash = "0437dd33e324195341129e99242eedf433a867f87cdbebff7e14b3ff21bfcd09"
+content-hash = "99bcd8e1e1415a103af349ea5bd8b3fae810f96695f032a5c3ff3d1ac21a84e8"
 
 [metadata.files]
 alabaster = [
@@ -1609,8 +1609,8 @@ huggingface-hub = [
     {file = "huggingface_hub-0.8.1.tar.gz", hash = "sha256:75c70797da54b849f06c2cbf7ba2217250ee217230b9f65547d5db3c5bd84bb5"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.48.1-py3-none-any.whl", hash = "sha256:1f605e8e50d3e29d14ac8c0bf1c53ac66f3515f3a0e09abb07bdd7a9dc4dcaaf"},
-    {file = "hypothesis-6.48.1.tar.gz", hash = "sha256:5b296c32a57e50555841dd742f2cd96c0b7ba1687730b0ef34b506d0f76b4a68"},
+    {file = "hypothesis-6.48.2-py3-none-any.whl", hash = "sha256:6223e31cc35c786a179a3caa6032238286937a6943de7ad0adb9e0f1382edcc3"},
+    {file = "hypothesis-6.48.2.tar.gz", hash = "sha256:ef548f10438095678af7fcfa369b882390355a6329db73174a65749b677677ec"},
 ]
 identify = [
     {file = "identify-2.5.0-py2.py3-none-any.whl", hash = "sha256:3acfe15a96e4272b4ec5662ee3e231ceba976ef63fd9980ed2ce9cc415df393f"},
