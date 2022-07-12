@@ -1219,7 +1219,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "toolz"
-version = "0.11.2"
+version = "0.12.0"
 description = "List processing tools and functional utilities"
 category = "main"
 optional = false
@@ -1413,7 +1413,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.0"
-content-hash = "3a1028c080196ef558c0319426856fac76faecc3027117e06189368f765660e4"
+content-hash = "7a155a7a61e25167002142dfef0b12cbbb49a41d424906cc82e590b53e13614c"
 
 [metadata.files]
 alabaster = []
