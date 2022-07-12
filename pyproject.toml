@@ -33,7 +33,7 @@ pytest = "^7.1.2"
 coverage = {extras = ["toml"], version = "^6.4"}
 safety = "^2.0.0"
 mypy = "^0.961"
-xdoctest = {extras = ["colors"], version = "^1.0.0"}
+xdoctest = {extras = ["colors"], version = "^1.0.1"}
 sphinx = "^5.0.2"
 sphinx-autobuild = "^2021.3.14"
 pre-commit = "^2.20.0"
