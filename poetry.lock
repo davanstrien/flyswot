@@ -885,7 +885,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "reorder-python-imports"
-version = "3.8.1"
+version = "3.8.2"
 description = "Tool for reordering python imports"
 category = "dev"
 optional = false
@@ -1417,7 +1417,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.0"
-content-hash = "49da46de6e7ea6195ba07860d8aec0d7147a0150a351f395c3d0700715af8733"
+content-hash = "0c65b05cba1e9243c19401bb7fc7e4b8ae81fc09a9764cd453046e84b9db22de"
 
 [metadata.files]
 alabaster = [
@@ -2082,8 +2082,8 @@ regex = [
     {file = "regex-2022.4.24.tar.gz", hash = "sha256:92183e9180c392371079262879c6532ccf55f808e6900df5d9f03c9ca8807255"},
 ]
 reorder-python-imports = [
-    {file = "reorder_python_imports-3.8.1-py2.py3-none-any.whl", hash = "sha256:bfa44fa719595766c18c59ff552e6e02c071f896425746f94b2a34f4b93e217c"},
-    {file = "reorder_python_imports-3.8.1.tar.gz", hash = "sha256:33a981a477875ac79588dbc6f80d7db85eccd2f5529ff289fe51283afd5affb5"},
+    {file = "reorder_python_imports-3.8.2-py2.py3-none-any.whl", hash = "sha256:c362190fc61f28c9ed3657de0ae702694ce97f90da54617716b23d70b4d4771c"},
+    {file = "reorder_python_imports-3.8.2.tar.gz", hash = "sha256:bc5bd5e01548423fdcf62da767b28d5df6e613b03f9f795438f72b08b75dfba8"},
 ]
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
