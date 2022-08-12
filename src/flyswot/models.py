@@ -161,7 +161,6 @@ def create_metrics_tables(model_info: ModelInfo) -> List[Table]:
         for result in model["results"]:
             for metric in result["metrics"]:
                 metrics.append(metric)
-    tables = []
     for metric in metrics:
         table = Table()
         for name in metric.keys():
@@ -172,8 +171,7 @@ def create_metrics_tables(model_info: ModelInfo) -> List[Table]:
         for item in metric_values
     ]
     table.add_row(*list(map(str, rounded_metric_values)))
-    tables.append(table)
-    return tables
+    return [table]
 
 
 if __name__ == "__main__":  # pragma: no cover
