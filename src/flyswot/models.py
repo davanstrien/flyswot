@@ -48,16 +48,6 @@ class LocalModel:
                 self.model = file
 
 
-# def _url_callback(url: str) -> Union[str, None]:
-#     """Checks url is valid"""
-#     if url == "latest":
-#         return url
-#     if validators.url(url):
-#         return url
-#     else:
-#         raise typer.BadParameter(f"Please check {url} is a valid url")
-
-
 def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
     """Checks for a local model dir and creates one if not found"""
     if not model_dir_path:

@@ -217,11 +217,6 @@ def create_file_summary_markdown(
     image_formats: Union[List[str], str],
 ) -> Panel:
     """creates Markdown summary containing number of files checked by flyswot vs total images files under directory"""
-    # if isinstance(image_formats, list):
-    #     counts = [core.count_files_with_ext(directory, ext) for ext in image_formats]
-    #     total_image_file_count = sum(counts)
-    # else:
-    #     total_image_file_count = core.count_files_with_ext(directory, image_formats)
     return Panel(
         Markdown(
             f"""
@@ -394,7 +389,6 @@ class HuggingFaceInferenceSession(InferenceSession):
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
         all_pred = []
         for file, pred in zip(str_batch, prediction_dicts):
-            # flysheet_other_pred = self._create_flysheet_other_predictions(pred)
             item_pred = [pred]
             prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
             all_pred.append(prediction)
