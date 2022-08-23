@@ -12,6 +12,7 @@ import typer
 from huggingface_hub import hf_hub_url
 from huggingface_hub import snapshot_download
 from huggingface_hub.hf_api import ModelInfo
+from rich import print
 from rich.markdown import Markdown
 from rich.table import Table
 from toolz import itertoolz
@@ -56,13 +57,13 @@ def ensure_model_dir(model_dir_path: Union[Path, None] = None) -> Path:
     else:
         model_dir = Path(model_dir_path) / "models"
     if not (model_dir.exists() and model_dir.is_dir()):
-        typer.echo(f"Creating directory for storing models in {model_dir}...")
+        print(f"Creating directory for storing models in {model_dir}...")
         try:
             model_dir.mkdir(parents=True)
         except PermissionError as e:  # pragma: no cover
-            typer.echo(f"{model_dir} is not writeable: {e}")
+            print(f"{model_dir} is not writeable: {e}")
             raise typer.Exit(code=1) from None
-    typer.echo(f"Models stored in {model_dir}")
+    print(f"Models stored in {model_dir}")
     return model_dir
 
 
@@ -95,7 +96,7 @@ def ensure_model(model_dir: Path) -> LocalModel:  # pragma: no cover
     """Checks for a local model and if not found downloads the latest available remote model"""
     if model := get_model(model_dir=model_dir):
         return LocalModel(model)
-    typer.echo("Not able to find a model")
+    print("Not able to find a model")
     raise typer.Exit()
 
 

@@ -60,7 +60,7 @@ def predict_image(
 def check_files(files: List, pattern: str, directory: Path) -> None:
     """Check if files exist and raises error if not"""
     if not files:
-        typer.echo(
+        print(
             f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
         )
         raise typer.Exit(code=1)
