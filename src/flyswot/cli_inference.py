@@ -25,6 +25,7 @@ from rich.columns import Columns
 from rich.layout import Layout
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.progress import Progress
 from rich.table import Table
 from rich.text import Text
 from toolz import itertoolz
@@ -83,7 +84,8 @@ def predict_files(
     files: List[Path], inference_session, bs, csv_fname
 ) -> Tuple[set, int]:
     """Predict files"""
-    with typer.progressbar(length=len(files)) as progress:
+    with Progress() as progress:
+        total_progress = progress.add_task("prediction progress", total=len(files))
         images_checked = 0
         bad_batch_files = []
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
@@ -96,7 +98,7 @@ def predict_files(
                 create_csv_header(batch_predictions, csv_fname)
             if not bad_batch:
                 write_batch_preds_to_csv(batch_predictions, csv_fname)
-            progress.update(len(batch))
+            progress.update(total_progress, advance=len(batch))
             images_checked += len(batch)
         corrupt_images = set()
         if bad_batch_files:
