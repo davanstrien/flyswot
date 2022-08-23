@@ -93,19 +93,19 @@ cog.out(
 ]]] -->
 
 ```
-Usage: flyswot [OPTIONS] COMMAND [ARGS]...
 
-Options:
-  --install-completion [bash|zsh|fish|powershell|pwsh]
-                                  Install completion for the specified shell.
-  --show-completion [bash|zsh|fish|powershell|pwsh]
-                                  Show completion for the specified shell, to
-                                  copy it or customize the installation.
-  --help                          Show this message and exit.
+ Usage: flyswot [OPTIONS] COMMAND [ARGS]...
 
-Commands:
-  model    flyswot commands for interacting with models
-  predict  flyswot commands for making predictions
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --install-completion        [bash|zsh|fish|powershell|pwsh]  Install completion for the specified shell. [default: None]                                                 │
+│ --show-completion           [bash|zsh|fish|powershell|pwsh]  Show completion for the specified shell, to copy it or customize the installation. [default: None]          │
+│ --help                                                       Show this message and exit.                                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ model                      flyswot commands for interacting with models                                                                                                  │
+│ predict                    flyswot commands for making predictions                                                                                                       │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 
 ```
 
@@ -128,26 +128,25 @@ cog.out(
 ]]] -->
 
 ```
-Usage: flyswot predict directory [OPTIONS] DIRECTORY CSV_SAVE_DIR
 
-  Predicts against all images stored under DIRECTORY which match PATTERN in the
-  filename.
+ Usage: flyswot predict directory [OPTIONS] DIRECTORY CSV_SAVE_DIR
 
-  By default searches for filenames containing 'fs'.
+ Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
+ By default searches for filenames containing 'fs'.
+ Creates a CSV report saved to `csv_save_dir`
 
-  Creates a CSV report saved to `csv_save_dir`
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    directory         PATH  Directory to start searching for images from [default: None] [required]                                                                     │
+│ *    csv_save_dir      PATH  Directory used to store the csv report [default: None] [required]                                                                           │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --model-id             TEXT     The model flyswot should use for making predictions [default: flyswot/convnext-tiny-224_flyswot]                                         │
+│ --pattern              TEXT     Pattern used to filter image filenames [default: None]                                                                                   │
+│ --bs                   INTEGER  Batch Size [default: 16]                                                                                                                 │
+│ --image-formats        TEXT     Image format(s) to check [default: .tif]                                                                                                 │
+│ --help                          Show this message and exit.                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-Arguments:
-  DIRECTORY     Directory to start searching for images from  [required]
-  CSV_SAVE_DIR  Directory used to store the csv report  [required]
-
-Options:
-  --model-id TEXT       The model flyswot should use for making predictions
-                        [default: flyswot/convnext-tiny-224_flyswot]
-  --pattern TEXT        Pattern used to filter image filenames
-  --bs INTEGER          Batch Size  [default: 16]
-  --image-formats TEXT  Image format(s) to check  [default: .tif]
-  --help                Show this message and exit.
 
 ```
 
