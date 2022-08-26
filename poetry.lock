@@ -383,7 +383,7 @@ gitdb = ">=4.0.1,<5"
 
 [[package]]
 name = "huggingface-hub"
-version = "0.9.0"
+version = "0.9.1"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
 category = "main"
 optional = false
@@ -1683,8 +1683,8 @@ gitpython = [
     {file = "GitPython-3.1.27.tar.gz", hash = "sha256:1c885ce809e8ba2d88a29befeb385fcea06338d3640712b59ca623c220bb5704"},
 ]
 huggingface-hub = [
-    {file = "huggingface_hub-0.9.0-py3-none-any.whl", hash = "sha256:b525f5b4cb3a739985bd63523b19d6dea5edb127ad2d3e58109654b45b948d78"},
-    {file = "huggingface_hub-0.9.0.tar.gz", hash = "sha256:3f38eeece4f7b88d8a47eb300188b695c31cf3d9c38a48108c670aa400eb3029"},
+    {file = "huggingface_hub-0.9.1-py3-none-any.whl", hash = "sha256:7a588046bdeb84e7bc99b3da58bbb4312a56d94ba51ebc60dfe610c18b3d0b9f"},
+    {file = "huggingface_hub-0.9.1.tar.gz", hash = "sha256:6395f26aaf44bbb4a73d3e14aca228fa39534696f651c6c82a6347f8c9f5950b"},
 ]
 humanfriendly = [
     {file = "humanfriendly-10.0-py2.py3-none-any.whl", hash = "sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477"},
