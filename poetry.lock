@@ -1333,7 +1333,7 @@ telegram = ["requests"]
 
 [[package]]
 name = "transformers"
-version = "4.22.0"
+version = "4.22.1"
 description = "State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow"
 category = "main"
 optional = false
@@ -2404,8 +2404,8 @@ tqdm = [
     {file = "tqdm-4.64.0.tar.gz", hash = "sha256:40be55d30e200777a307a7585aee69e4eabb46b4ec6a4b4a5f2d9f11e7d5408d"},
 ]
 transformers = [
-    {file = "transformers-4.22.0-py3-none-any.whl", hash = "sha256:4b3ac02ff76b9a8db02bb74e6de9a29c7e01aa3cd126d66b19205561644c6947"},
-    {file = "transformers-4.22.0.tar.gz", hash = "sha256:3beb6e1b65528649bec777be6032c242765e1a7b1ff0fb562c6bcd574ec8c96f"},
+    {file = "transformers-4.22.1-py3-none-any.whl", hash = "sha256:8f06d0dbdb95717fc4a48c61d876f25a35ca67e95851581c681fe4e6d1cf9f94"},
+    {file = "transformers-4.22.1.tar.gz", hash = "sha256:b9834aa01979778c16130ad260e41d314f4c3a65930bdc40b1232833c988280b"},
 ]
 typer = [
     {file = "typer-0.6.1-py3-none-any.whl", hash = "sha256:54b19e5df18654070a82f8c2aa1da456a4ac16a2a83e6dcd9f170e291c56338e"},
