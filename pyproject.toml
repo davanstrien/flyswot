@@ -54,7 +54,7 @@ hypothesis = "^6.54.5"
 memory-profiler = "^0.60.0"
 pytest-datafiles = "^2.0"
 onnxruntime = "^1.12.1"
-furo = "^2022.6.21"
+furo = "^2022.9.15"
 myst-parser = "^0.18.0"
 cogapp = "^3.3.0"
 
