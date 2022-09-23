@@ -339,7 +339,7 @@ def write_batch_preds_to_csv(predictions, csv_fpath: Path) -> None:
 @write_batch_preds_to_csv.register
 def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
     """Appends `predictions` batch to `csv_path`"""
-    with open(csv_fpath, mode="a", newline="") as csv_file:
+    with open(csv_fpath, mode="a", newline="", encoding="utf-8") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         for pred in predictions.batch:
@@ -359,7 +359,7 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
             for j in range(top_n):
                 row[f"prediction_label_{i}_{j}"] = sorted_predictions[j][1]
                 row[f"confidence_label_{i}_{j}"] = sorted_predictions[j][0]
-        with open(csv_fpath, mode="a", newline="") as csv_file:
+        with open(csv_fpath, mode="a", newline="", encoding="utf-8") as csv_file:
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
             writer.writerow(row)
