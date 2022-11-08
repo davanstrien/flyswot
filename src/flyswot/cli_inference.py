@@ -20,6 +20,7 @@ from typing import Union
 
 import PIL
 import typer
+from loguru import logger
 from rich import print
 from rich.columns import Columns
 from rich.layout import Layout
@@ -73,6 +74,7 @@ def try_predict_batch(batch, inference_session, bs):
         batch_predictions = inference_session.predict_batch(batch, bs)
         return batch_predictions, bad_batch
     except PIL.UnidentifiedImageError:
+        logger.warning("Found bad image in batch")
         bad_batch = True
         return batch, bad_batch
     except ValueError:
@@ -348,6 +350,7 @@ def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
             writer.writerow(row)
 
 
+@logger.catch()
 @write_batch_preds_to_csv.register
 def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> None:
     for pred in predictions.batch:
@@ -362,7 +365,13 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
         with open(csv_fpath, mode="a", newline="", encoding="utf-8") as csv_file:
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
-            writer.writerow(row)
+            try:
+                writer.writerow(row)
+            except UnicodeEncodeError as exception:
+                logger.error(
+                    f"Unable to write prediction to CSV because of {exception}"
+                )
+                continue
 
 
 class HuggingFaceInferenceSession(InferenceSession):
