@@ -324,7 +324,7 @@ def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2) -> None:
         for j in range(top_n):
             pred[f"prediction_label_{string.ascii_letters[i]}_{j}"] = ""
             pred[f"confidence_label_{string.ascii_letters[i]}_{j}"] = ""
-    with open(csv_path, mode="w", newline="") as csv_file:
+    with open(csv_path, mode="w", newline="", encoding="utf-8") as csv_file:
         field_names = list(pred.keys())
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         writer.writeheader()
