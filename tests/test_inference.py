@@ -237,6 +237,12 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         )
 
 
+@pytest.mark.datafiles(
+    os.path.join(
+        FIXTURE_DIR,
+        "fly_fse.jpg",
+    )
+)
 def test_predict_directory_app_cache(datafiles, tmp_path) -> None:
     cli_inference.predict_directory(
         datafiles,
