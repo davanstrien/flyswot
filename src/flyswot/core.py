@@ -10,6 +10,7 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 
+from loguru import logger
 from toolz import itertoolz  # type: ignore
 
 from flyswot.console import console
@@ -40,6 +41,7 @@ def create_file_search_message(
     return message
 
 
+@logger.catch()
 def get_image_files_from_pattern(
     directory: Path, pattern: Optional[str], ext: Optional[str]
 ) -> Iterator[Path]:
@@ -61,6 +63,7 @@ def get_image_files_from_pattern(
                     yield file
 
 
+@logger.catch()
 def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[Path]:
     """filter_to_preferred_ext"""
     files = list(files)
