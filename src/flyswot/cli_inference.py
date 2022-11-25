@@ -386,7 +386,8 @@ class HuggingFaceInferenceSession(InferenceSession):
 
     def __init__(self, model: str, share_hf_cache_directory: bool = True):
         """Create Hugging Face Inference Session"""
-        if not self.share_hf_cache_dir:
+        self.share_hf_cache_directory = share_hf_cache_directory
+        if not self.share_hf_cache_directory:
             self.model = AutoModelForImageClassification.from_pretrained(
                 model, cache_dir=app_dir
             )
