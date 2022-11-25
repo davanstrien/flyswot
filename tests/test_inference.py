@@ -237,6 +237,18 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         )
 
 
+def test_predict_directory_app_cache(datafiles, tmp_path) -> None:
+    cli_inference.predict_directory(
+        datafiles,
+        tmp_path,
+        pattern="fse",
+        bs=1,
+        image_formats=[".jpg"],
+        model_id="flyswot/convnext-tiny-224_flyswot",
+        share_hf_cache_directory=False,
+    )
+
+
 def test_csv_header():
     with pytest.raises(NotImplementedError):
         cli_inference.create_csv_header("string", Path("."))

@@ -37,6 +37,7 @@ from transformers import pipeline
 
 from flyswot import core
 from flyswot import models
+from flyswot.config import APP_NAME
 from flyswot.console import console
 from flyswot.inference import InferenceSession
 from flyswot.inference import MultiLabelImagePredictionItem
@@ -46,6 +47,7 @@ from flyswot.logo import flyswot_logo
 
 app = typer.Typer()
 
+app_dir = typer.get_app_dir(APP_NAME)
 
 image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
 
@@ -138,6 +140,9 @@ def predict_directory(
         default=[".tif"],
         help="Image format(s) to check",
     ),
+    share_hf_cache_directory: bool = typer.Option(
+        True, help="Wheter to shrare the same cache directory as other 🤗models"
+    ),
 ):
     """Predicts against all images stored under DIRECTORY which match PATTERN in the filename.
 
@@ -146,7 +151,9 @@ def predict_directory(
     Creates a CSV report saved to `csv_save_dir`
     """
     start_time = time.perf_counter()
-    huggingfaceinference = HuggingFaceInferenceSession(model=model_id)
+    huggingfaceinference = HuggingFaceInferenceSession(
+        model=model_id, share_hf_cache_directory=share_hf_cache_directory
+    )
     files = sorted(
         itertoolz.concat(
             core.get_image_files_from_pattern(directory, pattern, image_format)
@@ -237,7 +244,7 @@ def get_inference_table_columns(csv_fname: Path) -> List[Table]:
     """print_inference_summary from `fname`"""
     labels_to_print = labels_from_csv(csv_fname)
     return [
-        print_table(labels, f"Prediction summary {i+1}", print=False)
+        print_table(labels, f"Prediction summary {i + 1}", print=False)
         for i, labels in enumerate(labels_to_print)
     ]
 
@@ -377,10 +384,18 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
 class HuggingFaceInferenceSession(InferenceSession):
     "Huggingface inference session"
 
-    def __init__(self, model: str):
+    def __init__(self, model: str, share_hf_cache_dir: bool = True):
         """Create Hugging Face Inference Session"""
-        self.model = AutoModelForImageClassification.from_pretrained(model)
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(model)
+        if not share_hf_cache_dir:
+            self.model = AutoModelForImageClassification.from_pretrained(
+                model, cache_dir=app_dir
+            )
+            self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+                model, cache_dir=app_dir
+            )
+        else:
+            self.model = AutoModelForImageClassification.from_pretrained(model)
+            self.feature_extractor = AutoFeatureExtractor.from_pretrained(model)
         self.session = pipeline(
             "image-classification",
             model=self.model,
