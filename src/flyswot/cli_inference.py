@@ -20,6 +20,7 @@ from typing import Union
 
 import PIL
 import typer
+from loguru import logger
 from rich import print
 from rich.columns import Columns
 from rich.layout import Layout
@@ -73,6 +74,7 @@ def try_predict_batch(batch, inference_session, bs):
         batch_predictions = inference_session.predict_batch(batch, bs)
         return batch_predictions, bad_batch
     except PIL.UnidentifiedImageError:
+        logger.warning("Found bad image in batch")
         bad_batch = True
         return batch, bad_batch
     except ValueError:
@@ -324,7 +326,7 @@ def _(batch: MultiPredictionBatch, csv_path: Path, top_n: int = 2) -> None:
         for j in range(top_n):
             pred[f"prediction_label_{string.ascii_letters[i]}_{j}"] = ""
             pred[f"confidence_label_{string.ascii_letters[i]}_{j}"] = ""
-    with open(csv_path, mode="w", newline="") as csv_file:
+    with open(csv_path, mode="w", newline="", encoding="utf-8") as csv_file:
         field_names = list(pred.keys())
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         writer.writeheader()
@@ -339,7 +341,7 @@ def write_batch_preds_to_csv(predictions, csv_fpath: Path) -> None:
 @write_batch_preds_to_csv.register
 def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
     """Appends `predictions` batch to `csv_path`"""
-    with open(csv_fpath, mode="a", newline="") as csv_file:
+    with open(csv_fpath, mode="a", newline="", encoding="utf-8") as csv_file:
         field_names = ["path", "directory", "predicted_label", "confidence"]
         writer = csv.DictWriter(csv_file, fieldnames=field_names)
         for pred in predictions.batch:
@@ -348,6 +350,7 @@ def _(predictions: PredictionBatch, csv_fpath: Path) -> None:
             writer.writerow(row)
 
 
+@logger.catch()
 @write_batch_preds_to_csv.register
 def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> None:
     for pred in predictions.batch:
@@ -359,10 +362,16 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
             for j in range(top_n):
                 row[f"prediction_label_{i}_{j}"] = sorted_predictions[j][1]
                 row[f"confidence_label_{i}_{j}"] = sorted_predictions[j][0]
-        with open(csv_fpath, mode="a", newline="") as csv_file:
+        with open(csv_fpath, mode="a", newline="", encoding="utf-8") as csv_file:
             field_names = list(row.keys())
             writer = csv.DictWriter(csv_file, fieldnames=field_names)
-            writer.writerow(row)
+            try:
+                writer.writerow(row)
+            except UnicodeEncodeError as exception:
+                logger.error(
+                    f"Unable to write prediction to CSV because of {exception}"
+                )
+                continue
 
 
 class HuggingFaceInferenceSession(InferenceSession):
