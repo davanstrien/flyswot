@@ -384,9 +384,9 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
 class HuggingFaceInferenceSession(InferenceSession):
     "Huggingface inference session"
 
-    def __init__(self, model: str, share_hf_cache_dir: bool = True):
+    def __init__(self, model: str, share_hf_cache_directory: bool = True):
         """Create Hugging Face Inference Session"""
-        if not share_hf_cache_dir:
+        if not self.share_hf_cache_dir:
             self.model = AutoModelForImageClassification.from_pretrained(
                 model, cache_dir=app_dir
             )
