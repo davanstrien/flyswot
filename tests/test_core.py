@@ -32,7 +32,6 @@ patterns_to_test: List[str] = [
     "fse002av",
     "fse002bv",
     "fbrigr",
-    "fbrigv",
 ]
 
 
