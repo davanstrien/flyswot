@@ -1,5 +1,7 @@
 """Core functionality."""
+import fnmatch
 import mimetypes
+import os
 import time
 from pathlib import Path
 from typing import Any
@@ -9,14 +11,14 @@ from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
+from typing import Union
 
 from loguru import logger
 from toolz import itertoolz  # type: ignore
 
 from flyswot.console import console
 
-
-image_extensions: Set[str] = {
+IMAGE_EXTENSIONS: Set[str] = {
     k for k, v in mimetypes.types_map.items() if v.startswith("image/")
 }
 
@@ -41,26 +43,77 @@ def create_file_search_message(
     return message
 
 
+#
+# @logger.catch()
+# def get_image_files_from_pattern(
+#     directory: Path, pattern: Optional[str], ext: Optional[str]
+# ) -> Iterator[Path]:
+#     """yield image files from `directory` matching pattern `str` with `ext`"""
+#     message = create_file_search_message(directory, pattern, ext)
+#     with console.status(message, spinner="dots"):
+#         time.sleep(1)
+#         if pattern:
+#             yield from Path(directory).rglob(f"**/*{pattern}*{ext}")
+#             console.log("Search files complete...")
+#         if pattern and not ext:
+#             yield from Path(directory).rglob(f"*{pattern}*")
+#         if not pattern and ext:
+#             yield from Path(directory).rglob(f"*{ext}")
+#         if not pattern and not ext:
+#             match_files = Path(directory).rglob("*")
+#             for file in match_files:
+#                 if file.suffix in image_extensions:
+#                     yield file
+
+
+def yield_all_files(directory: Path) -> Iterator[Path]:  # pragma: no cover
+    """Yield all files recursively from directory."""
+    with os.scandir(directory) as it:
+        for entry in it:
+            if entry.is_dir():
+                yield from yield_all_files(entry.path)
+            if entry.is_file:
+                yield Path(entry)
+
+
+def file_can_be_read(path) -> bool:  # pragma: no cover
+    """Checks if a file can be opened."""
+    return os.access(path, os.R_OK)
+
+
+def filter_readable_files(files: Iterator[Path]) -> Iterator[Path]:  # pragma: no cover
+    """Yields all readable files from files."""
+    for file in files:
+        if file_can_be_read(file):
+            yield file
+        else:
+            logger.warning(f"Following file can't be read {file}")
+            continue
+
+
 @logger.catch()
 def get_image_files_from_pattern(
-    directory: Path, pattern: Optional[str], ext: Optional[str]
+    directory: Path,
+    filename_pattern: Optional[str] = None,
+    image_formats: Union[str, Set[str]] = None,
+    check_opens: bool = True,
 ) -> Iterator[Path]:
-    """yield image files from `directory` matching pattern `str` with `ext`"""
-    message = create_file_search_message(directory, pattern, ext)
+    """yield image files from `directory` matching pattern with `ext`"""
+    message = create_file_search_message(directory, filename_pattern, image_formats)
     with console.status(message, spinner="dots"):
         time.sleep(1)
-        if pattern:
-            yield from Path(directory).rglob(f"**/*{pattern}*{ext}")
-            console.log("Search files complete...")
-        if pattern and not ext:
-            yield from Path(directory).rglob(f"*{pattern}*")
-        if not pattern and ext:
-            yield from Path(directory).rglob(f"*{ext}")
-        if not pattern and not ext:
-            match_files = Path(directory).rglob("*")
-            for file in match_files:
-                if file.suffix in image_extensions:
-                    yield file
+        all_files = yield_all_files(directory)
+        if check_opens:
+            all_files = filter_readable_files(all_files)
+        for file in all_files:
+            name = file.name
+            filename_pattern = f"*{filename_pattern}*" if filename_pattern else "*"
+            if not image_formats:
+                image_formats = IMAGE_EXTENSIONS
+            if isinstance(image_formats, str):
+                image_formats = {image_formats}
+            if fnmatch.fnmatch(name, filename_pattern) and file.suffix in image_formats:
+                yield file
 
 
 @logger.catch()
