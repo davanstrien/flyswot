@@ -69,7 +69,8 @@ def test_filter(fname, tmpdir):
     assert len(files) == (50 * 2) + 25
     assert len(list(matches)) == 50 + 25
 
-# TODO generate patterns via hypothesis 
+
+# TODO generate patterns via hypothesis
 patterns_to_test_with_front: List[str] = [
     "fs",
     "fse",
