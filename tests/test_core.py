@@ -69,7 +69,7 @@ def test_filter(fname, tmpdir):
     assert len(files) == (50 * 2) + 25
     assert len(list(matches)) == 50 + 25
 
-
+# TODO generate patterns via hypothesis 
 patterns_to_test_with_front: List[str] = [
     "fs",
     "fse",
@@ -131,6 +131,7 @@ def test_get_all_images_with_pattern(pattern, tmpdir):
 
 
 def test_count_files_with_extension(tmpdir):
+    """It returns the correct file count."""
     a_dir = tmpdir.mkdir("image_dir")
     for number in range(50):
         file = a_dir.join(f"file_{number}.tif")
