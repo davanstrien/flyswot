@@ -185,7 +185,7 @@ def test_filter_matching_files(fname, tmp_path):
 
 @pytest.fixture()
 def image_files(tmpdir_factory):
-    """Fixture for image files"""
+    """Fixture for image files."""
     a_dir = tmpdir_factory.mktemp("image_dir")
     for fname in range(2000):
         file = a_dir.join(f"file_{fname}.tif")
