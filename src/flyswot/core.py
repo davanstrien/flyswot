@@ -118,7 +118,7 @@ def get_image_files_from_pattern(
 
 @logger.catch()
 def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[Path]:
-    """filter_to_preferred_ext"""
+    """Filter files to preferred extension."""
     files = list(files)
     files_without_ext = (
         file.with_suffix("") for file in files if not file.name.startswith(".")
