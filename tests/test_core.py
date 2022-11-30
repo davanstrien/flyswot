@@ -1,4 +1,5 @@
 """Tests for core module."""
+import itertools
 import os
 import typing
 from pathlib import Path
@@ -31,7 +32,6 @@ patterns_to_test: List[str] = [
     "fse002av",
     "fse002bv",
     "fbrigr",
-    "fbrigv",
 ]
 
 
@@ -58,15 +58,18 @@ def test_filter(fname, tmpdir):
         file2.ensure()
     for i in range(5):  # create 25 files in 5 subfolders
         a_sub_dir = a_dir.mkdir(f"{i}_dir")
-        for i in range(5):
-            file = a_sub_dir.join(f"file_{fname}_{i}.tif")
+        for j in range(5):
+            file = a_sub_dir.join(f"file_{fname}_{j}.tif")
             file.ensure()
-    matches = core.get_image_files_from_pattern(a_dir, fname, ".tif")
+    matches = core.get_image_files_from_pattern(
+        a_dir, fname, image_formats={".tif"}, check_opens=False
+    )
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == (50 * 2) + 25
     assert len(list(matches)) == 50 + 25
 
 
+# TODO generate patterns via hypothesis
 patterns_to_test_with_front: List[str] = [
     "fs",
     "fse",
@@ -100,7 +103,7 @@ def test_get_all_images(ext, tmpdir):
         for i in range(5):
             file = a_sub_dir.join(f"file_{i}.{ext}")
             file.ensure()
-    matches = core.get_image_files_from_pattern(a_dir, None, None)
+    matches = core.get_image_files_from_pattern(a_dir, None, None, check_opens=False)
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == 50 + 25
     assert len(list(matches)) == 50 + 25  # all image files matched
@@ -111,22 +114,24 @@ def test_get_all_images_with_pattern(pattern, tmpdir):
     """It gets all image files"""
     image_extensions = ["tif", "tiff", "jpg", "jpeg", "png"]
     a_dir = tmpdir.mkdir("image_dir")
-    for number in range(2):
-        for ext in image_extensions:
-            file = a_dir.join(f"file{pattern}_{number}.{ext}")
-            file.ensure()
+    for number, ext in itertools.product(range(2), image_extensions):
+        file = a_dir.join(f"file{pattern}_{number}.{ext}")
+        file.ensure()
     for ext in image_extensions:
-        matches = core.get_image_files_from_pattern(a_dir, None, ext)
-        files = [f for f in Path(a_dir).rglob(f"**/{ext}") if f.is_file()]
+        matches = core.get_image_files_from_pattern(
+            a_dir, None, f".{ext}", check_opens=False
+        )
+        # files = [f for f in Path(a_dir).rglob(f"**/{ext}") if f.is_file()]
         assert len(list(matches)) == 2
 
-    matches = core.get_image_files_from_pattern(a_dir, pattern, None)
+    matches = core.get_image_files_from_pattern(a_dir, pattern, None, check_opens=False)
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == 2 * len(image_extensions)
     assert len(list(matches)) == 2 * len(image_extensions)  # all image files matched
 
 
 def test_count_files_with_extension(tmpdir):
+    """It returns the correct file count."""
     a_dir = tmpdir.mkdir("image_dir")
     for number in range(50):
         file = a_dir.join(f"file_{number}.tif")
@@ -149,7 +154,7 @@ def test_filter_with_front(fname, tmpdir):
         for i in range(5):
             file = a_sub_dir.join(f"file_{fname}_{i}.tif")
             file.ensure()
-    matches = core.get_image_files_from_pattern(a_dir, fname, ".tif")
+    matches = core.get_image_files_from_pattern(a_dir, fname, ".tif", check_opens=False)
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == (50 * 2) + 25
     assert len(list(matches)) == 50 + 25
@@ -179,7 +184,7 @@ def test_filter_matching_files(fname, tmp_path):
 
 @pytest.fixture()
 def image_files(tmpdir_factory):
-    """Fixture for image files"""
+    """Fixture for image files."""
     a_dir = tmpdir_factory.mktemp("image_dir")
     for fname in range(2000):
         file = a_dir.join(f"file_{fname}.tif")
