@@ -723,13 +723,13 @@ pyreadline3 = {version = "*", markers = "sys_platform == \"win32\" and python_ve
 
 [[package]]
 name = "hypothesis"
-version = "6.81.1"
+version = "6.82.0"
 description = "A library for property-based testing"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "hypothesis-6.81.1-py3-none-any.whl", hash = "sha256:f370dc76c2c036298e345dc207ec80f2ce695f95166a5d358988464b34a53e0f"},
-    {file = "hypothesis-6.81.1.tar.gz", hash = "sha256:89c1afad5000a1cc89409fff4187e6118816a6cac80195c8c719efda14a8ce52"},
+    {file = "hypothesis-6.82.0-py3-none-any.whl", hash = "sha256:fa8eee429b99f7d3c953fb2b57de415fd39b472b09328b86c1978f12669ef395"},
+    {file = "hypothesis-6.82.0.tar.gz", hash = "sha256:ffece8e40a34329e7112f7408f2c45fe587761978fdbc6f4f91bf0d683a7d4d9"},
 ]
 
 [package.dependencies]
@@ -2665,4 +2665,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.0, <3.11.0"
-content-hash = "f68b3e081e00f6d2c0add66859e994cb237314504deb6bf241f076b5ffb26883"
+content-hash = "51527484f13b1f9c4ab9aa17eea83f550dcd07ca4220f14e20acf600335b58fa"
