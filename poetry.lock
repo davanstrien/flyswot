@@ -632,13 +632,13 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "furo"
-version = "2023.5.20"
+version = "2023.8.17"
 description = "A clean customisable Sphinx documentation theme."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "furo-2023.5.20-py3-none-any.whl", hash = "sha256:594a8436ddfe0c071f3a9e9a209c314a219d8341f3f1af33fdf7c69544fab9e6"},
-    {file = "furo-2023.5.20.tar.gz", hash = "sha256:40e09fa17c6f4b22419d122e933089226dcdb59747b5b6c79363089827dea16f"},
+    {file = "furo-2023.8.17-py3-none-any.whl", hash = "sha256:baed406fc8f75a585caa330756b6841e6a1d4c844a3a355387e01ba9d1a4c6ee"},
+    {file = "furo-2023.8.17.tar.gz", hash = "sha256:56664be7290d1457a49d6c2c98cbf96537b9ee1cf05d28e05a5178e76abe5c55"},
 ]
 
 [package.dependencies]
@@ -2665,4 +2665,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.0, <3.11.0"
-content-hash = "f68b3e081e00f6d2c0add66859e994cb237314504deb6bf241f076b5ffb26883"
+content-hash = "4781b016369a0bc7db3f7d344a347d4de9d2c8519c085e8b5bc70ce9676b2732"
