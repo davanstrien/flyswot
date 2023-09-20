@@ -29,6 +29,7 @@ huggingface-hub = ">=0.11.0,<0.17.0"
 transformers = {extras = ["torch"], version = "^4.16.2"}
 typer = ">=0.5.0"
 loguru = ">=0.6,<0.8"
+gitpython = "^3.1.36"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"
