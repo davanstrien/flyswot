@@ -30,6 +30,7 @@ transformers = {extras = ["torch"], version = "^4.16.2"}
 typer = ">=0.5.0"
 loguru = ">=0.6,<0.8"
 gitpython = "^3.1.36"
+urllib3 = "^2.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.2"
