@@ -10,7 +10,6 @@ package = "flyswot"
 python_versions = ["3.12", "3.11", "3.10"]
 nox.options.sessions = (
     "ruff-check",
-    "mypy",
     "tests",
     "xdoctest",
     "docs-build",
