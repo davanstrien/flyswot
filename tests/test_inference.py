@@ -65,9 +65,7 @@ def test_image_prediction_item(confidence, label, imfile: Any):
 
 @given(confidence=st.floats(max_value=100.0), label=text_strategy)
 def test_multi_image_prediction_item(confidence, label, imfile: Any):
-    item = inference.MultiLabelImagePredictionItem(
-        imfile, [{confidence: label}, {confidence: label}]
-    )
+    item = inference.MultiLabelImagePredictionItem(imfile, [{confidence: label}, {confidence: label}])
     assert item.path == imfile
     assert type(item.predictions) == list
     assert type(item.predictions[0]) == dict
@@ -88,12 +86,8 @@ def test_prediction_batch(confidence: float, label: str, imfile: Any):
     label=text_strategy,
 )
 def test_multi_prediction_batch(confidence: float, label: str, imfile: Any):
-    item = inference.MultiLabelImagePredictionItem(
-        imfile, [{confidence: label}, {confidence: label}]
-    )
-    item2 = inference.MultiLabelImagePredictionItem(
-        imfile, [{confidence: label}, {confidence: label}]
-    )
+    item = inference.MultiLabelImagePredictionItem(imfile, [{confidence: label}, {confidence: label}])
+    item2 = inference.MultiLabelImagePredictionItem(imfile, [{confidence: label}, {confidence: label}])
     batch = inference.MultiPredictionBatch([item, item2])
     assert batch.batch
     assert type(batch.batch) == list
@@ -120,9 +114,7 @@ def test_try_predict_batch(datafiles, tmp_path) -> None:
     assert files
     assert bad_batch is False
     assert batch
-    assert isinstance(
-        batch, (inference.MultiPredictionBatch, inference.PredictionBatch)
-    )
+    assert isinstance(batch, (inference.MultiPredictionBatch, inference.PredictionBatch))
 
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
@@ -156,9 +148,7 @@ def test_predict_files(datafiles, tmp_path) -> None:
     )
     files = list(Path(datafiles).rglob("*.jpg"))
     tmp_csv = tmp_path / "test.csv"
-    corrupt_images, images_checked = cli_inference.predict_files(
-        files, session, 1, tmp_csv
-    )
+    corrupt_images, images_checked = cli_inference.predict_files(files, session, 1, tmp_csv)
     assert not corrupt_images
     assert images_checked == 1
 
@@ -176,16 +166,12 @@ def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -
         shutil.copyfile(file, im_file)
 
     files = list(Path(image_dir).rglob("*.jpg"))
-    files = sorted(
-        files, reverse=True
-    )  # temporary sorting to make sure first image isn't corrupt
+    files = sorted(files, reverse=True)  # temporary sorting to make sure first image isn't corrupt
     assert len(files) == 20
     assert files[0].name.startswith("fly_fse")
     tmp_csv = tmp_path / "test.csv"
     # good batch
-    corrupt_images, images_checked = cli_inference.predict_files(
-        files, session, 1, tmp_csv
-    )
+    corrupt_images, images_checked = cli_inference.predict_files(files, session, 1, tmp_csv)
     # # bad batch
     # corrupt_images, images_checked = inference.predict_files(
     #     [files[1]], session, 1, tmp_csv
@@ -221,7 +207,7 @@ def test_predict_directory(datafiles, tmp_path) -> None:
         reader = csv.DictReader(csvfile)
 
         for row in reader:
-            for (k, v) in row.items():
+            for k, v in row.items():
                 columns[k].append(v)
         assert any("prediction" in k for k in columns)
         labels = [columns[k] for k in columns if "prediction" in k]
@@ -293,9 +279,7 @@ def test_print_table(labels, title):
     assert table.title == title
     unique = itertoolz.count(itertoolz.unique(labels))
     assert table.row_count == unique + 1
-    assert all(
-        label in getattr(itertoolz.first(table.columns), "_cells") for label in labels
-    )
+    assert all(label in getattr(itertoolz.first(table.columns), "_cells") for label in labels)
     table = cli_inference.print_table(labels, title, print=True)
 
 
@@ -323,6 +307,4 @@ def test_file_summary_markdown():
     output = cli_inference.create_file_summary_markdown("fs", 3, Path("."), ".jpg")
     assert output
     assert isinstance(output, rich.panel.Panel)
-    output = cli_inference.create_file_summary_markdown(
-        "fs", 3, Path("."), [".jpg", ".png"]
-    )
+    output = cli_inference.create_file_summary_markdown("fs", 3, Path("."), [".jpg", ".png"])

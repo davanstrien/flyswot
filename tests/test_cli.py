@@ -1,4 +1,5 @@
 """Tests for cli module."""
+
 import pytest
 from typer.testing import CliRunner
 

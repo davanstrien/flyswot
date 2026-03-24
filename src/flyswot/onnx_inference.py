@@ -1,18 +1,19 @@
 """Onnxruntime inference session."""
+
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
-from typing import List
-from typing import Union
 
 import numpy as np
 from PIL import Image
 
 from flyswot import models
-from flyswot.inference import ImagePredictionArgmaxItem
-from flyswot.inference import InferenceSession
-from flyswot.inference import MultiLabelImagePredictionItem
-from flyswot.inference import MultiPredictionBatch
-from flyswot.inference import PredictionBatch
+from flyswot.inference import (
+    ImagePredictionArgmaxItem,
+    InferenceSession,
+    MultiLabelImagePredictionItem,
+    MultiPredictionBatch,
+    PredictionBatch,
+)
 
 try:  # pragma: no cover
     import onnxruntime as rt
@@ -38,9 +39,7 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
         self.vocab = models.load_vocab(vocab)
         self.vocab_mappings = [dict(enumerate(v)) for v in self.vocab]
 
-    def predict_image(
-        self, image: Path
-    ) -> Union[ImagePredictionArgmaxItem, MultiLabelImagePredictionItem]:
+    def predict_image(self, image: Path) -> ImagePredictionArgmaxItem | MultiLabelImagePredictionItem:
         """Predict a single image"""
         img = self._load_image(image)
         output_names = [o.name for o in self.session.get_outputs()]
@@ -53,12 +52,9 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
             return ImagePredictionArgmaxItem(image, predicted_label, confidence)
         else:
             prediction_dicts = []
-            for vocab_map, pred in zip(self.vocab_mappings, raw_result):
+            for vocab_map, pred in zip(self.vocab_mappings, raw_result, strict=False):
                 predictions = self._postprocess(pred)
-                prediction_dict = {
-                    float(prediction): vocab_map[i]
-                    for i, prediction in enumerate(predictions)
-                }
+                prediction_dict = {float(prediction): vocab_map[i] for i, prediction in enumerate(predictions)}
                 prediction_dicts.append(prediction_dict)
         return MultiLabelImagePredictionItem(image, prediction_dicts)
 
@@ -71,9 +67,7 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
         stddev_vec = np.array([0.229, 0.224, 0.225])
         norm_img_data = np.zeros(img_data.shape).astype("float32")
         for i in range(img_data.shape[0]):
-            norm_img_data[i, :, :] = (
-                img_data[i, :, :] / 255 - mean_vec[i]
-            ) / stddev_vec[i]
+            norm_img_data[i, :, :] = (img_data[i, :, :] / 255 - mean_vec[i]) / stddev_vec[i]
 
         # add batch channel
         norm_img_data = norm_img_data.reshape(1, 3, 512, 512).astype("float32")
@@ -86,13 +80,11 @@ class OnnxInferenceSession(InferenceSession):  # pragma: no cover
         image_data = np.array(image).transpose(2, 0, 1)
         return self._preprocess(image_data)
 
-    def _postprocess(self, result: List):
+    def _postprocess(self, result: list):
         """process results from onnx session"""
         return softmax(np.array(result)).tolist()
 
-    def predict_batch(
-        self, batch: Iterable[Path], bs: int
-    ) -> Union[PredictionBatch, MultiPredictionBatch]:
+    def predict_batch(self, batch: Iterable[Path], bs: int) -> PredictionBatch | MultiPredictionBatch:
         """predicts a batch of images"""
         prediction_items = [self.predict_image(file) for file in batch]
         if len(self.vocab) < 2:

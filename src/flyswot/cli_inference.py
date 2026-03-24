@@ -1,22 +1,16 @@
 """Inference functionality"""
+
 import csv
 import mimetypes
 import re
 import string
 import time
-from collections import defaultdict
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+from collections.abc import Iterable
 from dataclasses import asdict
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import singledispatch
 from pathlib import Path
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
 
 import PIL
 import typer
@@ -31,17 +25,11 @@ from rich.table import Table
 from rich.text import Text
 from toolz import itertoolz
 from toolz.dicttoolz import merge
-from transformers import AutoFeatureExtractor
-from transformers import AutoModelForImageClassification
-from transformers import pipeline
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification, pipeline
 
-from flyswot import core
-from flyswot import models
+from flyswot import core, models
 from flyswot.console import console
-from flyswot.inference import InferenceSession
-from flyswot.inference import MultiLabelImagePredictionItem
-from flyswot.inference import MultiPredictionBatch
-from flyswot.inference import PredictionBatch
+from flyswot.inference import InferenceSession, MultiLabelImagePredictionItem, MultiPredictionBatch, PredictionBatch
 from flyswot.logo import flyswot_logo
 
 app = typer.Typer()
@@ -51,19 +39,15 @@ image_extensions = {k for k, v in mimetypes.types_map.items() if v.startswith("i
 
 
 @app.command()
-def predict_image(
-    image: Path = typer.Argument(..., readable=True, resolve_path=True)
-) -> None:
+def predict_image(image: Path = typer.Argument(..., readable=True, resolve_path=True)) -> None:
     """Predict a single image"""
     pass  # pragma: no cover
 
 
-def check_files(files: List, pattern: str, directory: Path) -> None:
+def check_files(files: list, pattern: str, directory: Path) -> None:
     """Check if files exist and raises error if not"""
     if not files:
-        print(
-            f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot"
-        )
+        print(f"Didn't find any files maching {pattern} in {directory}, please check the inputs to flyswot")
         raise typer.Exit(code=1)
 
 
@@ -82,18 +66,14 @@ def try_predict_batch(batch, inference_session, bs):
         return batch, bad_batch
 
 
-def predict_files(
-    files: List[Path], inference_session, bs, csv_fname
-) -> Tuple[set, int]:
+def predict_files(files: list[Path], inference_session, bs, csv_fname) -> tuple[set, int]:
     """Predict files"""
     with Progress() as progress:
         total_progress = progress.add_task("prediction progress", total=len(files))
         images_checked = 0
         bad_batch_files = []
         for i, batch in enumerate(itertoolz.partition_all(bs, files)):
-            batch_predictions, bad_batch = try_predict_batch(
-                batch, inference_session, bs
-            )
+            batch_predictions, bad_batch = try_predict_batch(batch, inference_session, bs)
             if bad_batch:
                 bad_batch_files.append(batch)
             if i == 0 and not bad_batch:
@@ -134,7 +114,7 @@ def predict_directory(
     ),
     pattern: str = typer.Option(None, help="Pattern used to filter image filenames"),
     bs: int = typer.Option(16, help="Batch Size"),
-    image_formats: List[str] = typer.Option(
+    image_formats: list[str] = typer.Option(
         default=[".tif"],
         help="Image format(s) to check",
     ),
@@ -149,16 +129,13 @@ def predict_directory(
     huggingfaceinference = HuggingFaceInferenceSession(model=model_id)
     files = sorted(
         itertoolz.concat(
-            core.get_image_files_from_pattern(directory, pattern, image_format)
-            for image_format in image_formats
+            core.get_image_files_from_pattern(directory, pattern, image_format) for image_format in image_formats
         )
     )
     check_files(files, pattern, directory)
     if not pattern:
         pattern = "any pattern"
-    print(
-        f"Found {len(files)} files matching {pattern} in {directory} with extension(s) {image_formats}"
-    )
+    print(f"Found {len(files)} files matching {pattern} in {directory} with extension(s) {image_formats}")
     csv_fname = create_csv_fname(csv_save_dir)
     corrupt_images, images_checked = predict_files(
         files, inference_session=huggingfaceinference, bs=bs, csv_fname=csv_fname
@@ -182,9 +159,9 @@ def print_inference_summary(
     pattern: str,
     directory: Path,
     csv_fname: Path,
-    image_format: Union[List[str], str],
+    image_format: list[str] | str,
     matched_file_count: int,
-    model_id: Optional[str] = None,
+    model_id: str | None = None,
 ):
     """prints summary report"""
     print(flyswot_logo())
@@ -205,11 +182,7 @@ def print_inference_summary(
             title=":stopwatch: Time taken to run :stopwatch:",
         )
     )
-    print(
-        create_file_summary_markdown(
-            pattern, matched_file_count, directory, image_format
-        )
-    )
+    print(create_file_summary_markdown(pattern, matched_file_count, directory, image_format))
     inference_summary_columns = get_inference_table_columns(csv_fname)
     print(Panel(Columns(inference_summary_columns), title="Prediction Summary"))
 
@@ -218,7 +191,7 @@ def create_file_summary_markdown(
     pattern: str,
     matched_file_count: int,
     directory: Path,
-    image_formats: Union[List[str], str],
+    image_formats: list[str] | str,
 ) -> Panel:
     """creates Markdown summary containing number of files checked by flyswot vs total images files under directory"""
     return Panel(
@@ -233,32 +206,27 @@ def create_file_summary_markdown(
     )
 
 
-def get_inference_table_columns(csv_fname: Path) -> List[Table]:
+def get_inference_table_columns(csv_fname: Path) -> list[Table]:
     """print_inference_summary from `fname`"""
     labels_to_print = labels_from_csv(csv_fname)
-    return [
-        print_table(labels, f"Prediction summary {i+1}", print=False)
-        for i, labels in enumerate(labels_to_print)
-    ]
+    return [print_table(labels, f"Prediction summary {i + 1}", print=False) for i, labels in enumerate(labels_to_print)]
 
 
 label_regex = re.compile(r"prediction_label_\D_0")
 
 
-def labels_from_csv(fname: Path) -> List[List[str]]:
+def labels_from_csv(fname: Path) -> list[list[str]]:
     """Gets top labels from csv `fname`"""
     columns = defaultdict(list)
-    with open(fname, "r") as f:
+    with open(fname) as f:
         reader = csv.DictReader(f)
         for row in reader:
-            for (k, v) in row.items():
+            for k, v in row.items():
                 columns[k].append(v)
     return [columns[k] for k in columns if label_regex.match(k)]
 
 
-def print_table(
-    decoded: list, header: str = "Prediction summary", print: bool = True
-) -> Table:
+def print_table(decoded: list, header: str = "Prediction summary", print: bool = True) -> Table:
     """Prints table summary of predicted labels"""
     table = Table(show_header=True, title=header)
     table.add_column(
@@ -286,9 +254,7 @@ def make_layout():
     """Define the layout."""
     layout = Layout(name="root")
     layout.split(Layout(name="header", size=4), Layout(name="main"))
-    layout["main"].split_column(
-        Layout(name="info", size=4), Layout(name="body", ratio=2, minimum_size=60)
-    )
+    layout["main"].split_column(Layout(name="info", size=4), Layout(name="body", ratio=2, minimum_size=60))
     layout["info"].split_row(Layout(name="time"), Layout(name="files"))
     return layout
 
@@ -368,9 +334,7 @@ def _(predictions: MultiPredictionBatch, csv_fpath: Path, top_n: int = 2) -> Non
             try:
                 writer.writerow(row)
             except UnicodeEncodeError as exception:
-                logger.error(
-                    f"Unable to write prediction to CSV because of {exception}"
-                )
+                logger.error(f"Unable to write prediction to CSV because of {exception}")
                 continue
 
 
@@ -387,33 +351,24 @@ class HuggingFaceInferenceSession(InferenceSession):
             feature_extractor=self.feature_extractor,
         )
 
-    def predict_image(self, image: Path) -> List[Dict[str, float]]:
+    def predict_image(self, image: Path) -> list[dict[str, float]]:
         """Predict single Image."""
         return self.session(image, top_k=10)
 
     def predict_batch(self, batch: Iterable[Path], bs: int) -> MultiPredictionBatch:
         """Predict batch of images"""
         str_batch = [str(file) for file in batch]
-        predictions: List[List[Dict[str, float]]] = self.session(
-            str_batch, batch_size=bs, top_k=20
-        )
+        predictions: list[list[dict[str, float]]] = self.session(str_batch, batch_size=bs, top_k=20)
         prediction_dicts = [self._process_prediction_dict(pred) for pred in predictions]
         all_pred = []
-        for file, pred in zip(str_batch, prediction_dicts):
+        for file, pred in zip(str_batch, prediction_dicts, strict=False):
             item_pred = [pred]
             prediction = MultiLabelImagePredictionItem(Path(file), item_pred)
             all_pred.append(prediction)
         return MultiPredictionBatch(all_pred)
 
-    def _process_prediction_dict(
-        self, prediction_item: List[Dict[str, float]]
-    ) -> Dict[float, str]:
-        return merge(
-            [
-                {prediction["score"]: prediction["label"]}
-                for prediction in prediction_item
-            ]
-        )
+    def _process_prediction_dict(self, prediction_item: list[dict[str, float]]) -> dict[float, str]:
+        return merge([{prediction["score"]: prediction["label"]} for prediction in prediction_item])
 
 
 if __name__ == "__main__":

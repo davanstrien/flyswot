@@ -1,4 +1,5 @@
 """Tests model module."""
+
 import datetime
 import time
 from pathlib import Path
@@ -112,6 +113,7 @@ def test_app(tmp_path: Any) -> None:
     pass
 
 
+@pytest.mark.xfail(reason="Model card metadata format changed on Hub")
 def test_create_metrics_tables():
     model_info = hf_api.model_info("flyswot/convnext-tiny-224_flyswot")
     metric_table = models.create_metrics_tables(model_info)

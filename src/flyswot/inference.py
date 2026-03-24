@@ -1,19 +1,16 @@
 """Core inference functionality."""
-from abc import ABC
-from abc import abstractmethod
+
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Union
 
 
 class InferenceSession(ABC):
     """Abstract class for inference sessions"""
 
     @abstractmethod
-    def __init__(self, model: Union[str, Path]):  # pragma: no cover
+    def __init__(self, model: str | Path):  # pragma: no cover
         """Inference Sessions should init from a model file and vocab"""
         pass
 
@@ -23,9 +20,7 @@ class InferenceSession(ABC):
         pass
 
     @abstractmethod
-    def predict_batch(
-        self, model: Path, batch: Iterable[Path], bs: int
-    ):  # pragma: no cover
+    def predict_batch(self, model: Path, batch: Iterable[Path], bs: int):  # pragma: no cover
         """Predict a batch"""
         pass
 
@@ -44,7 +39,7 @@ class ImagePredictionArgmaxItem:
     predicted_label: str
     confidence: float
 
-    def __post_init__(self) -> Union[Path, None]:
+    def __post_init__(self) -> Path | None:
         """attempt to get absolute path"""
         try:
             self.path: Path = self.path.absolute()
@@ -57,9 +52,9 @@ class MultiLabelImagePredictionItem:
     """Multiple predictions for a single image"""
 
     path: Path
-    predictions: List[Dict[float, str]]
+    predictions: list[dict[float, str]]
 
-    def _get_top_labels(self) -> List[str]:
+    def _get_top_labels(self) -> list[str]:
         """Get top labels"""
         top_labels = []
         for prediction in self.predictions:
@@ -77,7 +72,7 @@ class MultiLabelImagePredictionItem:
 class PredictionBatch:
     """Container for ImagePredictionItems"""
 
-    batch: List[ImagePredictionArgmaxItem]
+    batch: list[ImagePredictionArgmaxItem]
 
     def __post_init__(self):
         """Returns a iterable of all predicted labels in batch"""
@@ -88,7 +83,7 @@ class PredictionBatch:
 class MultiPredictionBatch:
     """Container for MultiLabelImagePredictionItems"""
 
-    batch: List[MultiLabelImagePredictionItem]
+    batch: list[MultiLabelImagePredictionItem]
 
     def _get_predicted_labels(self) -> Iterable:
         """Returns a iterable of all predicted labels in batch"""

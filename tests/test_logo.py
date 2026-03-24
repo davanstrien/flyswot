@@ -1,4 +1,5 @@
 """test console"""
+
 from rich.text import Text
 
 from flyswot.logo import flyswot_logo
