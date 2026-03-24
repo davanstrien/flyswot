@@ -495,7 +495,7 @@ dependencies = [
     { name = "urllib3" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 dev = [
     { name = "coverage", extra = ["toml"] },
     { name = "hypothesis" },
@@ -520,37 +520,32 @@ docs = [
 
 [package.metadata]
 requires-dist = [
+    { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.3" },
+    { name = "furo", marker = "extra == 'docs'", specifier = ">=2024.1" },
     { name = "gitpython", specifier = ">=3.1.36" },
     { name = "huggingface-hub", specifier = ">=0.20" },
+    { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.84" },
     { name = "loguru", specifier = ">=0.7" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.5" },
+    { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=3.0" },
     { name = "numpy", specifier = ">=1.24" },
+    { name = "onnxruntime", marker = "extra == 'dev'", specifier = ">=1.16" },
     { name = "pillow", specifier = ">=10" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.4" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4" },
+    { name = "pytest-datafiles", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "requests", specifier = ">=2.31" },
     { name = "rich", specifier = ">=13.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
+    { name = "sphinx", marker = "extra == 'docs'", specifier = ">=7.2" },
+    { name = "sphinx-click", marker = "extra == 'docs'", specifier = ">=6.0" },
     { name = "toolz", specifier = ">=0.12" },
     { name = "transformers", extras = ["torch"], specifier = ">=4.36,<5" },
     { name = "typer", specifier = ">=0.9" },
     { name = "urllib3", specifier = ">=2.1" },
+    { name = "xdoctest", extras = ["colors"], marker = "extra == 'dev'", specifier = ">=1.1" },
 ]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "coverage", extras = ["toml"], specifier = ">=7.3" },
-    { name = "hypothesis", specifier = ">=6.84" },
-    { name = "mypy", specifier = ">=1.5" },
-    { name = "onnxruntime", specifier = ">=1.16" },
-    { name = "pre-commit", specifier = ">=3.4" },
-    { name = "pytest", specifier = ">=7.4" },
-    { name = "pytest-datafiles", specifier = ">=3.0" },
-    { name = "ruff", specifier = ">=0.9" },
-    { name = "xdoctest", extras = ["colors"], specifier = ">=1.1" },
-]
-docs = [
-    { name = "furo", specifier = ">=2024.1" },
-    { name = "myst-parser", specifier = ">=3.0" },
-    { name = "sphinx", specifier = ">=7.2" },
-    { name = "sphinx-click", specifier = ">=6.0" },
-]
+provides-extras = ["dev", "docs"]
 
 [[package]]
 name = "fsspec"
