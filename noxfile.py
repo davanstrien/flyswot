@@ -39,26 +39,7 @@ def mypy(session: nox.Session) -> None:
 def tests(session: nox.Session) -> None:
     """Run the test suite."""
     session.install(".[dev]")
-    try:
-        session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
-    finally:
-        if session.interactive:
-            session.notify("coverage")
-
-
-@nox.session
-def coverage(session: nox.Session) -> None:
-    """Produce the coverage report."""
-    nsessions = len(session._runner.manifest)  # type: ignore[attr-defined]
-    has_args = session.posargs and nsessions == 1
-    args = session.posargs if has_args else ["report"]
-
-    session.install("coverage[toml]")
-
-    if not has_args and any(Path().glob(".coverage.*")):
-        session.run("coverage", "combine")
-
-    session.run("coverage", *args)
+    session.run("pytest", *session.posargs)
 
 
 @nox.session(python=python_versions)
