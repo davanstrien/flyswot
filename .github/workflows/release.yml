@@ -1,9 +1,10 @@
 name: Release
 
+# Manual-only for now: PyPI auth (secrets.PYPI_TOKEN) needs revisiting —
+# ideally migrate to Trusted Publishing — before re-enabling auto-release.
+# To restore: replace workflow_dispatch with `push: branches: [main]`.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   release:
