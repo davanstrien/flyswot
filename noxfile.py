@@ -1,4 +1,5 @@
 """Nox sessions."""
+
 import os
 import shutil
 from pathlib import Path
@@ -35,9 +36,11 @@ def ty(session: nox.Session) -> None:
 
 @nox.session(python=python_versions)
 def tests(session: nox.Session) -> None:
-    """Run the test suite."""
+    """Run the test suite under coverage."""
     session.install(".[dev]")
-    session.run("pytest", *session.posargs)
+    session.run("coverage", "run", "-m", "pytest", *session.posargs)
+    if not session.posargs:
+        session.run("coverage", "report")
 
 
 @nox.session(python=python_versions)

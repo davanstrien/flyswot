@@ -40,7 +40,7 @@ flyswot = "flyswot.cli:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4",
-    "coverage[toml]>=7.3",
+    "coverage[toml]>=7.4",
     "ty==0.0.35",
     "xdoctest[colors]>=1.1",
     "pre-commit>=3.4",
@@ -60,7 +60,10 @@ source = ["src", "*/site-packages"]
 
 [tool.coverage.run]
 branch = true
-source = ["flyswot"]
+core = "sysmon"
+disable_warnings = ["no-sysmon"]
+relative_files = true
+source_pkgs = ["flyswot"]
 
 [tool.coverage.report]
 show_missing = true
