@@ -2,7 +2,7 @@
 name = "flyswot"
 version = "0.3.15"
 description = "Command Line Interface for running Transformers Image Classification locally"
-authors = [{ name = "Daniel van Strien", email = "daniel.van-strien@bl.uk" }]
+authors = [{ name = "Daniel van Strien" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
