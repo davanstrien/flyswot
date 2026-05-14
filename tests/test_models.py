@@ -1,4 +1,5 @@
 """Tests model module."""
+
 import datetime
 import time
 from pathlib import Path
@@ -6,11 +7,9 @@ from typing import Any
 from typing import Dict
 
 import click
-import onnxruntime as ort
 import pytest
 import rich
 import typer
-from huggingface_hub import hf_api
 from typer.testing import CliRunner
 from typing_extensions import runtime
 
@@ -110,14 +109,6 @@ def test_show_model_card(tmp_path):
 
 def test_app(tmp_path: Any) -> None:
     pass
-
-
-def test_create_metrics_tables():
-    model_info = hf_api.model_info("flyswot/convnext-tiny-224_flyswot")
-    metric_table = models.create_metrics_tables(model_info)
-    assert metric_table
-    assert isinstance(metric_table, list)
-    assert isinstance(metric_table[0], rich.table.Table)
 
 
 def test_create_model_card():

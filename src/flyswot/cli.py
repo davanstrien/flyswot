@@ -1,17 +1,13 @@
 """flyswot command line"""
+
 import typer
 
-from flyswot import cli_inference
-from flyswot import models
+from flyswot import cli_inference, models
 
 app = typer.Typer()
 
-app.add_typer(
-    cli_inference.app, name="predict", help="flyswot commands for making predictions"
-)
-app.add_typer(
-    models.app, name="model", help="flyswot commands for interacting with models"
-)
+app.add_typer(cli_inference.app, name="predict", help="flyswot commands for making predictions")
+app.add_typer(models.app, name="model", help="flyswot commands for interacting with models")
 
 typer_click_object = typer.main.get_command(app)
 

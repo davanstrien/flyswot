@@ -1,26 +1,19 @@
 """Core functionality."""
+
 import fnmatch
 import mimetypes
 import os
 import time
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
-from typing import Iterable
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
 
 from loguru import logger
-from toolz import itertoolz  # type: ignore
+from toolz import itertoolz
 
 from flyswot.console import console
 
-IMAGE_EXTENSIONS: Set[str] = {
-    k for k, v in mimetypes.types_map.items() if v.startswith("image/")
-}
+IMAGE_EXTENSIONS: set[str] = {k for k, v in mimetypes.types_map.items() if v.startswith("image/")}
 
 
 def count_files_with_ext(directory: Path, ext: str) -> int:
@@ -28,10 +21,10 @@ def count_files_with_ext(directory: Path, ext: str) -> int:
     return itertoolz.count(Path(directory).rglob(f"*{ext}"))
 
 
-def create_file_search_message(
-    directory: Path, pattern: Optional[str], ext: Optional[str]
-) -> str:
+def create_file_search_message(directory: Path, pattern: str | None, ext: str | set[str] | None) -> str:
     """Creates a message to show pattern and ext used for search"""
+    if isinstance(ext, set):
+        ext = ", ".join(sorted(ext))
     if pattern and ext:
         message = f"Searching for files in {directory} matching {pattern} with extension {ext}"
     if pattern and not ext:
@@ -71,7 +64,7 @@ def yield_all_files(directory: Path) -> Iterator[Path]:  # pragma: no cover
     with os.scandir(directory) as it:
         for entry in it:
             if entry.is_dir():
-                yield from yield_all_files(entry.path)
+                yield from yield_all_files(Path(entry.path))
             if entry.is_file:
                 yield Path(entry)
 
@@ -94,8 +87,8 @@ def filter_readable_files(files: Iterator[Path]) -> Iterator[Path]:  # pragma: n
 @logger.catch()
 def get_image_files_from_pattern(
     directory: Path,
-    filename_pattern: Optional[str] = None,
-    image_formats: Union[str, Set[str]] = None,
+    filename_pattern: str | None = None,
+    image_formats: str | set[str] | None = None,
     check_opens: bool = True,
 ) -> Iterator[Path]:
     """yield image files from `directory` matching pattern with `ext`"""
@@ -117,12 +110,10 @@ def get_image_files_from_pattern(
 
 
 @logger.catch()
-def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[Path]:
+def filter_to_preferred_ext(files: Iterable[Path], exts: list[str]) -> Iterable[Path]:
     """Filter files to preferred extension."""
     files = list(files)
-    files_without_ext = (
-        file.with_suffix("") for file in files if not file.name.startswith(".")
-    )
+    files_without_ext = (file.with_suffix("") for file in files if not file.name.startswith("."))
     file_names_without_ext = (file.name for file in files_without_ext)
     unique = set(itertoolz.unique(file_names_without_ext))
     for file in files:
@@ -136,7 +127,7 @@ def filter_to_preferred_ext(files: Iterable[Path], exts: List[str]) -> Iterable[
                 unique.discard(file_without_suffix.name)
 
 
-def signal_last(it: Iterable[Any]) -> Iterable[Tuple[bool, Any]]:
+def signal_last(it: Iterable[Any]) -> Iterable[tuple[bool, Any]]:
     """returns original iterator and iterator yield false until last item in iterator"""
     if not it:
         raise ValueError

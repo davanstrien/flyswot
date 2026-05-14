@@ -1,4 +1,5 @@
 """test console"""
+
 from flyswot.console import console
 
 

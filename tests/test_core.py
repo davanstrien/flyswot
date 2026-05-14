@@ -1,4 +1,5 @@
 """Tests for core module."""
+
 import itertools
 import os
 import typing
@@ -13,7 +14,6 @@ from hypothesis.core import given  # type: ignore
 from flyswot import core
 
 # flake8: noqa
-# mypy: allow-untyped-defs
 
 int_values = strategies.integers()
 str_values = strategies.text()
@@ -61,9 +61,7 @@ def test_filter(fname, tmpdir):
         for j in range(5):
             file = a_sub_dir.join(f"file_{fname}_{j}.tif")
             file.ensure()
-    matches = core.get_image_files_from_pattern(
-        a_dir, fname, image_formats={".tif"}, check_opens=False
-    )
+    matches = core.get_image_files_from_pattern(a_dir, fname, image_formats={".tif"}, check_opens=False)
     files = [f for f in Path(a_dir).rglob("**/*") if f.is_file()]
     assert len(files) == (50 * 2) + 25
     assert len(list(matches)) == 50 + 25
@@ -118,9 +116,7 @@ def test_get_all_images_with_pattern(pattern, tmpdir):
         file = a_dir.join(f"file{pattern}_{number}.{ext}")
         file.ensure()
     for ext in image_extensions:
-        matches = core.get_image_files_from_pattern(
-            a_dir, None, f".{ext}", check_opens=False
-        )
+        matches = core.get_image_files_from_pattern(a_dir, None, f".{ext}", check_opens=False)
         # files = [f for f in Path(a_dir).rglob(f"**/{ext}") if f.is_file()]
         assert len(list(matches)) == 2
 
@@ -226,11 +222,7 @@ def test_filter_matching_files_in_different_directories(fname, tmp_path):
         files,
         [".tif"],
     )
-    files = [
-        f
-        for f in Path(img_dir).rglob("**/*")
-        if f.is_file() and not f.name.startswith(".")
-    ]
+    files = [f for f in Path(img_dir).rglob("**/*") if f.is_file() and not f.name.startswith(".")]
     assert len(files) == 100
     assert len(list(matches)) == 50
 
@@ -252,11 +244,7 @@ def test_signal_last_raises_value_error_with_no_length():
             print(i)
 
 
-@given(
-    strategies.dictionaries(
-        keys=strategies.text(min_size=1), values=strategies.integers(), min_size=1
-    )
-)
+@given(strategies.dictionaries(keys=strategies.text(min_size=1), values=strategies.integers(), min_size=1))
 def test_signal_last_dictionary(d):
     """It returns last element for dictionary"""
     *_, last = d
@@ -266,11 +254,7 @@ def test_signal_last_dictionary(d):
             assert key == last
 
 
-@given(
-    strategies.dictionaries(
-        keys=strategies.text(min_size=1), values=strategies.integers(), min_size=1
-    )
-)
+@given(strategies.dictionaries(keys=strategies.text(min_size=1), values=strategies.integers(), min_size=1))
 def test_signal_last_truth(d):
     """It returns True for last element"""
     dict_len = len(d)

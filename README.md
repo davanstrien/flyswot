@@ -7,7 +7,6 @@
 
 [![Read the documentation at https://flyswot.readthedocs.io/](https://img.shields.io/readthedocs/flyswot/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/davanstrien/flyswot/actions/workflows/tests.yml/badge.svg)](https://github.com/davanstrien/flyswot/actions/workflows/tests.yml)
-[![Codecov](https://codecov.io/gh/davanstrien/flyswot/branch/main/graph/badge.svg)][codecov]
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
@@ -18,7 +17,6 @@
 [license]: https://opensource.org/licenses/MIT
 [read the docs]: https://flyswot.readthedocs.io/
 [tests]: https://github.com/davanstrien/flyswot/actions?workflow=Tests
-[codecov]: https://app.codecov.io/gh/davanstrien/flyswot
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
