@@ -25,7 +25,7 @@ from rich.table import Table
 from rich.text import Text
 from toolz import itertoolz
 from toolz.dicttoolz import merge
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification, pipeline
+from transformers import AutoImageProcessor, AutoModelForImageClassification, pipeline
 
 from flyswot import core, models
 from flyswot.console import console
@@ -344,11 +344,11 @@ class HuggingFaceInferenceSession(InferenceSession):
     def __init__(self, model: str):
         """Create Hugging Face Inference Session"""
         self.model = AutoModelForImageClassification.from_pretrained(model)
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(model)
+        self.image_processor = AutoImageProcessor.from_pretrained(model)
         self.session = pipeline(
             "image-classification",
             model=self.model,
-            feature_extractor=self.feature_extractor,
+            image_processor=self.image_processor,
         )
 
     def predict_image(self, image: Path) -> list[dict[str, float]]:

@@ -1,6 +1,8 @@
 .mypy_cache/
 /.coverage
 /.nox/
+/.venv/
+/.venv-v5/
 /.python-version
 /.pytype/
 /dist/
