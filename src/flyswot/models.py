@@ -7,10 +7,8 @@ from pathlib import Path
 import requests
 import typer
 from huggingface_hub import hf_hub_url, snapshot_download
-from huggingface_hub.hf_api import ModelInfo
 from rich import print
 from rich.markdown import Markdown
-from rich.table import Table
 from toolz import itertoolz, recipes
 
 from flyswot.config import APP_NAME, MODEL_REPO_ID
@@ -142,24 +140,6 @@ def create_markdown_model_card(model_id: str):
     r = requests.get(readme_url, timeout=30)
     r.raise_for_status()
     return Markdown(r.text)
-
-
-def create_metrics_tables(model_info: ModelInfo) -> list[Table]:
-    """Creates a list of rich tables for metrics contained in `model_info`"""
-    model_indexes = list(model_info.cardData["model-index"])
-    metrics = []
-    for model in model_indexes:
-        for result in model["results"]:
-            for metric in result["metrics"]:
-                metrics.append(metric)
-    for metric in metrics:
-        table = Table()
-        for name in metric.keys():
-            table.add_column(name.title())
-    metric_values = list(metric.values())
-    rounded_metric_values = [round(item, ndigits=3) if isinstance(item, float) else item for item in metric_values]
-    table.add_row(*list(map(str, rounded_metric_values)))
-    return [table]
 
 
 if __name__ == "__main__":  # pragma: no cover
