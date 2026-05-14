@@ -1,7 +1,6 @@
 """Nox sessions."""
 import os
 import shutil
-import sys
 from pathlib import Path
 
 import nox
@@ -10,6 +9,7 @@ package = "flyswot"
 python_versions = ["3.12", "3.11", "3.10"]
 nox.options.sessions = (
     "ruff-check",
+    "ty",
     "tests",
     "xdoctest",
     "docs-build",
@@ -25,14 +25,12 @@ def ruff_check(session: nox.Session) -> None:
     session.run("ruff", "format", "--check", "src", "tests")
 
 
-@nox.session(python=python_versions)
-def mypy(session: nox.Session) -> None:
-    """Type-check using mypy."""
-    args = session.posargs or ["src", "docs/conf.py"]
+@nox.session(python="3.12")
+def ty(session: nox.Session) -> None:
+    """Type-check using ty."""
+    args = session.posargs or ["src"]
     session.install(".[dev]")
-    session.run("mypy", *args)
-    if not session.posargs:
-        session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+    session.run("ty", "check", *args)
 
 
 @nox.session(python=python_versions)

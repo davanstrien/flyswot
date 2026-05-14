@@ -13,6 +13,7 @@ jobs:
       matrix:
         include:
           - { python-version: "3.12", os: ubuntu-latest, session: "ruff-check" }
+          - { python-version: "3.12", os: ubuntu-latest, session: "ty" }
           - { python-version: "3.12", os: ubuntu-latest, session: "tests" }
           - { python-version: "3.11", os: ubuntu-latest, session: "tests" }
           - { python-version: "3.10", os: ubuntu-latest, session: "tests" }

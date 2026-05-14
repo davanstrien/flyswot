@@ -14,7 +14,6 @@ from hypothesis.core import given  # type: ignore
 from flyswot import core
 
 # flake8: noqa
-# mypy: allow-untyped-defs
 
 int_values = strategies.integers()
 str_values = strategies.text()

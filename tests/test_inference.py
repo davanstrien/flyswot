@@ -21,7 +21,6 @@ from toolz import itertoolz
 
 from flyswot import cli_inference
 from flyswot import inference
-from flyswot import onnx_inference
 
 # flake8: noqa
 
@@ -103,12 +102,12 @@ FIXTURE_DIR = os.path.join(
 )
 
 
+MODEL_ID = "flyswot/convnext-tiny-224_flyswot"
+
+
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
 def test_try_predict_batch(datafiles, tmp_path) -> None:
-    session = onnx_inference.OnnxInferenceSession(
-        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
-        Path("tests/test_files/mult/20210629/model/vocab.txt"),
-    )
+    session = cli_inference.HuggingFaceInferenceSession(MODEL_ID)
     files = list(Path(datafiles).rglob("*.jpg"))
     batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
     assert files
@@ -119,20 +118,7 @@ def test_try_predict_batch(datafiles, tmp_path) -> None:
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
 def test_try_predict_batch_with_corrupt_image(datafiles, tmp_path) -> None:
-    session = onnx_inference.OnnxInferenceSession(
-        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
-        Path("tests/test_files/mult/20210629/model/vocab.txt"),
-    )
-    files = list(Path(datafiles).rglob("*.jpg"))
-    batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
-    assert files
-    assert bad_batch is True
-    assert isinstance(batch, list)
-
-
-@pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "corrupt_image.jpg"))
-def test_try_predict_batch_with_corrupt_image_huggingface(datafiles, tmp_path) -> None:
-    session = cli_inference.HuggingFaceInferenceSession("flyswot/flyswot")
+    session = cli_inference.HuggingFaceInferenceSession(MODEL_ID)
     files = list(Path(datafiles).rglob("*.jpg"))
     batch, bad_batch = cli_inference.try_predict_batch(files, session, bs=1)
     assert files
@@ -142,10 +128,7 @@ def test_try_predict_batch_with_corrupt_image_huggingface(datafiles, tmp_path) -
 
 @pytest.mark.datafiles(os.path.join(FIXTURE_DIR, "fly_fse.jpg"))
 def test_predict_files(datafiles, tmp_path) -> None:
-    session = onnx_inference.OnnxInferenceSession(
-        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
-        Path("tests/test_files/mult/20210629/model/vocab.txt"),
-    )
+    session = cli_inference.HuggingFaceInferenceSession(MODEL_ID)
     files = list(Path(datafiles).rglob("*.jpg"))
     tmp_csv = tmp_path / "test.csv"
     corrupt_images, images_checked = cli_inference.predict_files(files, session, 1, tmp_csv)
@@ -156,10 +139,7 @@ def test_predict_files(datafiles, tmp_path) -> None:
 @pytest.mark.datafiles(FIXTURE_DIR)
 def test_predict_files_with_corrupt_image(datafiles, tmp_path, tmpdir_factory) -> None:
     image_dir = tmpdir_factory.mktemp("images")
-    session = onnx_inference.OnnxInferenceSession(
-        Path("tests/test_files/mult/20210629/model/2021-06-29-model.onnx"),
-        Path("tests/test_files/mult/20210629/model/vocab.txt"),
-    )
+    session = cli_inference.HuggingFaceInferenceSession(MODEL_ID)
     files = list(Path(datafiles).rglob("*.jpg"))
     for file, i in itertools.product(files, range(10)):
         im_file = image_dir / f"{file.name}_{i}.jpg"

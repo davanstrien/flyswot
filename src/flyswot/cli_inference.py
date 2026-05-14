@@ -353,7 +353,7 @@ class HuggingFaceInferenceSession(InferenceSession):
 
     def predict_image(self, image: Path) -> list[dict[str, float]]:
         """Predict single Image."""
-        return self.session(image, top_k=10)
+        return self.session(str(image), top_k=10)
 
     def predict_batch(self, batch: Iterable[Path], bs: int) -> MultiPredictionBatch:
         """Predict batch of images"""

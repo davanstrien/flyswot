@@ -7,7 +7,6 @@ from flyswot.cli import app
 
 
 # flake8: noqa
-# mypy: allow-untyped-defs
 
 runner = CliRunner()
 

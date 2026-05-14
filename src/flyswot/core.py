@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from loguru import logger
-from toolz import itertoolz  # type: ignore
+from toolz import itertoolz
 
 from flyswot.console import console
 
@@ -21,7 +21,7 @@ def count_files_with_ext(directory: Path, ext: str) -> int:
     return itertoolz.count(Path(directory).rglob(f"*{ext}"))
 
 
-def create_file_search_message(directory: Path, pattern: str | None, ext: str | None) -> str:
+def create_file_search_message(directory: Path, pattern: str | None, ext: str | set[str] | None) -> str:
     """Creates a message to show pattern and ext used for search"""
     if pattern and ext:
         message = f"Searching for files in {directory} matching {pattern} with extension {ext}"
@@ -62,7 +62,7 @@ def yield_all_files(directory: Path) -> Iterator[Path]:  # pragma: no cover
     with os.scandir(directory) as it:
         for entry in it:
             if entry.is_dir():
-                yield from yield_all_files(entry.path)
+                yield from yield_all_files(Path(entry.path))
             if entry.is_file:
                 yield Path(entry)
 
@@ -86,7 +86,7 @@ def filter_readable_files(files: Iterator[Path]) -> Iterator[Path]:  # pragma: n
 def get_image_files_from_pattern(
     directory: Path,
     filename_pattern: str | None = None,
-    image_formats: str | set[str] = None,
+    image_formats: str | set[str] | None = None,
     check_opens: bool = True,
 ) -> Iterator[Path]:
     """yield image files from `directory` matching pattern with `ext`"""

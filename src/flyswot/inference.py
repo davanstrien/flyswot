@@ -20,7 +20,7 @@ class InferenceSession(ABC):
         pass
 
     @abstractmethod
-    def predict_batch(self, model: Path, batch: Iterable[Path], bs: int):  # pragma: no cover
+    def predict_batch(self, batch: Iterable[Path], bs: int):  # pragma: no cover
         """Predict a batch"""
         pass
 

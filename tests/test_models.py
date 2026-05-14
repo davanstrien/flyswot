@@ -7,7 +7,6 @@ from typing import Any
 from typing import Dict
 
 import click
-import onnxruntime as ort
 import pytest
 import rich
 import typer
