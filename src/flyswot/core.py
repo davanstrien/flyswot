@@ -23,6 +23,8 @@ def count_files_with_ext(directory: Path, ext: str) -> int:
 
 def create_file_search_message(directory: Path, pattern: str | None, ext: str | set[str] | None) -> str:
     """Creates a message to show pattern and ext used for search"""
+    if isinstance(ext, set):
+        ext = ", ".join(sorted(ext))
     if pattern and ext:
         message = f"Searching for files in {directory} matching {pattern} with extension {ext}"
     if pattern and not ext:
