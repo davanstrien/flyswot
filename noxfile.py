@@ -7,7 +7,7 @@ from pathlib import Path
 import nox
 
 package = "flyswot"
-python_versions = ["3.12", "3.11", "3.10"]
+python_versions = ["3.12", "3.11", "3.13"]
 nox.options.sessions = (
     "ruff-check",
     "ty",
